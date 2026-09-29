@@ -206,6 +206,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"daily_logs": {
+                  Row: {
+                    "author_type": string,"created_at": string,"created_by": string,"custom": NonNullable<Json>,"deleted_at": string | null,"id": string,"include_weather": boolean,"include_weather_notes": boolean,"job_id": string,"log_date": string,"notes": string,"org_id": string,"published_at": string | null,"share_clients": boolean,"share_internal": boolean,"share_subs": boolean,"status": Database["public"]['Enums']["log_status"],"tag_ids": (string)[],"title": string | null,"updated_at": string,"weather": Json | null,"weather_notes": string | null
+                  }
+                  Insert: {
+                    "author_type"?: string,"created_at"?: string,"created_by"?: string,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"id"?: string,"include_weather"?: boolean,"include_weather_notes"?: boolean,"job_id": string,"log_date"?: string,"notes": string,"org_id": string,"published_at"?: string | null,"share_clients"?: boolean,"share_internal"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["log_status"],"tag_ids"?: (string)[],"title"?: string | null,"updated_at"?: string,"weather"?: Json | null,"weather_notes"?: string | null
+                  }
+                  Update: {
+                    "author_type"?: string,"created_at"?: string,"created_by"?: string,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"id"?: string,"include_weather"?: boolean,"include_weather_notes"?: boolean,"job_id"?: string,"log_date"?: string,"notes"?: string,"org_id"?: string,"published_at"?: string | null,"share_clients"?: boolean,"share_internal"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["log_status"],"tag_ids"?: (string)[],"title"?: string | null,"updated_at"?: string,"weather"?: Json | null,"weather_notes"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "daily_logs_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "daily_logs_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "daily_logs_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"invites": {
                   Row: {
                     "accepted_at": string | null,"accepted_by": string | null,"created_at": string,"email": string,"expires_at": string,"id": string,"invited_by": string | null,"job_client_id": string | null,"kind": Database["public"]['Enums']["invite_kind"],"org_id": string,"role_id": string | null,"sub_org_id": string | null,"token": string
@@ -840,7 +871,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","todo_priority": "low"|"medium"|"high"
+            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","todo_priority": "low"|"medium"|"high"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -956,7 +987,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"todo_priority": ["low", "medium", "high"]
+            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"todo_priority": ["low", "medium", "high"]
           }
         }
 } as const

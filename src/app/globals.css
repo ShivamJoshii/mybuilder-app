@@ -58,3 +58,10 @@ body {
 }
 
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* Print: just the page content */
+@media print {
+  header, aside, nav[aria-label='Settings'], button, .no-print { display: none !important; }
+  body, main { background: white !important; overflow: visible !important; height: auto !important; }
+  .h-screen { height: auto !important; }
+}

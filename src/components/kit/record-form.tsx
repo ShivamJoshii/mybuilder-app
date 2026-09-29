@@ -7,9 +7,14 @@ import { Badge } from '@/components/ui/badge'
 import { Alert } from '@/components/ui/alert'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
-function SaveButton({ label }: { label: string }) {
+function SaveButton({ label, draftLabel }: { label: string; draftLabel?: string }) {
   const { pending } = useFormStatus()
-  return <Button type="submit" variant="primary" disabled={pending}>{pending ? 'Saving…' : label}</Button>
+  return (
+    <>
+      {draftLabel && <Button type="submit" name="intent" value="draft" disabled={pending}>{draftLabel}</Button>}
+      <Button type="submit" name="intent" value="save" variant="primary" disabled={pending}>{pending ? 'Saving…' : label}</Button>
+    </>
+  )
 }
 
 /**
@@ -17,12 +22,14 @@ function SaveButton({ label }: { label: string }) {
  * and an unsaved-changes guard ("Do you want to save your changes before exiting?").
  */
 export function RecordForm({
-  title, action, cancelHref, saveLabel = 'Save', draft, error, children,
+  title, action, cancelHref, saveLabel = 'Save', draftLabel, draft, error, children,
 }: {
   title: string
   action: (formData: FormData) => void
   cancelHref: string
   saveLabel?: string
+  /** Adds a secondary submit (intent=draft), e.g. "Save draft" next to "Publish". */
+  draftLabel?: string
   draft?: boolean
   error?: string
   children: React.ReactNode
@@ -48,7 +55,7 @@ export function RecordForm({
         </div>
         <div className="flex gap-2">
           <Button type="button" onClick={() => (dirty ? setConfirm(true) : router.push(cancelHref))}>Cancel</Button>
-          <SaveButton label={saveLabel} />
+          <SaveButton label={saveLabel} draftLabel={draftLabel} />
         </div>
       </div>
       <div className="mx-auto w-full max-w-4xl flex-1 space-y-5 p-5">
@@ -59,7 +66,13 @@ export function RecordForm({
         <DialogContent title="Unsaved changes" description="Do you want to save your changes before exiting?">
           <div className="flex justify-end gap-2 p-4">
             <Button type="button" onClick={() => { setDirty(false); setConfirm(false); router.push(cancelHref) }}>Don’t save</Button>
-            <Button type="button" variant="primary" onClick={() => { setConfirm(false); formRef.current?.requestSubmit() }}>Save</Button>
+            <Button type="button" variant="primary" onClick={() => {
+              setConfirm(false)
+              // Prefer the safe choice: save as draft when the form has a draft button
+              const f = formRef.current
+              const btn = f?.querySelector<HTMLButtonElement>('button[name=intent][value=draft]') ?? f?.querySelector<HTMLButtonElement>('button[name=intent][value=save]')
+              f?.requestSubmit(btn ?? undefined)
+            }}>Save</Button>
           </div>
         </DialogContent>
       </Dialog>
