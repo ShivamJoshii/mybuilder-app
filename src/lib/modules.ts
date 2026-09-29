@@ -43,7 +43,7 @@ export const MODULES: ModuleDef[] = [
     emptyTitle: 'Let clients choose finishes', emptyBody: 'Options, allowances and approvals with deadlines tied to the schedule.' },
   { slug: 'warranty', label: 'Warranty', module: 'warranties', icon: ShieldCheck, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 11,
     emptyTitle: 'Handle warranty claims', emptyBody: 'Claims, service appointments and feedback in one place.' },
-  { slug: 'plans', label: 'Plans and specs', module: 'specs', icon: ScrollText, modes: ['builder', 'sub'], jobScoped: true, isNew: true, buildStep: 8,
+  { slug: 'plans', label: 'Plans and specs', module: 'specs', icon: ScrollText, modes: ['builder', 'sub', 'client'], jobScoped: true, isNew: true, buildStep: 8,
     emptyTitle: 'Share the latest plans', emptyBody: 'Upload plan sheets and publish specifications to your team and trades.' },
   { slug: 'submittals', label: 'Submittals', module: 'submittals', icon: Inbox, modes: ['builder', 'sub'], jobScoped: true, isNew: true, buildStep: 8,
     emptyTitle: 'Track submittals to approval', emptyBody: 'Shop drawings, samples and product data with a clear ball-in-court.' },

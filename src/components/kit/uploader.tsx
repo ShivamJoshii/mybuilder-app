@@ -6,20 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Alert } from '@/components/ui/alert'
 import { startUpload, finishUpload } from '@/app/(app)/files/actions'
+import { putFile } from '@/lib/upload'
 
 type Item = { name: string; size: number; progress: number; error?: string; done?: boolean }
 
-function put(url: string, file: File, onProgress: (p: number) => void) {
-  return new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open('PUT', url)
-    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
-    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100))
-    xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)))
-    xhr.onerror = () => reject(new Error('Network error'))
-    xhr.send(file)
-  })
-}
+const put = (url: string, file: File, onProgress: (p: number) => void) => putFile(url, file, file.type, onProgress)
 
 /**
  * Upload modal used everywhere attachments exist: drag-drop or browse, viewing

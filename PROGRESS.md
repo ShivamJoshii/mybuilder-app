@@ -25,7 +25,9 @@ Last updated: 2026-09-29 (overnight build)
 | Send to budget (locks estimate, writes original budget, sets contract price), unlock | Built, browser-tested |
 | Change orders (numbered, cost worksheet, release for e-signature, approval updates budget + contract price, client change requests) | Built, browser-tested |
 | Selections + allowances (choices with client price / builder cost, deadlines tied to schedule items, client picks, approval locks, overage/credit → draft change order, subs see without prices) | Built, browser-tested |
-| Plans and specs, bids/POs/bills, budget screens, invoices, warranty, messages | Next, per build order |
+| Plans: upload a plan set PDF → one sheet per page with sheet numbers read from title blocks; viewer (zoom/pan), markups (pen, rectangle, revision cloud, arrow, text; private/team/shared), versions with overlay compare (red removed / blue added), sharing + notifications | Built, browser-tested |
+| Specifications (divisions, plain-text body with bullets, sharing, print) | Built, browser-tested |
+| Bids/POs/bills, budget screens, invoices, warranty, messages | Next, per build order |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -62,15 +64,17 @@ Last updated: 2026-09-29 (overnight build)
   typed name, timestamp, IP and browser, plus the frozen proposal they signed.
 - Subs don't see change orders (they carry client pricing); trade-side changes will come
   through purchase orders.
+- Plans: our own viewer on pdf.js (legacy build for browser support); markups are vectors
+  in PDF page units stored per version, so they survive zoom and never bleed into a new version.
 - Invited clients get a copyable invite link on the job page until email sending is on.
 
 ## Tests
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections | 190 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs | 202 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math | 12 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections | 12 flows | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans | 13 flows | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

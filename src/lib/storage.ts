@@ -47,3 +47,9 @@ export async function headObject(key: string) {
 export async function deleteObject(key: string) {
   await s3().send(new DeleteObjectCommand({ Bucket: bucket(), Key: key }))
 }
+
+/** Stream an object through our own origin (used where the browser needs same-origin bytes, e.g. pdf.js). */
+export async function getObjectStream(key: string) {
+  const o = await s3().send(new GetObjectCommand({ Bucket: bucket(), Key: key }))
+  return { body: o.Body?.transformToWebStream() ?? null, mime: o.ContentType ?? 'application/octet-stream', size: Number(o.ContentLength ?? 0) }
+}

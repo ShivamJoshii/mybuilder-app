@@ -1173,6 +1173,87 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"plan_markups": {
+                  Row: {
+                    "author_id": string,"created_at": string,"id": string,"shapes": NonNullable<Json>,"sheet_id": string,"updated_at": string,"version": number,"visibility": Database["public"]['Enums']["markup_visibility"]
+                  }
+                  Insert: {
+                    "author_id"?: string,"created_at"?: string,"id"?: string,"shapes"?: NonNullable<Json>,"sheet_id": string,"updated_at"?: string,"version": number,"visibility"?: Database["public"]['Enums']["markup_visibility"]
+                  }
+                  Update: {
+                    "author_id"?: string,"created_at"?: string,"id"?: string,"shapes"?: NonNullable<Json>,"sheet_id"?: string,"updated_at"?: string,"version"?: number,"visibility"?: Database["public"]['Enums']["markup_visibility"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "plan_markups_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "plan_markups_sheet_id_fkey"
+      columns: ["sheet_id"]
+isOneToOne: false
+      referencedRelation: "plan_sheets"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"plan_sheet_versions": {
+                  Row: {
+                    "created_at": string,"id": string,"mime": string,"note": string | null,"page": number,"sheet_id": string,"size_bytes": number,"status": string,"storage_key": string,"uploaded_by": string,"version": number
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"mime"?: string,"note"?: string | null,"page"?: number,"sheet_id": string,"size_bytes"?: number,"status"?: string,"storage_key": string,"uploaded_by"?: string,"version": number
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"mime"?: string,"note"?: string | null,"page"?: number,"sheet_id"?: string,"size_bytes"?: number,"status"?: string,"storage_key"?: string,"uploaded_by"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "plan_sheet_versions_sheet_id_fkey"
+      columns: ["sheet_id"]
+isOneToOne: false
+      referencedRelation: "plan_sheets"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "plan_sheet_versions_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"plan_sheets": {
+                  Row: {
+                    "created_at": string,"created_by": string,"current_version": number,"deleted_at": string | null,"discipline": string | null,"id": string,"job_id": string,"number": string,"org_id": string,"share_clients": boolean,"share_subs": boolean,"title": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"current_version"?: number,"deleted_at"?: string | null,"discipline"?: string | null,"id"?: string,"job_id": string,"number": string,"org_id": string,"share_clients"?: boolean,"share_subs"?: boolean,"title"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"current_version"?: number,"deleted_at"?: string | null,"discipline"?: string | null,"id"?: string,"job_id"?: string,"number"?: string,"org_id"?: string,"share_clients"?: boolean,"share_subs"?: boolean,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "plan_sheets_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "plan_sheets_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "plan_sheets_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "avatar_url": string | null,"created_at": string,"email": string,"first_name": string,"id": string,"last_name": string,"phone": string | null,"updated_at": string
@@ -1770,6 +1851,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"spec_documents": {
+                  Row: {
+                    "body": string,"created_at": string,"created_by": string,"deleted_at": string | null,"division": string | null,"id": string,"job_id": string,"org_id": string,"share_clients": boolean,"share_subs": boolean,"title": string,"updated_at": string
+                  }
+                  Insert: {
+                    "body"?: string,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"division"?: string | null,"id"?: string,"job_id": string,"org_id": string,"share_clients"?: boolean,"share_subs"?: boolean,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"division"?: string | null,"id"?: string,"job_id"?: string,"org_id"?: string,"share_clients"?: boolean,"share_subs"?: boolean,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "spec_documents_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "spec_documents_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "spec_documents_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tags": {
                   Row: {
                     "color": string | null,"id": string,"module": string,"name": string,"org_id": string
@@ -2003,6 +2115,9 @@ isOneToOne: false
 "can_see_selection":
 { Args: { "p_sel": string }; Returns: boolean
                            },
+"can_see_sheet":
+{ Args: { "p_sheet": string }; Returns: boolean
+                           },
 "choose_selection":
 { Args: { "p_choice": string,"p_sel": string }; Returns: undefined
                            },
@@ -2131,7 +2246,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -2247,7 +2362,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const
