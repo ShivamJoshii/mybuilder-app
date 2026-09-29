@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { FileUp, History,
+import { FileUp, History, PenLine,
   BarChart3, Calculator, CalendarDays, CheckSquare, ClipboardList, DollarSign, FileCheck2, FileQuestion,
   FileSignature, FileText, FolderOpen, Gavel, Hammer, Image as ImageIcon, Inbox, LayoutDashboard, ListChecks,
   MessageCircle, MessageSquare, NotebookPen, Receipt, ScrollText, ShieldCheck, ShoppingCart, Target, Timer,
@@ -57,6 +57,9 @@ export const MODULES: ModuleDef[] = [
   { slug: 'videos', label: 'Videos', module: 'files', icon: Video, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 3,
     emptyTitle: 'Add a folder', emptyBody: 'Organize your documents, photos and videos. Add a folder to start uploading files.' },
 
+  { slug: 'signatures', label: 'Signatures', module: 'files', icon: PenLine, modes: ['builder', 'sub', 'client'], jobScoped: true, isNew: true, buildStep: 3,
+    emptyTitle: 'Get documents signed', emptyBody: 'Send any PDF on the job to clients, subs or your team to sign.' },
+
   { slug: 'comments', label: 'Comments', module: 'messages', icon: MessageSquare, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 3,
     emptyTitle: 'Every comment in one place', emptyBody: 'Comments on logs, files and change orders, grouped by record.' },
   { slug: 'messages', label: 'Messages', module: 'messages', icon: MessageCircle, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 3,
@@ -101,7 +104,7 @@ export function navFor(mode: Mode): NavGroup[] {
   if (mode === 'builder') groups.push({ label: 'Sales', items: items(['leads', 'lead-activities', 'proposals'], mode) })
   groups.push(
     { label: 'Project Management', items: items(['schedule', 'daily-logs', 'todos', 'change-orders', 'selections', 'warranty', 'plans', 'submittals', 'time-clock'], mode) },
-    { label: 'Files', items: items(['documents', 'photos', 'videos'], mode) },
+    { label: 'Files', items: items(['documents', 'photos', 'videos', 'signatures'], mode) },
     { label: 'Messaging', items: items(['comments', 'messages', 'rfis'], mode) },
     { label: 'Financial', items: items(['estimates', ...(mode === 'client' ? ['proposals'] : []), 'bids', 'purchase-orders', 'bills', 'budget', 'invoices', 'reports'], mode) },
   )

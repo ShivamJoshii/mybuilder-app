@@ -2536,6 +2536,68 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"signature_request_signers": {
+                  Row: {
+                    "comment": string | null,"decided_at": string | null,"id": string,"ip": string | null,"label": string,"request_id": string,"signature": string | null,"signed_by": string | null,"signer_name": string | null,"sort": number,"status": string,"sub_org_id": string | null,"user_agent": string | null,"user_id": string | null
+                  }
+                  Insert: {
+                    "comment"?: string | null,"decided_at"?: string | null,"id"?: string,"ip"?: string | null,"label": string,"request_id": string,"signature"?: string | null,"signed_by"?: string | null,"signer_name"?: string | null,"sort"?: number,"status"?: string,"sub_org_id"?: string | null,"user_agent"?: string | null,"user_id"?: string | null
+                  }
+                  Update: {
+                    "comment"?: string | null,"decided_at"?: string | null,"id"?: string,"ip"?: string | null,"label"?: string,"request_id"?: string,"signature"?: string | null,"signed_by"?: string | null,"signer_name"?: string | null,"sort"?: number,"status"?: string,"sub_org_id"?: string | null,"user_agent"?: string | null,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "signature_request_signers_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "signature_requests"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "signature_request_signers_sub_org_id_fkey"
+      columns: ["sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"signature_requests": {
+                  Row: {
+                    "completed_at": string | null,"created_at": string,"created_by": string | null,"file_id": string,"file_sha256": string | null,"file_version": number,"id": string,"in_order": boolean,"job_id": string,"message": string | null,"org_id": string,"sent_at": string | null,"signed_file_id": string | null,"status": Database["public"]['Enums']["sigreq_status"],"title": string
+                  }
+                  Insert: {
+                    "completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"file_id": string,"file_sha256"?: string | null,"file_version"?: number,"id"?: string,"in_order"?: boolean,"job_id": string,"message"?: string | null,"org_id": string,"sent_at"?: string | null,"signed_file_id"?: string | null,"status"?: Database["public"]['Enums']["sigreq_status"],"title": string
+                  }
+                  Update: {
+                    "completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"file_id"?: string,"file_sha256"?: string | null,"file_version"?: number,"id"?: string,"in_order"?: boolean,"job_id"?: string,"message"?: string | null,"org_id"?: string,"sent_at"?: string | null,"signed_file_id"?: string | null,"status"?: Database["public"]['Enums']["sigreq_status"],"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "signature_requests_file_id_fkey"
+      columns: ["file_id"]
+isOneToOne: false
+      referencedRelation: "files"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "signature_requests_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "signature_requests_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "signature_requests_signed_file_id_fkey"
+      columns: ["signed_file_id"]
+isOneToOne: false
+      referencedRelation: "files"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"spec_documents": {
                   Row: {
                     "body": string,"created_at": string,"created_by": string,"deleted_at": string | null,"division": string | null,"id": string,"job_id": string,"org_id": string,"share_clients": boolean,"share_subs": boolean,"title": string,"updated_at": string
@@ -3041,6 +3103,9 @@ isOneToOne: false
 "approve_selection":
 { Args: { "p_create_co"?: boolean,"p_sel": string }; Returns: string
                            },
+"attach_signed_copy":
+{ Args: { "p_file": string,"p_req": string }; Returns: undefined
+                           },
 "award_bid":
 { Args: { "p_request": string }; Returns: string
                            },
@@ -3218,6 +3283,9 @@ isOneToOne: false
 "my_permissions":
 { Args: { "p_org": string }; Returns: Json
                            },
+"my_signature_turn":
+{ Args: { "p_req": string }; Returns: boolean
+                           },
 "pay_bill":
 { Args: { "p_bill": string,"p_method": string,"p_paid_on": string,"p_ref"?: string }; Returns: number
                            },
@@ -3316,6 +3384,9 @@ isOneToOne: false
 "send_estimate_to_budget":
 { Args: { "p_estimate": string }; Returns: undefined
                            },
+"send_signature_request":
+{ Args: { "p_req": string,"p_sha256": string }; Returns: undefined
+                           },
 "set_active_org":
 { Args: { "p_org": string }; Returns: undefined
                            },
@@ -3339,6 +3410,9 @@ isOneToOne: false
                            },
 "shift_hours":
 { Args: { "s": Database["public"]['Tables']["time_shifts"]['Row'] }; Returns: number
+                           },
+"sign_document":
+{ Args: { "p_comment"?: string,"p_decision": string,"p_ip"?: string,"p_req": string,"p_signature": string,"p_signer_name": string,"p_ua"?: string }; Returns: string
                            },
 "start_conversation":
 { Args: { "p_body"?: string,"p_job": string,"p_org": string,"p_title"?: string,"p_users": (string)[] }; Returns: string
@@ -3376,10 +3450,13 @@ isOneToOne: false
                            },
 "void_invoice":
 { Args: { "p": string }; Returns: undefined
+                           },
+"void_signature_request":
+{ Args: { "p_req": string }; Returns: undefined
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","appt_status": "scheduled"|"confirmed"|"completed"|"missed"|"cancelled","bid_package_status": "draft"|"open"|"closed"|"awarded","bid_request_status": "invited"|"submitted"|"declined"|"awarded"|"not_awarded","bill_status": "draft"|"submitted"|"approved"|"paid"|"rejected","claim_status": "open"|"scheduled"|"resolved"|"closed","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","invoice_status": "draft"|"released"|"paid"|"void","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "pending"|"active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","po_status": "draft"|"released"|"accepted"|"declined"|"void","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","shift_status": "open"|"submitted"|"approved"|"rejected","submittal_status": "draft"|"requested"|"submitted"|"revise"|"approved"|"approved_as_noted"|"rejected"|"closed","todo_priority": "low"|"medium"|"high","work_status": "not_started"|"in_progress"|"complete","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","appt_status": "scheduled"|"confirmed"|"completed"|"missed"|"cancelled","bid_package_status": "draft"|"open"|"closed"|"awarded","bid_request_status": "invited"|"submitted"|"declined"|"awarded"|"not_awarded","bill_status": "draft"|"submitted"|"approved"|"paid"|"rejected","claim_status": "open"|"scheduled"|"resolved"|"closed","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","invoice_status": "draft"|"released"|"paid"|"void","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "pending"|"active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","po_status": "draft"|"released"|"accepted"|"declined"|"void","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","shift_status": "open"|"submitted"|"approved"|"rejected","sigreq_status": "draft"|"sent"|"completed"|"declined"|"voided","submittal_status": "draft"|"requested"|"submitted"|"revise"|"approved"|"approved_as_noted"|"rejected"|"closed","todo_priority": "low"|"medium"|"high","work_status": "not_started"|"in_progress"|"complete","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -3495,7 +3572,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"appt_status": ["scheduled", "confirmed", "completed", "missed", "cancelled"],"bid_package_status": ["draft", "open", "closed", "awarded"],"bid_request_status": ["invited", "submitted", "declined", "awarded", "not_awarded"],"bill_status": ["draft", "submitted", "approved", "paid", "rejected"],"claim_status": ["open", "scheduled", "resolved", "closed"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"invoice_status": ["draft", "released", "paid", "void"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["pending", "active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"po_status": ["draft", "released", "accepted", "declined", "void"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"shift_status": ["open", "submitted", "approved", "rejected"],"submittal_status": ["draft", "requested", "submitted", "revise", "approved", "approved_as_noted", "rejected", "closed"],"todo_priority": ["low", "medium", "high"],"work_status": ["not_started", "in_progress", "complete"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"appt_status": ["scheduled", "confirmed", "completed", "missed", "cancelled"],"bid_package_status": ["draft", "open", "closed", "awarded"],"bid_request_status": ["invited", "submitted", "declined", "awarded", "not_awarded"],"bill_status": ["draft", "submitted", "approved", "paid", "rejected"],"claim_status": ["open", "scheduled", "resolved", "closed"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"invoice_status": ["draft", "released", "paid", "void"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["pending", "active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"po_status": ["draft", "released", "accepted", "declined", "void"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"shift_status": ["open", "submitted", "approved", "rejected"],"sigreq_status": ["draft", "sent", "completed", "declined", "voided"],"submittal_status": ["draft", "requested", "submitted", "revise", "approved", "approved_as_noted", "rejected", "closed"],"todo_priority": ["low", "medium", "high"],"work_status": ["not_started", "in_progress", "complete"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const

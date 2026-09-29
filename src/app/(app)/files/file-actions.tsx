@@ -1,6 +1,6 @@
 'use client'
 import { useState, useTransition } from 'react'
-import { Download, ExternalLink, History, Link2, MoreHorizontal, Pencil, QrCode, Share2, Trash2, Undo2 } from 'lucide-react'
+import { Download, ExternalLink, History, PenLine, Link2, MoreHorizontal, Pencil, QrCode, Share2, Trash2, Undo2 } from 'lucide-react'
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '@/components/ui/dropdown'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input'
 import { ActionForm } from '@/components/kit/action-form'
 import { createShareLink, revokeShareLinks, shareQr, setFileSharing, trashFiles, restoreFile, renameFile } from './actions'
 
-export function FileActions({ id, name, canManage, canShare, trashed, subs, clients, versions }: {
-  id: string; name: string; canManage: boolean; canShare: boolean; trashed?: boolean; subs: boolean; clients: boolean; versions: { version: number; created_at: string }[]
+export function FileActions({ id, name, canManage, canShare, trashed, subs, clients, versions, canSign }: {
+  id: string; name: string; canManage: boolean; canShare: boolean; trashed?: boolean; subs: boolean; clients: boolean; versions: { version: number; created_at: string }[]; canSign?: boolean
 }) {
   const [pending, start] = useTransition()
   const [share, setShare] = useState<{ url: string; qr?: string } | null>(null)
@@ -25,6 +25,7 @@ export function FileActions({ id, name, canManage, canShare, trashed, subs, clie
           <MenuItem asChild><a href={`/files/${id}/download`}><Download />Download</a></MenuItem>
           {canShare && <MenuItem onSelect={() => start(async () => setShare({ url: await createShareLink(id) }))}><Share2 />Share link</MenuItem>}
           {versions.length > 0 && <MenuItem onSelect={() => setHistory(true)}><History />Version history</MenuItem>}
+          {canSign && <MenuItem asChild><a href={`/signatures/new?file=${id}`}><PenLine />Request signatures</a></MenuItem>}
           {canManage && <>
             <MenuSeparator />
             <MenuItem onSelect={() => setRename(true)}><Pencil />Rename</MenuItem>

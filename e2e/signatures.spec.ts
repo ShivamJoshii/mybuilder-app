@@ -1,0 +1,83 @@
+import path from 'node:path'
+import fs from 'node:fs'
+import { test, expect } from '@playwright/test'
+import { signUp, signIn, signOut, createBuilder, uid } from './helpers'
+
+test('document signatures: client then builder sign in order; signed copy with certificate', async ({ page }) => {
+  test.setTimeout(150_000)
+  const id = uid()
+  const ownerEmail = `sid.${id}@sign.test`
+  const clientEmail = `cleo.${id}@home.test`
+  await signUp(page, { first: 'Sid', last: 'Signer', email: ownerEmail })
+  await createBuilder(page, `Sign Homes ${id}`)
+  await page.goto('/jobs/new')
+  await page.getByLabel('Job name').fill(`Willow ${id}`)
+  await page.getByRole('button', { name: 'Create job' }).click()
+  await expect(page.getByRole('heading', { name: `Willow ${id}` })).toBeVisible()
+  await page.getByLabel('First name').fill('Cleo')
+  await page.getByLabel('Last name').fill('Client')
+  await page.locator('#c_email').fill(clientEmail)
+  await page.getByRole('button', { name: 'Add client' }).click()
+  const link = await page.locator('[data-copy*="/invite/"]').first().getAttribute('data-copy')
+  await signOut(page)
+  await page.goto(new URL(link!).pathname)
+  await page.getByRole('link', { name: 'Create account' }).click()
+  await page.getByLabel('First name').fill('Cleo')
+  await page.getByLabel('Last name').fill('Client')
+  await page.getByLabel('Password').fill('correct-horse-battery')
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await page.getByRole('button', { name: 'Accept invite' }).click()
+  await expect(page).toHaveURL(/\/summary/)
+  await signOut(page)
+
+  // Builder uploads the contract and asks the client, then themself, to sign
+  await signIn(page, ownerEmail)
+  await page.goto('/documents')
+  await page.getByRole('button', { name: 'Add a folder' }).click()
+  await page.getByLabel('Folder name').fill('Contracts')
+  await page.getByRole('button', { name: 'Create folder' }).click()
+  await expect(page.getByText('Contracts created.')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.getByRole('link', { name: /Contracts/ }).click()
+  await page.getByRole('button', { name: 'Upload', exact: true }).click()
+  await page.getByLabel('Choose files').setInputFiles({ name: 'contract.pdf', mimeType: 'application/pdf', buffer: fs.readFileSync(path.join(__dirname, 'fixtures', 'plan-set.pdf')) })
+  await page.getByRole('dialog').getByRole('button', { name: 'Upload', exact: true }).click()
+  await expect(page.getByRole('link', { name: 'contract.pdf' })).toBeVisible()
+  await page.getByRole('button', { name: 'Actions for contract.pdf' }).click()
+  await page.getByRole('menuitem', { name: 'Request signatures' }).click()
+  await page.getByLabel('Title').fill('Construction contract')
+  await page.getByLabel('Cleo Client').check()
+  await page.getByLabel('Sid Signer').check()
+  await page.getByLabel(/Sign in order/).check()
+  await page.getByRole('button', { name: 'Create request' }).click()
+  await expect(page.getByRole('heading', { name: 'Construction contract' })).toBeVisible()
+  await page.getByRole('button', { name: 'Send for signature' }).click()
+  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(page.getByText('Waiting for signatures')).toBeVisible()
+  await expect(page.getByText(/Document fingerprint \(SHA-256\): [0-9a-f]{64}/)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Your signature' })).toHaveCount(0)   // client goes first
+  const reqUrl = page.url()
+  await signOut(page)
+
+  // Client signs
+  await signIn(page, clientEmail)
+  await page.goto('/signatures')
+  await page.getByRole('link', { name: 'Construction contract' }).click()
+  await page.getByLabel(/legal equivalent/).check()
+  await page.getByRole('button', { name: /^Sign/ }).first().click()
+  await expect(page.getByText(/You signed this on/)).toBeVisible()
+  await signOut(page)
+
+  // Builder signs last → completed with a signed copy
+  await signIn(page, ownerEmail)
+  await page.goto(reqUrl)
+  await page.getByLabel(/legal equivalent/).check()
+  await page.getByRole('button', { name: /^Sign/ }).first().click()
+  await expect(page.getByText(/You signed this on/)).toBeVisible()
+  await expect(page.getByText('Completed')).toBeVisible()
+  const res = await page.request.get((await page.getByRole('link', { name: 'Signed copy' }).getAttribute('href'))!)
+  expect(res.status()).toBe(200)
+  const body = await res.body()
+  expect(body.subarray(0, 5).toString()).toBe('%PDF-')
+  expect(body.length).toBeGreaterThan(fs.statSync(path.join(__dirname, 'fixtures', 'plan-set.pdf')).size)
+})

@@ -172,7 +172,7 @@ export async function FilesPage({ kind, sp }: { kind: Kind; sp: Sp }) {
                     {thumbs.get(f.id) ? <img src={thumbs.get(f.id)} alt={f.name} className="aspect-square w-full object-cover" loading="lazy" /> : <div className="flex aspect-square items-center justify-center bg-surface-2"><ImageIcon className="size-8 text-text-3" /></div>}
                   </a>
                   <div className="flex items-center gap-1 px-2 py-1 text-xs"><span className="flex-1 truncate">{f.name}</span>
-                    <FileActions id={f.id} name={f.name} canManage={canEdit || f.uploaded_by === ctx.userId} canShare={mode === 'builder'} subs={f.share_subs} clients={f.share_clients}
+                    <FileActions id={f.id} name={f.name} canManage={canEdit || f.uploaded_by === ctx.userId} canShare={mode === 'builder'} subs={f.share_subs} clients={f.share_clients} canSign={mode === 'builder' && f.mime === 'application/pdf' && can(ctx, 'files', 'add')}
                       versions={(f.file_versions ?? []) as { version: number; created_at: string }[]} />
                   </div>
                 </li>
@@ -191,7 +191,7 @@ export async function FilesPage({ kind, sp }: { kind: Kind; sp: Sp }) {
                     </div>
                     {mode === 'builder' && <span className="hidden gap-1 sm:flex">{f.share_subs && <Badge tone="brand">Subs</Badge>}{f.share_clients && <Badge tone="brand">Client</Badge>}</span>}
                     {(canEdit || f.uploaded_by === ctx.userId) && <Uploader folderId={current.id} replaceFileId={f.id} label="New version" audience="none" />}
-                    <FileActions id={f.id} name={f.name} canManage={canEdit || f.uploaded_by === ctx.userId} canShare={mode === 'builder'} subs={f.share_subs} clients={f.share_clients}
+                    <FileActions id={f.id} name={f.name} canManage={canEdit || f.uploaded_by === ctx.userId} canShare={mode === 'builder'} subs={f.share_subs} clients={f.share_clients} canSign={mode === 'builder' && f.mime === 'application/pdf' && can(ctx, 'files', 'add')}
                       versions={(f.file_versions ?? []) as { version: number; created_at: string }[]} />
                   </li>
                 )

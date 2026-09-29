@@ -53,3 +53,13 @@ export async function getObjectStream(key: string) {
   const o = await s3().send(new GetObjectCommand({ Bucket: bucket(), Key: key }))
   return { body: o.Body?.transformToWebStream() ?? null, mime: o.ContentType ?? 'application/octet-stream', size: Number(o.ContentLength ?? 0) }
 }
+
+/** Whole object as bytes (server-side processing such as stamping a signed PDF). */
+export async function getObjectBytes(key: string) {
+  const o = await s3().send(new GetObjectCommand({ Bucket: bucket(), Key: key }))
+  return o.Body ? new Uint8Array(await o.Body.transformToByteArray()) : null
+}
+
+export async function putObject(key: string, bytes: Uint8Array, mime: string) {
+  await s3().send(new PutObjectCommand({ Bucket: bucket(), Key: key, Body: bytes, ContentType: mime }))
+}
