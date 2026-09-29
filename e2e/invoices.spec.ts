@@ -1,0 +1,64 @@
+import { test, expect } from '@playwright/test'
+import { signUp, createBuilder, uid } from './helpers'
+
+test('contract from estimate → progress draw invoice → payment → WIP and receivables', async ({ page }) => {
+  const id = uid()
+  await signUp(page, { first: 'Ivan', last: 'Invoice', email: `ivan.${id}@inv.test` })
+  await createBuilder(page, `Invoice Homes ${id}`)
+  await page.goto('/jobs/new')
+  await page.getByLabel('Job name').fill(`Larch ${id}`)
+  await page.getByRole('button', { name: 'Create job' }).click()
+  await expect(page.getByRole('heading', { name: `Larch ${id}` })).toBeVisible()
+  const jobId = page.url().split('/jobs/')[1]
+
+  // Contract: estimate → proposal approved on the client's behalf → budget
+  await page.goto(`/estimates/${jobId}`)
+  await page.getByRole('button', { name: 'Start estimate' }).click()
+  await page.getByRole('button', { name: 'Add line' }).click()
+  await page.getByLabel('Line title').fill('House')
+  await page.getByLabel('Unit cost').fill('80000')
+  await page.getByLabel('Markup', { exact: true }).fill('25')
+  await page.getByRole('button', { name: 'Save estimate' }).click()
+  await expect(page.getByText('Estimate saved.')).toBeVisible()
+  await page.getByRole('button', { name: 'Create proposal' }).click()
+  await page.getByRole('button', { name: 'Release to client' }).click()
+  await page.getByRole('button', { name: 'Release', exact: true }).click()
+  await page.getByLabel('Full name').fill('Hal Homeowner')
+  await page.getByLabel(/I agree that my electronic signature/).check()
+  await page.getByRole('button', { name: 'Approve and sign' }).click()
+  await expect(page.getByText(/Approved by Hal Homeowner \(recorded by the builder\)/)).toBeVisible()
+  await page.goto(`/estimates/${jobId}`)
+  await page.getByRole('button', { name: 'Send to budget' }).click()
+  await page.getByRole('button', { name: 'Send to budget' }).last().click()
+  await expect(page.getByText(/Sent to budget/).first()).toBeVisible()
+
+  // Draw 1: 25% of contract, 10% owner holdback
+  await page.goto('/invoices/new')
+  await page.getByLabel('Title').fill('Draw 1 — foundation')
+  await page.getByLabel('Owner holdback %').fill('10')
+  await page.getByRole('button', { name: 'Create invoice' }).click()
+  await expect(page.getByText('Contract $100,000.00')).toBeVisible()
+  await page.getByRole('button', { name: '% of contract' }).click()
+  await page.getByLabel('Percent of contract').fill('25')
+  await page.getByLabel('Line description').fill('25% — foundation complete')
+  await page.getByRole('button', { name: 'Save lines' }).click()
+  await expect(page.getByText('Lines saved.')).toBeVisible()
+  await page.getByRole('button', { name: 'Send to client' }).click()
+  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(page.getByTestId('invoice-balance')).toHaveText('$23,750.00')   // 25,000 + 1,250 GST − 2,500 holdback
+
+  await page.goto('/reports?tab=ar')
+  await expect(page.getByRole('link', { name: '#1 Draw 1 — foundation' })).toBeVisible()
+  await page.getByRole('link', { name: '#1 Draw 1 — foundation' }).click()
+  await page.getByLabel('Amount').fill('23750')
+  await page.getByRole('button', { name: 'Record payment' }).click()
+  await expect(page.getByTestId('invoice-balance')).toHaveText('$0.00')
+  await expect(page.getByText('Paid', { exact: true }).first()).toBeVisible()
+
+  await page.goto('/reports')
+  const row = page.getByRole('row', { name: new RegExp(`Larch ${id}`) })
+  await expect(row).toContainText('$100,000.00')
+  await expect(row).toContainText('$25,000.00')
+  await expect(row).toContainText('$23,750.00')
+  await page.screenshot({ path: 'test-results/97-wip.png', fullPage: true })
+})

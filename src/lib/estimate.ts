@@ -74,3 +74,6 @@ export const BILL_STATUS: Record<string, { label: string; tone: 'neutral' | 'bra
   paid: { label: 'Paid', tone: 'success' }, rejected: { label: 'Rejected', tone: 'danger' },
 }
 export const PAYMENT_METHODS: Record<string, string> = { eft: 'EFT / direct deposit', cheque: 'Cheque', credit_card: 'Credit card', cash: 'Cash', other: 'Other' }
+export const INVOICE_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
+  draft: { label: 'Draft', tone: 'neutral' }, released: { label: 'Unpaid', tone: 'warning' }, paid: { label: 'Paid', tone: 'success' }, void: { label: 'Void', tone: 'neutral' },
+}

@@ -404,6 +404,87 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_invoice_lines": {
+                  Row: {
+                    "amount": number,"change_order_id": string | null,"id": string,"invoice_id": string,"kind": string,"percent": number | null,"sort": number,"taxable": boolean,"title": string
+                  }
+                  Insert: {
+                    "amount": number,"change_order_id"?: string | null,"id"?: string,"invoice_id": string,"kind"?: string,"percent"?: number | null,"sort"?: number,"taxable"?: boolean,"title": string
+                  }
+                  Update: {
+                    "amount"?: number,"change_order_id"?: string | null,"id"?: string,"invoice_id"?: string,"kind"?: string,"percent"?: number | null,"sort"?: number,"taxable"?: boolean,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_invoice_lines_change_order_id_fkey"
+      columns: ["change_order_id"]
+isOneToOne: false
+      referencedRelation: "change_orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_invoice_lines_invoice_id_fkey"
+      columns: ["invoice_id"]
+isOneToOne: false
+      referencedRelation: "client_invoices"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_invoices": {
+                  Row: {
+                    "created_at": string,"created_by": string,"deleted_at": string | null,"description": string | null,"due_date": string | null,"holdback_pct": number,"id": string,"invoice_date": string,"job_id": string,"number": number,"org_id": string,"released_at": string | null,"status": Database["public"]['Enums']["invoice_status"],"tax_label": string,"tax_rate": number,"title": string,"voided_at": string | null
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"description"?: string | null,"due_date"?: string | null,"holdback_pct"?: number,"id"?: string,"invoice_date"?: string,"job_id": string,"number": number,"org_id": string,"released_at"?: string | null,"status"?: Database["public"]['Enums']["invoice_status"],"tax_label"?: string,"tax_rate"?: number,"title": string,"voided_at"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"description"?: string | null,"due_date"?: string | null,"holdback_pct"?: number,"id"?: string,"invoice_date"?: string,"job_id"?: string,"number"?: number,"org_id"?: string,"released_at"?: string | null,"status"?: Database["public"]['Enums']["invoice_status"],"tax_label"?: string,"tax_rate"?: number,"title"?: string,"voided_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_invoices_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_invoices_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_invoices_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_payments": {
+                  Row: {
+                    "amount": number,"created_at": string,"created_by": string,"id": string,"invoice_id": string,"method": string,"note": string | null,"paid_on": string,"reference": string | null
+                  }
+                  Insert: {
+                    "amount": number,"created_at"?: string,"created_by"?: string,"id"?: string,"invoice_id": string,"method"?: string,"note"?: string | null,"paid_on": string,"reference"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"created_by"?: string,"id"?: string,"invoice_id"?: string,"method"?: string,"note"?: string | null,"paid_on"?: string,"reference"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_payments_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_payments_invoice_id_fkey"
+      columns: ["invoice_id"]
+isOneToOne: false
+      referencedRelation: "client_invoices"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_permission_defaults": {
                   Row: {
                     "org_id": string,"settings": NonNullable<Json>
@@ -2401,6 +2482,9 @@ isOneToOne: false
 "can_see_change_order":
 { Args: { "p_co": string }; Returns: boolean
                            },
+"can_see_invoice":
+{ Args: { "p": string }; Returns: boolean
+                           },
 "can_see_po":
 { Args: { "p_po": string }; Returns: boolean
                            },
@@ -2467,6 +2551,11 @@ isOneToOne: false
               "accepted": boolean,"email": string,"expired": boolean,"kind": Database["public"]['Enums']["invite_kind"],"org_name": string
             }[]
                            },
+"invoice_totals":
+{ Args: { "p": string }; Returns: {
+              "balance": number,"holdback": number,"paid": number,"subtotal": number,"tax": number,"total": number
+            }[]
+                           },
 "item_cost":
 { Args: { "i": Database["public"]['Tables']["estimate_items"]['Row'] }; Returns: number
                            },
@@ -2477,6 +2566,9 @@ isOneToOne: false
 { Args: { "p_job": string }; Returns: {
               "actual": number,"co_cost": number,"co_price": number,"committed": number,"cost_code_id": string,"cost_type": Database["public"]['Enums']["cost_type"],"original_cost": number,"original_price": number,"paid": number
             }[]
+                           },
+"job_contract":
+{ Args: { "p_job": string }; Returns: number
                            },
 "lead_form_info":
 { Args: { "p_token": string }; Returns: {
@@ -2513,6 +2605,9 @@ isOneToOne: false
 "po_total":
 { Args: { "p_po": string }; Returns: number
                            },
+"record_client_payment":
+{ Args: { "p": string,"p_amount": number,"p_method": string,"p_note"?: string,"p_paid_on": string,"p_ref"?: string }; Returns: undefined
+                           },
 "release_bid_package":
 { Args: { "p_due"?: string,"p_package": string }; Returns: undefined
                            },
@@ -2522,6 +2617,9 @@ isOneToOne: false
 "release_holdback":
 { Args: { "p_po": string }; Returns: string
                            },
+"release_invoice":
+{ Args: { "p": string }; Returns: undefined
+                           },
 "release_po":
 { Args: { "p_po": string }; Returns: undefined
                            },
@@ -2530,6 +2628,21 @@ isOneToOne: false
                            },
 "release_selection":
 { Args: { "p_sel": string }; Returns: undefined
+                           },
+"report_payables":
+{ Args: { "p_org": string }; Returns: {
+              "bill_id": string,"due_date": string,"invoice_date": string,"invoice_ref": string,"job_id": string,"job_title": string,"payable": number,"payee": string,"waiver_missing": boolean
+            }[]
+                           },
+"report_receivables":
+{ Args: { "p_org": string }; Returns: {
+              "balance": number,"due_date": string,"invoice_date": string,"invoice_id": string,"job_id": string,"job_title": string,"number": number,"title": string
+            }[]
+                           },
+"report_wip":
+{ Args: { "p_org": string }; Returns: {
+              "billed": number,"committed": number,"contract": number,"cost_to_date": number,"job_id": string,"job_title": string,"received": number,"revised_cost": number,"status": Database["public"]['Enums']["job_status"]
+            }[]
                            },
 "resolve_share_link":
 { Args: { "p_token": string }; Returns: {
@@ -2547,6 +2660,9 @@ isOneToOne: false
                            },
 "save_estimate":
 { Args: { "p_estimate": string,"p_groups": Json,"p_items": Json,"p_settings": Json }; Returns: undefined
+                           },
+"save_invoice_lines":
+{ Args: { "p_invoice": string,"p_lines": Json }; Returns: undefined
                            },
 "save_po_items":
 { Args: { "p_items": Json,"p_po": string }; Returns: undefined
@@ -2594,10 +2710,13 @@ isOneToOne: false
                            },
 "update_my_sub_profile":
 { Args: { "p_link": string,"p_profile": Json }; Returns: undefined
+                           },
+"void_invoice":
+{ Args: { "p": string }; Returns: undefined
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","bid_package_status": "draft"|"open"|"closed"|"awarded","bid_request_status": "invited"|"submitted"|"declined"|"awarded"|"not_awarded","bill_status": "draft"|"submitted"|"approved"|"paid"|"rejected","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","po_status": "draft"|"released"|"accepted"|"declined"|"void","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","todo_priority": "low"|"medium"|"high","work_status": "not_started"|"in_progress"|"complete","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","bid_package_status": "draft"|"open"|"closed"|"awarded","bid_request_status": "invited"|"submitted"|"declined"|"awarded"|"not_awarded","bill_status": "draft"|"submitted"|"approved"|"paid"|"rejected","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","invoice_status": "draft"|"released"|"paid"|"void","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","po_status": "draft"|"released"|"accepted"|"declined"|"void","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","todo_priority": "low"|"medium"|"high","work_status": "not_started"|"in_progress"|"complete","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -2713,7 +2832,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"bid_package_status": ["draft", "open", "closed", "awarded"],"bid_request_status": ["invited", "submitted", "declined", "awarded", "not_awarded"],"bill_status": ["draft", "submitted", "approved", "paid", "rejected"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"po_status": ["draft", "released", "accepted", "declined", "void"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"todo_priority": ["low", "medium", "high"],"work_status": ["not_started", "in_progress", "complete"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"bid_package_status": ["draft", "open", "closed", "awarded"],"bid_request_status": ["invited", "submitted", "declined", "awarded", "not_awarded"],"bill_status": ["draft", "submitted", "approved", "paid", "rejected"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"invoice_status": ["draft", "released", "paid", "void"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"po_status": ["draft", "released", "accepted", "declined", "void"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"todo_priority": ["low", "medium", "high"],"work_status": ["not_started", "in_progress", "complete"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const
