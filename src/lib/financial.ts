@@ -13,3 +13,17 @@ export async function costCodes(orgId: string) {
   const { data } = await supabase.from('cost_codes').select('id,code,title').eq('org_id', orgId).eq('is_active', true).order('code')
   return data ?? []
 }
+
+/** Team members and linked subs, as "u:<id>" / "s:<id>" options. */
+export async function teamAndSubs(orgId: string) {
+  const supabase = await createClient()
+  const [{ data: members }, subs] = await Promise.all([
+    supabase.from('org_members').select('user_id,profiles(first_name,last_name,email)').eq('org_id', orgId).eq('status', 'active'),
+    linkedSubs(orgId),
+  ])
+  type P = { first_name: string; last_name: string; email: string } | null
+  return [
+    ...(members ?? []).map((m) => { const p = m.profiles as P; return { value: `u:${m.user_id}`, label: p ? `${p.first_name} ${p.last_name}`.trim() || p.email : 'Team member', group: 'Team' } }),
+    ...subs.map((s) => ({ value: `s:${s.sub_org_id}`, label: s.company_name, group: 'Subs and vendors' })),
+  ]
+}

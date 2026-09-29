@@ -9,7 +9,13 @@ export const RECORD_TYPES: Record<string, { label: string; href: (jobId: string,
   todo: { label: 'To-do', href: (_j, id) => `/todos/${id}` },
   purchase_order: { label: 'Purchase order', href: (_j, id) => `/purchase-orders/${id}` },
   warranty: { label: 'Warranty claim', href: (_j, id) => `/warranty/${id}` },
-  schedule_item: { label: 'Schedule item', href: (_j, id) => `/schedule?item=${id}` },
+  warranty_claim: { label: 'Warranty claim', href: (_j, id) => `/warranty/${id}` },
+  bill: { label: 'Bill', href: (_j, id) => `/bills/${id}` },
+  bid_package: { label: 'Bid package', href: (_j, id) => `/bids/${id}` },
+  proposal: { label: 'Proposal', href: (_j, id) => `/proposals/${id}` },
+  invoice: { label: 'Invoice', href: (_j, id) => `/invoices/${id}` },
+  plan_sheet: { label: 'Plan sheet', href: (_j, id) => `/plans/${id}` },
+  schedule_item: { label: 'Schedule item', href: (_j, id) => `/schedule/${id}` },
 }
 
 export const recordLabel = (t: string) => RECORD_TYPES[t]?.label ?? t.replace(/_/g, ' ')
