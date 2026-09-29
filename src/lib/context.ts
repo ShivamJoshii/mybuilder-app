@@ -133,8 +133,9 @@ export const getAppContext = cache(async (): Promise<AppContext> => {
     .eq('org_id', selectionKey)
     .maybeSingle()
   const visible = new Set(jobs.map((j) => j.id))
+  // Portal users (subs, clients) with no saved choice see all their jobs by default
   const selection = {
-    allJobs: sel?.all_jobs ?? false,
+    allJobs: sel?.all_jobs ?? (workspace.mode !== 'builder'),
     jobIds: (sel?.job_ids ?? []).filter((id: string) => visible.has(id)),
   }
 
