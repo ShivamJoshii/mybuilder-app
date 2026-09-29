@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Plus, Send, Unlock } from 'lucide-react'
-import { getAppContext, can } from '@/lib/context'
+import { getAppContext, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { costCodes, linkedSubs } from '@/lib/financial'
 import { Button } from '@/components/ui/button'
@@ -106,7 +106,7 @@ export default async function PoPage({ params }: PageProps<'/purchase-orders/[id
         </Card>
       )}
 
-      {po.status === 'released' && (!builder || canEdit) && (
+      {po.status === 'released' && (!builder || (canEdit && hasAction(ctx, 'purchase_orders.approve_for_sub'))) && (
         <Card className="print:hidden">
           <CardHeader title={builder ? 'Record the sub’s decision' : 'Accept this purchase order'} />
           <div className="p-4"><DecisionForm action={decidePo.bind(null, id)} needSignature onBehalf={builder} party="sub" approveLabel="Accept"

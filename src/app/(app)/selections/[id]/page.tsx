@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Check, CheckCircle2, Pencil, Send, Trash2, Unlock } from 'lucide-react'
-import { getAppContext, can } from '@/lib/context'
+import { getAppContext, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -48,7 +48,7 @@ export default async function SelectionPage({ params }: PageProps<'/selections/[
   const picked = choices.find((c) => c.id === s.selected_choice_id)
   const diff = picked?.client_price != null && allowance != null ? picked.client_price - allowance : null
   const overdue = s.deadline && s.deadline < todayIn() && (s.status === 'pending' || s.status === 'draft')
-  const canChoose = open && ((mode === 'client' && s.share_client) || canEdit)
+  const canChoose = open && ((mode === 'client' && s.share_client) || (canEdit && hasAction(ctx, 'selections.approve_for_client')))
 
   return (
     <div className="mx-auto max-w-5xl space-y-5 p-5">

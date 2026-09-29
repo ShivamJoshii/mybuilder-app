@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(20);
+select plan(22);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -20,7 +20,7 @@ begin
 end $$;
 
 
-select pg_temp.mkuser('owner', 'o@b.test'); select pg_temp.mkuser('s1', 's1@b.test'); select pg_temp.mkuser('s2', 's2@b.test'); select pg_temp.mkuser('other', 'x@b.test');
+select pg_temp.mkuser('owner', 'o@b.test'); select pg_temp.mkuser('pm', 'pm@b.test'); select pg_temp.mkuser('s1', 's1@b.test'); select pg_temp.mkuser('s2', 's2@b.test'); select pg_temp.mkuser('other', 'x@b.test');
 
 select pg_temp.login('owner');
 insert into ids select 'org', public.create_builder_org('Bid Co');
@@ -34,10 +34,13 @@ with x as (insert into public.bid_package_items (package_id, title, quantity, un
 with x as (insert into public.bid_package_items (package_id, title, quantity, unit, sort) values (pg_temp.id('pkg'), 'Sheathing', 100, 'sheet', 2) returning id) insert into ids select 'i2', id from x;
 with x as (insert into public.bid_requests (package_id, sub_org_id) values (pg_temp.id('pkg'), pg_temp.id('so1')) returning id) insert into ids select 'r1', id from x;
 with x as (insert into public.bid_requests (package_id, sub_org_id) values (pg_temp.id('pkg'), pg_temp.id('so2')) returning id) insert into ids select 'r2', id from x;
+select public.invite_internal_user(pg_temp.id('org'), 'pm@b.test', (select id from public.roles where org_id = pg_temp.id('org') and template_key = 'project_manager'));
 reset role;
 create temp table toks on commit drop as select email::text as email, token from public.invites;
 grant select on toks to authenticated;
 select pg_temp.login('s1'); select public.accept_invite((select token from toks where email = 's1@b.test')); reset role;
+select pg_temp.login('pm'); select public.accept_invite((select token from toks where email = 'pm@b.test')); reset role;
+insert into public.job_members (job_id, user_id) values (pg_temp.id('job'), pg_temp.id('pm'));
 select pg_temp.login('s2'); select public.accept_invite((select token from toks where email = 's2@b.test')); reset role;
 
 select pg_temp.login('s1');
@@ -83,8 +86,12 @@ select is((select status::text || ':' || holdback_pct from public.bills where id
 select throws_ok(format($q$insert into public.bill_items (bill_id, po_item_id, title, amount) select %L, id, title, 3001 from public.po_items where po_id = %L and title = 'Sheathing'$q$, pg_temp.id('bill'), pg_temp.id('po')), '23514', null, 'cannot bill past the PO line');
 reset role;
 
+select pg_temp.login('owner'); update public.jobs set status = 'open' where id = pg_temp.id('job'); reset role;
+select pg_temp.login('pm');
+select lives_ok(format($q$select public.set_bill_status(%L, 'approve')$q$, pg_temp.id('bill')), 'a PM can approve bills');
+select throws_ok(format($q$select public.pay_bill(%L, current_date, 'eft')$q$, pg_temp.id('bill')), '42501', null, 'a PM cannot record payments without the permission');
+reset role;
 select pg_temp.login('owner');
-select public.set_bill_status(pg_temp.id('bill'), 'approve');
 select is(public.pay_bill(pg_temp.id('bill'), current_date, 'eft', 'EFT-1'), 2375.00::numeric, 'payment = subtotal + tax - holdback');
 select is((select balance from public.po_holdback(pg_temp.id('po'))), 250.00::numeric, 'holdback balance is tracked on the PO');
 insert into ids select 'hb', public.release_holdback(pg_temp.id('po'));

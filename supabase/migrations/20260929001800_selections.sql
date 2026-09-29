@@ -152,7 +152,7 @@ begin
   select * into s from public.selections where id = p_sel for update;
   if s.id is null or s.deleted_at is not null then raise exception 'Not found' using errcode = 'P0002'; end if;
   v_client := s.share_client and private.is_job_client(s.job_id);
-  if not (v_client or private.can_module(s.job_id, 'selections', 'edit')) then raise exception 'Not allowed' using errcode = '42501'; end if;
+  if not (v_client or (private.can_module(s.job_id, 'selections', 'edit') and private.has_action(s.org_id, 'selections.approve_for_client'))) then raise exception 'Not allowed' using errcode = '42501'; end if;
   if s.status not in ('pending', 'selected') then raise exception 'This selection is not open' using errcode = '22023'; end if;
   if not exists (select 1 from public.selection_choices where id = p_choice and selection_id = p_sel and is_available) then
     raise exception 'Pick an available choice' using errcode = '22023';

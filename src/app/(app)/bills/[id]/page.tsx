@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, CheckCircle2, FileCheck2, RotateCcw, Trash2, XCircle } from 'lucide-react'
-import { getAppContext, can } from '@/lib/context'
+import { getAppContext, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -27,6 +27,8 @@ export default async function BillPage({ params }: PageProps<'/bills/[id]'>) {
   const { data: items } = await supabase.from('bill_items').select('id,title,amount,cost_code_id,cost_codes(code,title)').eq('bill_id', id).order('sort')
   const builder = ctx.workspace.mode === 'builder'
   const canEdit = builder && can(ctx, 'bills', 'edit')
+  const canApprove = canEdit && hasAction(ctx, 'bills.approve')
+  const canPay = canEdit && hasAction(ctx, 'bills.mark_paid')
   const subtotal = (items ?? []).reduce((s, i) => s + Number(i.amount), 0)
   const hb = Math.round(subtotal * Number(b.holdback_pct)) / 100
   const payable = subtotal + Number(b.tax_amount) - hb
@@ -40,8 +42,8 @@ export default async function BillPage({ params }: PageProps<'/bills/[id]'>) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Button asChild variant="ghost"><Link href="/bills"><ArrowLeft />Bills</Link></Button>
         <div className="flex flex-wrap gap-2">
-          {canEdit && ['draft', 'submitted'].includes(b.status) && <form action={billStatus.bind(null, id, 'approve')}><Button type="submit" variant="primary"><CheckCircle2 />Approve</Button></form>}
-          {canEdit && b.status === 'approved' && <form action={billStatus.bind(null, id, 'unapprove')}><Button type="submit"><RotateCcw />Unapprove</Button></form>}
+          {canApprove && ['draft', 'submitted'].includes(b.status) && <form action={billStatus.bind(null, id, 'approve')}><Button type="submit" variant="primary"><CheckCircle2 />Approve</Button></form>}
+          {canApprove && b.status === 'approved' && <form action={billStatus.bind(null, id, 'unapprove')}><Button type="submit"><RotateCcw />Unapprove</Button></form>}
           {canEdit && waiverMissing && ['approved', 'draft', 'submitted'].includes(b.status) && <form action={billStatus.bind(null, id, 'lien_waiver')}><Button type="submit"><FileCheck2 />Lien waiver received</Button></form>}
           {canEdit && b.status === 'draft' && <form action={deleteBill.bind(null, id)}><ConfirmSubmit variant="ghost" title="Delete this bill?" body="The draft bill moves to the trash."><Trash2 />Delete</ConfirmSubmit></form>}
         </div>
@@ -85,7 +87,7 @@ export default async function BillPage({ params }: PageProps<'/bills/[id]'>) {
           </form>
         </Card>
       )}
-      {canEdit && b.status === 'approved' && (
+      {canPay && b.status === 'approved' && (
         <Card>
           <CardHeader title="Record payment" description={waiverMissing ? 'Mark the lien waiver as received before paying.' : 'Money moves outside MyBuilder for now; this records it.'} />
           <ActionForm action={payBill.bind(null, id)} className="flex flex-wrap items-end gap-3 p-4">

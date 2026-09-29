@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, Send, Trash2 } from 'lucide-react'
-import { getAppContext, can } from '@/lib/context'
+import { getAppContext, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -153,7 +153,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
         <Signatures sigs={sigs ?? []} />
       </Card>
 
-      {co.status === 'pending' && (isClient || canEdit) && (
+      {co.status === 'pending' && (isClient || (canEdit && hasAction(ctx, 'change_orders.approve_for_client'))) && (
         <Card className="print:hidden">
           <CardHeader title={isClient ? 'Your decision' : 'Record the client’s decision'} />
           <div className="p-4">

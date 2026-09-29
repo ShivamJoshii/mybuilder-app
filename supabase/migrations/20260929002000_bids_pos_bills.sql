@@ -302,7 +302,8 @@ declare p public.purchase_orders;
 begin
   select * into p from public.purchase_orders where id = p_po for update;
   if p.id is null then raise exception 'Not found' using errcode = 'P0002'; end if;
-  if not (private.is_my_linked_sub(p.org_id, p.sub_org_id) or private.po_internal(p.job_id, p.org_id, 'edit')) then raise exception 'Not allowed' using errcode = '42501'; end if;
+  if not (private.is_my_linked_sub(p.org_id, p.sub_org_id)
+          or (private.po_internal(p.job_id, p.org_id, 'edit') and private.has_action(p.org_id, 'purchase_orders.approve_for_sub'))) then raise exception 'Not allowed' using errcode = '42501'; end if;
   if p.status <> 'released' then raise exception 'This purchase order is not waiting for a decision' using errcode = '22023'; end if;
   if p_decision not in ('accepted', 'declined') then raise exception 'Bad decision' using errcode = '22023'; end if;
   if p_decision = 'accepted' and coalesce(trim(p_signature), '') = '' then raise exception 'A signature is required' using errcode = '23514'; end if;
@@ -473,6 +474,7 @@ begin
   perform set_config('app.bill_status', 'on', true);
   case p_action
     when 'approve' then
+      if not private.has_action(b.org_id, 'bills.approve') then raise exception 'You don''t have permission to approve bills' using errcode = '42501'; end if;
       if b.status not in ('draft', 'submitted') then raise exception 'Only draft or submitted bills can be approved' using errcode = '22023'; end if;
       if public.bill_subtotal(p_bill) = 0 then raise exception 'Add at least one line' using errcode = '22023'; end if;
       update public.bills set status = 'approved', approved_at = now(), approved_by = auth.uid(), rejected_reason = null where id = p_bill;
@@ -500,6 +502,7 @@ declare b public.bills; v_amount numeric;
 begin
   select * into b from public.bills where id = p_bill for update;
   if b.id is null or not private.bill_internal(b.job_id, b.org_id, 'edit') then raise exception 'Not allowed' using errcode = '42501'; end if;
+  if not private.has_action(b.org_id, 'bills.mark_paid') then raise exception 'You don''t have permission to pay bills' using errcode = '42501'; end if;
   if b.status <> 'approved' then raise exception 'Approve the bill before paying it' using errcode = '22023'; end if;
   if b.lien_waiver_required and b.lien_waiver_received_at is null then raise exception 'A lien waiver is required before payment' using errcode = '22023'; end if;
   v_amount := public.bill_subtotal(p_bill) + b.tax_amount - public.bill_holdback(p_bill);

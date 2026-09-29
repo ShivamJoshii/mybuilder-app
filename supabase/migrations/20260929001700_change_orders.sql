@@ -214,7 +214,7 @@ begin
   if c.status <> 'pending' then raise exception 'This change order is not open for approval' using errcode = '22023'; end if;
   if p_decision not in ('approved', 'declined') then raise exception 'Bad decision' using errcode = '22023'; end if;
   if private.is_job_client(c.job_id) then v_behalf := false;
-  elsif private.can_module(c.job_id, 'change_orders', 'edit') then v_behalf := true;
+  elsif private.can_module(c.job_id, 'change_orders', 'edit') and private.has_action(c.org_id, 'change_orders.approve_for_client') then v_behalf := true;
   else raise exception 'Not allowed' using errcode = '42501'; end if;
   if c.collect_signature and p_decision = 'approved' and coalesce(trim(p_signature), '') = '' then
     raise exception 'A signature is required' using errcode = '23514';
