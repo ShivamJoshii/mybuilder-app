@@ -44,6 +44,7 @@ Last updated: 2026-09-29 (overnight build)
 | Accounting: cost type / cost code → account mapping; QuickBooks-shaped CSV exports for bills and invoices; payments register | Built, browser-tested |
 | Bid documents: pick plan sheets for a bid package; invited bidders open those sheets and the package attachments before they're on the job | Built, browser-tested |
 | Custom fields on jobs, leads, daily logs, to-dos, RFIs and warranty claims: typed values, per-field visibility to subs / clients | Built, browser-tested |
+| Chat is live over Supabase Realtime (members only, via RLS); polling kicks in if the socket drops | Built, browser-tested |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |

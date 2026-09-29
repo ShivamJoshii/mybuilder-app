@@ -42,14 +42,17 @@ test('chat: builder and sub talk live in two browsers', async ({ page, browser }
   await page.getByRole('button', { name: 'Start chat' }).click()
   await expect(page.getByTestId('chat-feed').getByText('Can you start taping Monday?')).toBeVisible()
 
+  // both sides are on the live socket (polling drops to every 30s)
+  await expect(page.getByTestId('chat-feed')).toHaveAttribute('data-live', 'on', { timeout: 10_000 })
   await sub.goto('/chat')
   await expect(sub.getByTestId('chat-feed').getByText('Can you start taping Monday?')).toBeVisible()
+  await expect(sub.getByTestId('chat-feed')).toHaveAttribute('data-live', 'on', { timeout: 10_000 })
   await sub.getByLabel('Message').fill('Yes, 7am. Need the heat on.')
   await sub.keyboard.press('Enter')
   await expect(sub.getByTestId('chat-feed').getByText('Yes, 7am. Need the heat on.')).toBeVisible()
 
-  // Builder sees the reply arrive without reloading
-  await expect(page.getByTestId('chat-feed').getByText('Yes, 7am. Need the heat on.')).toBeVisible({ timeout: 10_000 })
+  // Builder sees the reply arrive without reloading, pushed over Realtime (well under the 30s fallback poll)
+  await expect(page.getByTestId('chat-feed').getByText('Yes, 7am. Need the heat on.')).toBeVisible({ timeout: 5_000 })
   await page.screenshot({ path: 'test-results/98-chat.png' })
   await subCtx.close()
 })

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 import { chatFeed, sendChat } from './actions'
 
 type Msg = { id: string; author_id: string; author: string; body: string; created_at: string }
@@ -12,7 +13,7 @@ type Msg = { id: string; author_id: string; author: string; body: string; create
 const time = (iso: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' }).format(new Date(iso))
 const ini = (n: string) => n.split(' ').map((x) => x[0]).join('').slice(0, 2).toUpperCase()
 
-/** Conversation view. Polls for new messages every few seconds (Realtime can replace this later). */
+/** Conversation view. New messages arrive over Supabase Realtime; polling is the fallback when the socket is down. */
 export function ChatRoom({ conversationId, me, initial }: { conversationId: string; me: string; initial: Msg[] }) {
   const [msgs, setMsgs] = useState<Msg[]>(initial)
   const [text, setText] = useState('')
@@ -26,10 +27,27 @@ export function ChatRoom({ conversationId, me, initial }: { conversationId: stri
     if (more.length) setMsgs((m) => [...m, ...more.filter((x) => !m.some((y) => y.id === x.id))])
   }, [conversationId, last])
 
+  const [live, setLive] = useState(false)
+  const pollRef = useRef(poll)
+  useEffect(() => { pollRef.current = poll }, [poll])
   useEffect(() => {
-    const t = setInterval(poll, 3000)
+    const sb = createClient()
+    let ch: ReturnType<typeof sb.channel> | null = null
+    let gone = false
+    // Join with the user's token so Realtime applies their RLS (only members get the rows)
+    void sb.auth.getSession().then(({ data }) => {
+      if (gone || !data.session) return
+      sb.realtime.setAuth(data.session.access_token)
+      ch = sb.channel(`chat:${conversationId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversationId}` }, () => { void pollRef.current() })
+        .subscribe((status) => setLive(status === 'SUBSCRIBED'))
+    })
+    return () => { gone = true; if (ch) void sb.removeChannel(ch) }
+  }, [conversationId])
+  useEffect(() => {
+    const t = setInterval(poll, live ? 30000 : 3000)
     return () => clearInterval(t)
-  }, [poll])
+  }, [poll, live])
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [msgs.length])
 
   const send = () => {
@@ -45,7 +63,7 @@ export function ChatRoom({ conversationId, me, initial }: { conversationId: stri
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite" data-testid="chat-feed">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite" data-testid="chat-feed" data-live={live ? 'on' : 'off'}>
         {msgs.map((m) => {
           const mine = m.author_id === me
           return (
