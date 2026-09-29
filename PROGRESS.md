@@ -52,6 +52,7 @@ Last updated: 2026-09-29 (overnight build)
 | Import from spreadsheets (Settings → Import data): jobs, leads, subs/vendors, cost codes; understands Buildertrend export headers, previews, reports skipped rows with reasons | Built, browser-tested |
 | Audit log (Settings → Audit log): who changed what, field by field, now including bills, POs, invoices, payments, change orders, selections, proposals, time, certificates and company settings | Built, browser-tested |
 | Document e-signatures: send any job PDF to clients, subs or team (in order or together); typed/drawn signatures with IP + browser; document fingerprinted (SHA-256) at send; signed copy with a certificate page saved next to the original | Built, browser-tested |
+| Database speed at scale: row-security rules now use per-query job lists; 40,000 to-dos load in ~60 ms (was 34 s), a PM's view in ~10 ms (was 4 s). Seed + timing notes in `supabase/perf/` | Built, measured |
 | Installable web app (manifest + icons) for phones and tablets | Built |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Second audit of tonight's features (8 findings): attachments tied to the record's job, sub certificates need builder verification, template copies respect module permissions, documents frozen while out for signature, signing evidence recorded server-side, signer IPs private, certificate documents scoped, templates don't send reminders | Fixed, regression tests added |
