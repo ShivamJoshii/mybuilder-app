@@ -39,8 +39,8 @@ export async function fetchJobs(ctx: AppContext): Promise<JobRow[]> {
   let q = supabase
     .from('jobs')
     .select(`id,org_id,title,status,color,job_type,contract_type,street,city,province,postal_code,permit_number,lot_info,
-             square_feet,sub_notes,projected_start,projected_end,actual_start,actual_end,work_days,created_at,
-             job_managers(user_id, profiles(first_name,last_name,email))`)
+             square_feet,projected_start,projected_end,actual_start,actual_end,work_days,created_at,
+             job_managers(user_id, profiles(first_name,last_name,email)), job_sub_notes(body)`)
     .is('deleted_at', null)
   const ws = ctx.workspace
   if (ws.mode === 'builder' || ws.mode === 'client') q = q.eq('org_id', ws.orgId)
@@ -49,11 +49,13 @@ export async function fetchJobs(ctx: AppContext): Promise<JobRow[]> {
   if (error) throw error
   const names = new Map(ctx.jobs.map((j) => [j.org_id, j.builder_name]))
   return (data ?? []).map((j) => {
-    const { job_managers, ...rest } = j as typeof j & {
+    const { job_managers, job_sub_notes, ...rest } = j as typeof j & {
       job_managers: { user_id: string; profiles: { first_name: string; last_name: string; email: string } | null }[]
+      job_sub_notes: { body: string } | null
     }
     return {
       ...rest,
+      sub_notes: job_sub_notes?.body || null,
       builder_name: names.get(j.org_id) ?? null,
       managers: (job_managers ?? []).map((m) => ({
         user_id: m.user_id,

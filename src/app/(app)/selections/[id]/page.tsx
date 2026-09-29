@@ -25,9 +25,11 @@ export default async function SelectionPage({ params }: PageProps<'/selections/[
   const { id } = await params
   const ctx = await getAppContext()
   const supabase = await createClient()
-  const { data: s } = await supabase.from('selections').select('*').eq('id', id).is('deleted_at', null).maybeSingle()
-  if (!s) notFound()
   const mode = ctx.workspace.mode
+  const { data: s } = mode === 'sub'
+    ? await subSelection(id, ctx.jobs.map((j) => j.id))
+    : await supabase.from('selections').select('*').eq('id', id).is('deleted_at', null).maybeSingle()
+  if (!s) notFound()
   const builder = mode === 'builder'
   const canEdit = builder && can(ctx, 'selections', 'edit')
   const canDelete = builder && can(ctx, 'selections', 'delete')
@@ -36,7 +38,7 @@ export default async function SelectionPage({ params }: PageProps<'/selections/[
   const open = s.status === 'pending' || s.status === 'selected'
 
   let choices: Choice[] = []
-  if (mode === 'sub') choices = (await supabase.rpc('selection_choices_public', { p_sel: id })).data ?? []
+  if (mode === 'sub' || (builder && !can(ctx, 'selections', 'price'))) choices = (await supabase.rpc('selection_choices_public', { p_sel: id })).data ?? []
   else choices = ((await supabase.from('selection_choices').select('id,title,description,vendor,product_code,is_available,client_price').eq('selection_id', id).order('sort')).data ?? [])
     .map((c) => ({ ...c, client_price: Number(c.client_price) }))
   if (mode === 'client') choices = choices.filter((c) => c.is_available || c.id === s.selected_choice_id)
@@ -146,4 +148,13 @@ export default async function SelectionPage({ params }: PageProps<'/selections/[
       <Attachments jobId={s.job_id} recordType="selection" recordId={id} path={`/selections/${id}`} share={{ subs: s.share_subs, clients: s.share_client }} canAdd={canEdit} />
     </div>
   )
+}
+
+/** Subs read a projection without the allowance or change order link. */
+async function subSelection(id: string, jobIds: string[]) {
+  const supabase = await createClient()
+  const { data } = await supabase.rpc('sub_selections', { p_jobs: jobIds, p_id: id })
+  const r = data?.[0]
+  return { data: r ? { ...r, allowance: null, change_order_id: null, schedule_item_id: null, days_before: null, org_id: '', deleted_at: null,
+    selected_by: null, selected_at: null, approved_by: null, approved_at: null, created_by: '', created_at: r.released_at ?? '' } : null }
 }

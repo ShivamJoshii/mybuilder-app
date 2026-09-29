@@ -319,13 +319,13 @@ isOneToOne: false
                   ]
                 },"builder_sub_links": {
                   Row: {
-                    "builder_org_id": string,"business_phone": string | null,"cell_phone": string | null,"city": string | null,"company_name": string,"created_at": string,"custom": NonNullable<Json>,"fax": string | null,"id": string,"postal_code": string | null,"primary_contact_first": string | null,"primary_contact_last": string | null,"primary_email": string | null,"province": string | null,"sms_opt_in": boolean,"status": Database["public"]['Enums']["link_status"],"street": string | null,"sub_org_id": string,"trade": string | null,"updated_at": string
+                    "builder_org_id": string,"business_phone": string | null,"cell_phone": string | null,"city": string | null,"company_name": string,"created_at": string,"fax": string | null,"id": string,"postal_code": string | null,"primary_contact_first": string | null,"primary_contact_last": string | null,"primary_email": string | null,"province": string | null,"sms_opt_in": boolean,"status": Database["public"]['Enums']["link_status"],"street": string | null,"sub_org_id": string,"trade": string | null,"updated_at": string
                   }
                   Insert: {
-                    "builder_org_id": string,"business_phone"?: string | null,"cell_phone"?: string | null,"city"?: string | null,"company_name": string,"created_at"?: string,"custom"?: NonNullable<Json>,"fax"?: string | null,"id"?: string,"postal_code"?: string | null,"primary_contact_first"?: string | null,"primary_contact_last"?: string | null,"primary_email"?: string | null,"province"?: string | null,"sms_opt_in"?: boolean,"status"?: Database["public"]['Enums']["link_status"],"street"?: string | null,"sub_org_id": string,"trade"?: string | null,"updated_at"?: string
+                    "builder_org_id": string,"business_phone"?: string | null,"cell_phone"?: string | null,"city"?: string | null,"company_name": string,"created_at"?: string,"fax"?: string | null,"id"?: string,"postal_code"?: string | null,"primary_contact_first"?: string | null,"primary_contact_last"?: string | null,"primary_email"?: string | null,"province"?: string | null,"sms_opt_in"?: boolean,"status"?: Database["public"]['Enums']["link_status"],"street"?: string | null,"sub_org_id": string,"trade"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "builder_org_id"?: string,"business_phone"?: string | null,"cell_phone"?: string | null,"city"?: string | null,"company_name"?: string,"created_at"?: string,"custom"?: NonNullable<Json>,"fax"?: string | null,"id"?: string,"postal_code"?: string | null,"primary_contact_first"?: string | null,"primary_contact_last"?: string | null,"primary_email"?: string | null,"province"?: string | null,"sms_opt_in"?: boolean,"status"?: Database["public"]['Enums']["link_status"],"street"?: string | null,"sub_org_id"?: string,"trade"?: string | null,"updated_at"?: string
+                    "builder_org_id"?: string,"business_phone"?: string | null,"cell_phone"?: string | null,"city"?: string | null,"company_name"?: string,"created_at"?: string,"fax"?: string | null,"id"?: string,"postal_code"?: string | null,"primary_contact_first"?: string | null,"primary_contact_last"?: string | null,"primary_email"?: string | null,"province"?: string | null,"sms_opt_in"?: boolean,"status"?: Database["public"]['Enums']["link_status"],"street"?: string | null,"sub_org_id"?: string,"trade"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -681,13 +681,13 @@ isOneToOne: false
                   ]
                 },"cost_codes": {
                   Row: {
-                    "category_id": string,"code": string,"created_at": string,"description": string | null,"id": string,"internal_notes": string | null,"is_active": boolean,"is_labor": boolean,"org_id": string,"parent_id": string | null,"sort": number,"title": string,"updated_at": string
+                    "category_id": string,"code": string,"created_at": string,"description": string | null,"id": string,"is_active": boolean,"is_labor": boolean,"org_id": string,"parent_id": string | null,"sort": number,"title": string,"updated_at": string
                   }
                   Insert: {
-                    "category_id": string,"code": string,"created_at"?: string,"description"?: string | null,"id"?: string,"internal_notes"?: string | null,"is_active"?: boolean,"is_labor"?: boolean,"org_id": string,"parent_id"?: string | null,"sort"?: number,"title": string,"updated_at"?: string
+                    "category_id": string,"code": string,"created_at"?: string,"description"?: string | null,"id"?: string,"is_active"?: boolean,"is_labor"?: boolean,"org_id": string,"parent_id"?: string | null,"sort"?: number,"title": string,"updated_at"?: string
                   }
                   Update: {
-                    "category_id"?: string,"code"?: string,"created_at"?: string,"description"?: string | null,"id"?: string,"internal_notes"?: string | null,"is_active"?: boolean,"is_labor"?: boolean,"org_id"?: string,"parent_id"?: string | null,"sort"?: number,"title"?: string,"updated_at"?: string
+                    "category_id"?: string,"code"?: string,"created_at"?: string,"description"?: string | null,"id"?: string,"is_active"?: boolean,"is_labor"?: boolean,"org_id"?: string,"parent_id"?: string | null,"sort"?: number,"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -762,13 +762,13 @@ isOneToOne: false
                   ]
                 },"daily_logs": {
                   Row: {
-                    "author_type": string,"created_at": string,"created_by": string,"custom": NonNullable<Json>,"deleted_at": string | null,"id": string,"include_weather": boolean,"include_weather_notes": boolean,"job_id": string,"log_date": string,"notes": string,"org_id": string,"published_at": string | null,"share_clients": boolean,"share_internal": boolean,"share_subs": boolean,"status": Database["public"]['Enums']["log_status"],"tag_ids": (string)[],"title": string | null,"updated_at": string,"weather": Json | null,"weather_notes": string | null
+                    "author_type": string,"created_at": string,"created_by": string,"deleted_at": string | null,"id": string,"include_weather": boolean,"include_weather_notes": boolean,"job_id": string,"log_date": string,"notes": string,"org_id": string,"published_at": string | null,"share_clients": boolean,"share_internal": boolean,"share_subs": boolean,"status": Database["public"]['Enums']["log_status"],"tag_ids": (string)[],"title": string | null,"updated_at": string,"weather": Json | null,"weather_notes": string | null
                   }
                   Insert: {
-                    "author_type"?: string,"created_at"?: string,"created_by"?: string,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"id"?: string,"include_weather"?: boolean,"include_weather_notes"?: boolean,"job_id": string,"log_date"?: string,"notes": string,"org_id": string,"published_at"?: string | null,"share_clients"?: boolean,"share_internal"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["log_status"],"tag_ids"?: (string)[],"title"?: string | null,"updated_at"?: string,"weather"?: Json | null,"weather_notes"?: string | null
+                    "author_type"?: string,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"id"?: string,"include_weather"?: boolean,"include_weather_notes"?: boolean,"job_id": string,"log_date"?: string,"notes": string,"org_id": string,"published_at"?: string | null,"share_clients"?: boolean,"share_internal"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["log_status"],"tag_ids"?: (string)[],"title"?: string | null,"updated_at"?: string,"weather"?: Json | null,"weather_notes"?: string | null
                   }
                   Update: {
-                    "author_type"?: string,"created_at"?: string,"created_by"?: string,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"id"?: string,"include_weather"?: boolean,"include_weather_notes"?: boolean,"job_id"?: string,"log_date"?: string,"notes"?: string,"org_id"?: string,"published_at"?: string | null,"share_clients"?: boolean,"share_internal"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["log_status"],"tag_ids"?: (string)[],"title"?: string | null,"updated_at"?: string,"weather"?: Json | null,"weather_notes"?: string | null
+                    "author_type"?: string,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"id"?: string,"include_weather"?: boolean,"include_weather_notes"?: boolean,"job_id"?: string,"log_date"?: string,"notes"?: string,"org_id"?: string,"published_at"?: string | null,"share_clients"?: boolean,"share_internal"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["log_status"],"tag_ids"?: (string)[],"title"?: string | null,"updated_at"?: string,"weather"?: Json | null,"weather_notes"?: string | null
                   }
                   Relationships: [
                     {
@@ -1284,6 +1284,31 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"job_sub_notes": {
+                  Row: {
+                    "body": string,"job_id": string,"org_id": string,"updated_at": string
+                  }
+                  Insert: {
+                    "body"?: string,"job_id": string,"org_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "body"?: string,"job_id"?: string,"org_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "job_sub_notes_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: true
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_sub_notes_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"job_subs": {
                   Row: {
                     "added_at": string,"can_assign_rfis_to_subs": boolean,"can_share_with_client": boolean,"can_view_owner_info": boolean,"job_id": string,"see_all_schedule_items": boolean,"sub_org_id": string
@@ -1311,13 +1336,13 @@ isOneToOne: false
                   ]
                 },"jobs": {
                   Row: {
-                    "actual_end": string | null,"actual_start": string | null,"city": string | null,"color": string,"contract_type": Database["public"]['Enums']["contract_type"],"created_at": string,"created_by": string | null,"custom": NonNullable<Json>,"deleted_at": string | null,"id": string,"job_type": string | null,"lat": number | null,"lng": number | null,"lot_info": string | null,"org_id": string,"permit_number": string | null,"postal_code": string | null,"prefix": string | null,"projected_end": string | null,"projected_start": string | null,"province": string | null,"square_feet": number | null,"status": Database["public"]['Enums']["job_status"],"street": string | null,"sub_notes": string | null,"title": string,"updated_at": string,"work_days": (number)[]
+                    "actual_end": string | null,"actual_start": string | null,"city": string | null,"color": string,"contract_type": Database["public"]['Enums']["contract_type"],"created_at": string,"created_by": string | null,"deleted_at": string | null,"id": string,"job_type": string | null,"lat": number | null,"lng": number | null,"lot_info": string | null,"org_id": string,"permit_number": string | null,"postal_code": string | null,"prefix": string | null,"projected_end": string | null,"projected_start": string | null,"province": string | null,"square_feet": number | null,"status": Database["public"]['Enums']["job_status"],"street": string | null,"title": string,"updated_at": string,"work_days": (number)[]
                   }
                   Insert: {
-                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"id"?: string,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id": string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"sub_notes"?: string | null,"title": string,"updated_at"?: string,"work_days"?: (number)[]
+                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id": string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"title": string,"updated_at"?: string,"work_days"?: (number)[]
                   }
                   Update: {
-                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"id"?: string,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id"?: string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"sub_notes"?: string | null,"title"?: string,"updated_at"?: string,"work_days"?: (number)[]
+                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id"?: string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"title"?: string,"updated_at"?: string,"work_days"?: (number)[]
                   }
                   Relationships: [
                     {
@@ -1629,13 +1654,13 @@ isOneToOne: false
                   ]
                 },"org_members": {
                   Row: {
-                    "all_jobs": boolean,"billable_rate": number | null,"is_admin": boolean,"joined_at": string,"labor_cost_rate": number | null,"org_id": string,"role_id": string | null,"status": Database["public"]['Enums']["member_status"],"title": string | null,"updated_at": string,"user_id": string
+                    "all_jobs": boolean,"is_admin": boolean,"joined_at": string,"org_id": string,"role_id": string | null,"status": Database["public"]['Enums']["member_status"],"title": string | null,"updated_at": string,"user_id": string
                   }
                   Insert: {
-                    "all_jobs"?: boolean,"billable_rate"?: number | null,"is_admin"?: boolean,"joined_at"?: string,"labor_cost_rate"?: number | null,"org_id": string,"role_id"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"title"?: string | null,"updated_at"?: string,"user_id": string
+                    "all_jobs"?: boolean,"is_admin"?: boolean,"joined_at"?: string,"org_id": string,"role_id"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"title"?: string | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "all_jobs"?: boolean,"billable_rate"?: number | null,"is_admin"?: boolean,"joined_at"?: string,"labor_cost_rate"?: number | null,"org_id"?: string,"role_id"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"title"?: string | null,"updated_at"?: string,"user_id"?: string
+                    "all_jobs"?: boolean,"is_admin"?: boolean,"joined_at"?: string,"org_id"?: string,"role_id"?: string | null,"status"?: Database["public"]['Enums']["member_status"],"title"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -3201,6 +3226,11 @@ isOneToOne: false
 "start_conversation":
 { Args: { "p_body"?: string,"p_job": string,"p_org": string,"p_title"?: string,"p_users": (string)[] }; Returns: string
                            },
+"sub_selections":
+{ Args: { "p_id"?: string,"p_jobs": (string)[] }; Returns: {
+              "category": string,"deadline": string,"id": string,"instructions": string,"job_id": string,"location": string,"released_at": string,"selected_choice_id": string,"share_client": boolean,"share_subs": boolean,"status": Database["public"]['Enums']["selection_status"],"title": string
+            }[]
+                           },
 "submit_bid":
 { Args: { "p_notes"?: string,"p_prices": Json,"p_request": string }; Returns: undefined
                            },
@@ -3227,7 +3257,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","appt_status": "scheduled"|"confirmed"|"completed"|"missed"|"cancelled","bid_package_status": "draft"|"open"|"closed"|"awarded","bid_request_status": "invited"|"submitted"|"declined"|"awarded"|"not_awarded","bill_status": "draft"|"submitted"|"approved"|"paid"|"rejected","claim_status": "open"|"scheduled"|"resolved"|"closed","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","invoice_status": "draft"|"released"|"paid"|"void","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","po_status": "draft"|"released"|"accepted"|"declined"|"void","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","shift_status": "open"|"submitted"|"approved"|"rejected","submittal_status": "draft"|"requested"|"submitted"|"revise"|"approved"|"approved_as_noted"|"rejected"|"closed","todo_priority": "low"|"medium"|"high","work_status": "not_started"|"in_progress"|"complete","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","appt_status": "scheduled"|"confirmed"|"completed"|"missed"|"cancelled","bid_package_status": "draft"|"open"|"closed"|"awarded","bid_request_status": "invited"|"submitted"|"declined"|"awarded"|"not_awarded","bill_status": "draft"|"submitted"|"approved"|"paid"|"rejected","claim_status": "open"|"scheduled"|"resolved"|"closed","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","invoice_status": "draft"|"released"|"paid"|"void","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "pending"|"active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","markup_visibility": "private"|"team"|"shared","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","po_status": "draft"|"released"|"accepted"|"declined"|"void","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","shift_status": "open"|"submitted"|"approved"|"rejected","submittal_status": "draft"|"requested"|"submitted"|"revise"|"approved"|"approved_as_noted"|"rejected"|"closed","todo_priority": "low"|"medium"|"high","work_status": "not_started"|"in_progress"|"complete","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -3343,7 +3373,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"appt_status": ["scheduled", "confirmed", "completed", "missed", "cancelled"],"bid_package_status": ["draft", "open", "closed", "awarded"],"bid_request_status": ["invited", "submitted", "declined", "awarded", "not_awarded"],"bill_status": ["draft", "submitted", "approved", "paid", "rejected"],"claim_status": ["open", "scheduled", "resolved", "closed"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"invoice_status": ["draft", "released", "paid", "void"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"po_status": ["draft", "released", "accepted", "declined", "void"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"shift_status": ["open", "submitted", "approved", "rejected"],"submittal_status": ["draft", "requested", "submitted", "revise", "approved", "approved_as_noted", "rejected", "closed"],"todo_priority": ["low", "medium", "high"],"work_status": ["not_started", "in_progress", "complete"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"appt_status": ["scheduled", "confirmed", "completed", "missed", "cancelled"],"bid_package_status": ["draft", "open", "closed", "awarded"],"bid_request_status": ["invited", "submitted", "declined", "awarded", "not_awarded"],"bill_status": ["draft", "submitted", "approved", "paid", "rejected"],"claim_status": ["open", "scheduled", "resolved", "closed"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"invoice_status": ["draft", "released", "paid", "void"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["pending", "active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"markup_visibility": ["private", "team", "shared"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"po_status": ["draft", "released", "accepted", "declined", "void"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"shift_status": ["open", "submitted", "approved", "rejected"],"submittal_status": ["draft", "requested", "submitted", "revise", "approved", "approved_as_noted", "rejected", "closed"],"todo_priority": ["low", "medium", "high"],"work_status": ["not_started", "in_progress", "complete"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const

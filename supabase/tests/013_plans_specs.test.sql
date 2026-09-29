@@ -31,7 +31,7 @@ insert into public.job_subs (job_id, sub_org_id) select pg_temp.id('job'), sub_o
 with x as (insert into public.job_clients (job_id, first_name, email) values (pg_temp.id('job'), 'C', 'c@pl.test') returning id) insert into ids select 'jc', id from x;
 select public.invite_job_client(pg_temp.id('jc'));
 with x as (insert into public.plan_sheets (org_id, job_id, number, title) values (pg_temp.id('org'), pg_temp.id('job'), 'A-101', 'Floor plan') returning id) insert into ids select 'sh', id from x;
-insert into public.plan_sheet_versions (sheet_id, version, storage_key, status) values (pg_temp.id('sh'), 1, 'k/1', 'ready');
+insert into public.plan_sheet_versions (sheet_id, version, storage_key, status) values (pg_temp.id('sh'), 1, pg_temp.id('org')::text || '/' || pg_temp.id('job')::text || '/set/v1/x', 'ready');
 with x as (insert into public.spec_documents (org_id, job_id, title, body, share_clients) values (pg_temp.id('org'), pg_temp.id('job'), 'Finishes', 'Paint: eggshell', true) returning id) insert into ids select 'spec', id from x;
 insert into public.plan_markups (sheet_id, version, visibility, shapes) values (pg_temp.id('sh'), 1, 'team', '[{"t":"rect"}]');
 reset role;

@@ -42,6 +42,7 @@ Last updated: 2026-09-29 (overnight build)
 | Global search across all modules | Built, browser-tested |
 | Company logo + GST/HST (and QST) numbers on proposals, change orders, POs and invoices; invoices show “Bill to” | Built, browser-tested |
 | Accounting: cost type / cost code → account mapping; QuickBooks-shaped CSV exports for bills and invoices; payments register | Built, browser-tested |
+| Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
@@ -96,12 +97,24 @@ Last updated: 2026-09-29 (overnight build)
   mapping is still to confirm with a Wagepoint account.
 - Forms keep what you typed when the server rejects it (React 19 otherwise resets forms after every action).
 - Invited clients get a copyable invite link on the job page until email sending is on.
+- Security audit fixes (migration `…003300_security_hardening`):
+  - Adding a sub that already has a MyBuilder company creates a **pending** link; their admin accepts the
+    emailed invite before the builder sees their people or can send them work. Subs the builder creates are linked at once.
+  - Sub matching uses the verified login email; profile emails can't be edited through the API.
+  - Invites and memberships can only be created by server functions; accepting re-checks the invite.
+  - File, version, plan and logo storage keys must sit under the record's own folder; share links can't be repointed.
+  - Subs can't change holdback or lien-waiver terms on their bills.
+  - A sub's comments are seen by the builder and that sub's own company (and the client only if allowed); audiences can't be widened later.
+  - "Notes for subs" moved to their own table so clients can't read them. Subs see selections without the allowance.
+  - Change orders and selection prices need the price permission; recording a client's proposal approval needs the new
+    "Approve proposals on behalf of a client" permission (given to roles that could already do this for change orders).
+  - Schedule, warranty, lead and submittal assignees must belong to the company / job.
 
 ## Tests
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals | 287 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions | 314 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime | 18 | `pnpm test` |
 | Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals | 20 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |

@@ -26,7 +26,11 @@ export default async function SelectionsPage({ searchParams }: PageProps<'/selec
   const status = typeof sp.status === 'string' && sp.status in SELECTION_STATUS ? sp.status : ''
   const supabase = await createClient()
   let rows: Row[] = []
-  if (picked.length) {
+  if (picked.length && mode === 'sub') {
+    // subs get a safe projection (no allowance) of selections shared with them
+    const { data } = await supabase.rpc('sub_selections', { p_jobs: picked.map((j) => j.id) })
+    rows = (data ?? []).filter((r) => !status || r.status === status).map((r) => ({ ...r, allowance: null }))
+  } else if (picked.length) {
     let q = supabase.from('selections').select('id,title,job_id,category,location,status,deadline,allowance,selected_choice_id')
       .in('job_id', picked.map((j) => j.id)).is('deleted_at', null).order('deadline', { ascending: true, nullsFirst: false }).order('title')
     if (status) q = q.eq('status', status as 'draft')

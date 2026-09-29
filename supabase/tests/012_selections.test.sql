@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(16);
+select plan(17);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -59,7 +59,8 @@ select is((select allowance from public.selections where id = pg_temp.id('sel'))
 reset role;
 
 select pg_temp.login('sub');
-select is((select count(*)::int from public.selections), 1, 'shared selection is visible to the job sub');
+select is((select count(*)::int from public.sub_selections(array[pg_temp.id('job')])), 1, 'shared selection is visible to the job sub');
+select is((select count(*)::int from public.selections), 0, 'sub cannot read the selections table (allowance)');
 select is((select count(*)::int from public.selection_choices), 0, 'sub cannot read priced choices');
 select is((select count(*)::int from public.selection_choices_public(pg_temp.id('sel'))), 2, 'sub reads choices without prices');
 select throws_ok(format('select public.choose_selection(%L, %L)', pg_temp.id('sel'), pg_temp.id('c1')), '42501', null, 'sub cannot choose');

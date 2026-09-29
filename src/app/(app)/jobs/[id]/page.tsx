@@ -31,7 +31,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
   const { id } = await params
   const ctx = await getAppContext()
   const supabase = await createClient()
-  const { data: job } = await supabase.from('jobs').select('*').eq('id', id).is('deleted_at', null).maybeSingle()
+  const { data: job } = await supabase.from('jobs').select('*, job_sub_notes(body)').eq('id', id).is('deleted_at', null).maybeSingle()
   if (!job) notFound()
 
   const isBuilder = ctx.workspace.mode === 'builder'
@@ -122,7 +122,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
             <div className="space-y-3 p-4 text-[13px]">
               <div>
                 <div className="mb-1 text-xs font-medium text-text-3">{isBuilder ? 'Notes for subs and vendors' : 'Job notes'}</div>
-                <p className="whitespace-pre-wrap">{job.sub_notes || <span className="text-text-3">No notes.</span>}</p>
+                <p className="whitespace-pre-wrap">{(job.job_sub_notes as { body: string } | null)?.body || <span className="text-text-3">No notes.</span>}</p>
               </div>
               {priv?.internal_notes && (
                 <div>

@@ -22,6 +22,8 @@ end $$;
 select pg_temp.mkuser('owner', 'o@f.test'); select pg_temp.mkuser('sub', 's@f.test'); select pg_temp.mkuser('sub2', 's2@f.test');
 select pg_temp.mkuser('client', 'h@f.test'); select pg_temp.mkuser('other', 'x@f.test');
 
+create or replace function pg_temp.fk(p_folder uuid, p_id uuid) returns text language sql as $$
+  select f.org_id::text || '/' || coalesce(f.job_id::text, 'global') || '/' || p_id::text || '/v1/x' from public.file_folders f where f.id = p_folder $$;
 select pg_temp.login('owner');
 insert into ids select 'org', public.create_builder_org('File Co');
 with x as (insert into public.jobs (org_id, title) values (pg_temp.id('org'), 'J1') returning id) insert into ids select 'job', id from x;
@@ -32,9 +34,9 @@ with x as (insert into public.job_clients (job_id, first_name, email) values (pg
 select public.invite_job_client(pg_temp.id('jc'));
 select is((select count(*)::int from public.file_folders where job_id = pg_temp.id('job')), 4, 'new jobs get system folders');
 with x as (insert into public.file_folders (org_id, job_id, kind, name) values (pg_temp.id('org'), pg_temp.id('job'), 'documents', 'Plans') returning id) insert into ids select 'plans', id from x;
-with x as (insert into public.files (org_id, folder_id, kind, name, storage_key, status) values (pg_temp.id('org'), pg_temp.id('plans'), 'documents', 'internal.pdf', 'k1', 'ready') returning id) insert into ids select 'f_int', id from x;
-with x as (insert into public.files (org_id, folder_id, kind, name, storage_key, status, share_subs) values (pg_temp.id('org'), pg_temp.id('plans'), 'documents', 'for-subs.pdf', 'k2', 'ready', true) returning id) insert into ids select 'f_subs', id from x;
-with x as (insert into public.files (org_id, folder_id, kind, name, storage_key, status, share_clients) values (pg_temp.id('org'), pg_temp.id('plans'), 'documents', 'for-client.pdf', 'k3', 'ready', true) returning id) insert into ids select 'f_client', id from x;
+with v as (select gen_random_uuid() id), x as (insert into public.files (id, org_id, folder_id, kind, name, storage_key, status) select v.id, pg_temp.id('org'), pg_temp.id('plans'), 'documents', 'internal.pdf', pg_temp.fk(pg_temp.id('plans'), v.id), 'ready' from v returning id) insert into ids select 'f_int', id from x;
+with v as (select gen_random_uuid() id), x as (insert into public.files (id, org_id, folder_id, kind, name, storage_key, status, share_subs) select v.id, pg_temp.id('org'), pg_temp.id('plans'), 'documents', 'for-subs.pdf', pg_temp.fk(pg_temp.id('plans'), v.id), 'ready', true from v returning id) insert into ids select 'f_subs', id from x;
+with v as (select gen_random_uuid() id), x as (insert into public.files (id, org_id, folder_id, kind, name, storage_key, status, share_clients) select v.id, pg_temp.id('org'), pg_temp.id('plans'), 'documents', 'for-client.pdf', pg_temp.fk(pg_temp.id('plans'), v.id), 'ready', true from v returning id) insert into ids select 'f_client', id from x;
 reset role;
 create temp table toks on commit drop as select email::text as email, token from public.invites;
 grant select on toks to authenticated;
@@ -47,9 +49,9 @@ select is((select count(*)::int from public.files), 3, 'owner sees all files');
 reset role;
 select pg_temp.login('sub');
 select is((select count(*)::int from public.files), 1, 'sub sees only files shared with subs');
-with x as (insert into public.files (org_id, folder_id, kind, name, storage_key) values (pg_temp.id('org'), (select id from public.file_folders where job_id = pg_temp.id('job') and system_key = 'sub_uploads' and kind = 'documents'), 'documents', 'invoice.pdf', 'k4') returning id) insert into ids select 'f_sub', id from x;
+with v as (select gen_random_uuid() id), x as (insert into public.files (id, org_id, folder_id, kind, name, storage_key) select v.id, pg_temp.id('org'), (select id from public.file_folders where job_id = pg_temp.id('job') and system_key = 'sub_uploads' and kind = 'documents'), 'documents', 'invoice.pdf', pg_temp.fk((select id from public.file_folders where job_id = pg_temp.id('job') and system_key = 'sub_uploads' and kind = 'documents'), v.id) from v returning id) insert into ids select 'f_sub', id from x;
 select is((select uploader_type from public.files where id = pg_temp.id('f_sub')), 'sub', 'sub upload is tagged');
-select throws_ok(format($q$insert into public.files (org_id, folder_id, kind, name, storage_key) values (%L, %L, 'documents', 'x', 'k5')$q$, pg_temp.id('org'), pg_temp.id('plans')), '42501', null, 'sub cannot upload into builder folders');
+select throws_ok(format($q$insert into public.files (id, org_id, folder_id, kind, name, storage_key) values ('00000000-0000-0000-0000-0000000000f5', %L, %L, 'documents', 'x', %L)$q$, pg_temp.id('org'), pg_temp.id('plans'), pg_temp.id('org')::text || '/' || pg_temp.id('job')::text || '/00000000-0000-0000-0000-0000000000f5/v1/x'), '42501', null, 'sub cannot upload into builder folders');
 reset role;
 select pg_temp.login('sub2');
 select is((select count(*)::int from public.files), 1, 'another sub does not see sub one''s upload');

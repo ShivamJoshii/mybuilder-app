@@ -47,7 +47,7 @@ reset role;
 select pg_temp.login('sub');
 select is((select count(*)::int from public.comments), 2, 'sub sees only comments shared with subs');
 insert into ids select 'c_by_sub', public.add_comment(pg_temp.id('job'), 'job', pg_temp.id('job'), 'from sub', null, false, true);
-select is((select visible_to_subs from public.comments where id = pg_temp.id('c_by_sub')), true, 'sub comments are always visible to subs');
+select is((select visible_to_subs from public.comments where id = pg_temp.id('c_by_sub')), false, 'sub comments stay between the sub and the builder');
 select is((select visible_to_clients from public.comments where id = pg_temp.id('c_by_sub')), false, 'sub cannot share with client without job permission');
 select is((select author_type from public.comments where id = pg_temp.id('c_by_sub')), 'sub', 'author type set to sub');
 reset role;

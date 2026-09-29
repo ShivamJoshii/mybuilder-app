@@ -69,10 +69,11 @@ export async function createJob(_: JobFormState, formData: FormData): Promise<Jo
   const ctx = await requireBuilder('jobs', 'add')
   const parsed = parse(formData)
   if (!parsed.success) return { error: 'Check the highlighted fields.', fieldErrors: fieldErrors(parsed.error) }
-  const { contract_price, internal_notes, managers, ...job } = parsed.data
+  const { contract_price, internal_notes, managers, sub_notes, ...job } = parsed.data
   const supabase = await createClient()
   const { data, error } = await supabase.from('jobs').insert({ ...job, org_id: ctx.workspace.orgId }).select('id').single()
   if (error || !data) return { error: 'Could not create the job.' }
+  if (sub_notes) await supabase.from('job_sub_notes').insert({ job_id: data.id, org_id: ctx.workspace.orgId, body: sub_notes })
   if (can(ctx, 'jobs', 'price') && (contract_price != null || internal_notes != null)) {
     await supabase.from('job_private').update({ contract_price, internal_notes }).eq('job_id', data.id)
   }
@@ -90,10 +91,11 @@ export async function updateJob(jobId: string, _: JobFormState, formData: FormDa
   z.string().uuid().parse(jobId)
   const parsed = parse(formData)
   if (!parsed.success) return { error: 'Check the highlighted fields.', fieldErrors: fieldErrors(parsed.error) }
-  const { contract_price, internal_notes, managers, ...job } = parsed.data
+  const { contract_price, internal_notes, managers, sub_notes, ...job } = parsed.data
   const supabase = await createClient()
-  const { data, error } = await supabase.from('jobs').update(job).eq('id', jobId).select('id')
+  const { data, error } = await supabase.from('jobs').update(job).eq('id', jobId).select('id,org_id')
   if (error || !data?.length) return { error: 'Could not save the job. You may not have access to it.' }
+  await supabase.from('job_sub_notes').upsert({ job_id: jobId, org_id: data[0].org_id, body: sub_notes ?? '' })
   if (can(ctx, 'jobs', 'price')) {
     await supabase.from('job_private').update({ contract_price, internal_notes }).eq('job_id', jobId)
   }

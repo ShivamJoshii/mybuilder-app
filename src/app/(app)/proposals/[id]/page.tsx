@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft, Send, Trash2 } from 'lucide-react'
-import { getAppContext, can } from '@/lib/context'
+import { getAppContext, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -152,7 +152,7 @@ export default async function ProposalPage({ params }: PageProps<'/proposals/[id
         <Signatures sigs={sigs ?? []} />
       </Card>
 
-      {p.status === 'released' && (isClient || canEdit) && (
+      {p.status === 'released' && (isClient || (canEdit && hasAction(ctx, 'proposals.approve_for_client'))) && (
         <Card className="print:hidden">
           <CardHeader title={isClient ? 'Your decision' : 'Record the client’s decision'} />
           <div className="p-4">

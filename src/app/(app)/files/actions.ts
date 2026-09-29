@@ -68,9 +68,12 @@ export async function startUpload(input: { folderId: string; name: string; mime:
 /** Step 2: confirm the bytes arrived, then mark the file ready. */
 export async function finishUpload(fileId: string, version: number, key: string, name: string) {
   await getAppContext()
+  const supabase = await createClient()
+  const { data: file } = await supabase.from('files').select('org_id,job_id').eq('id', uuid.parse(fileId)).maybeSingle()
+  // the key must be this file's own slot (the database enforces the same prefix)
+  if (!file || !Number.isInteger(version) || version < 1 || !key.startsWith(`${file.org_id}/${file.job_id ?? 'global'}/${fileId}/v${version}/`)) throw new Error('Upload did not complete')
   const head = await headObject(key)
   if (!head) throw new Error('Upload did not complete')
-  const supabase = await createClient()
   const patch = version > 1
     ? { version, storage_key: key, size_bytes: head.size, mime: head.mime, name, status: 'ready' as const }
     : { size_bytes: head.size, mime: head.mime, status: 'ready' as const }

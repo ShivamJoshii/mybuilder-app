@@ -72,7 +72,9 @@ export default async function SubsPage() {
                         </td>
                         <td className="px-3 py-2">{jobCount.get(l.sub_org_id) ?? 0}</td>
                         <td className="px-3 py-2">{inv ? <span className="flex items-center gap-2"><Badge tone="warning">Invited</Badge><CopyButton value={`${site}/invite/${inv.token}`} label="Invite link" /></span> : <Badge tone="success">Joined</Badge>}</td>
-                        <td className="px-3 py-2"><Badge tone={l.status === 'active' ? 'success' : 'neutral'}>{l.status}</Badge></td>
+                        <td className="px-3 py-2">{l.status === 'pending'
+                          ? <span title="This company already uses MyBuilder. Their admin must accept your invite before they can see your jobs."><Badge tone="warning">Awaiting their OK</Badge></span>
+                          : <Badge tone={l.status === 'active' ? 'success' : 'neutral'}>{l.status}</Badge>}</td>
                         <td className="px-3 py-2 text-right">
                           {canEdit && (
                             <span className="flex justify-end gap-1">
@@ -88,9 +90,11 @@ export default async function SubsPage() {
                                   </ActionForm>
                                 </DialogContent>
                               </Dialog>
-                              <form action={setSubStatus.bind(null, l.id, l.status === 'active' ? 'inactive' : 'active')}>
-                                <Button type="submit" size="sm" variant="ghost">{l.status === 'active' ? 'Deactivate' : 'Activate'}</Button>
-                              </form>
+                              {l.status !== 'pending' && (
+                                <form action={setSubStatus.bind(null, l.id, l.status === 'active' ? 'inactive' : 'active')}>
+                                  <Button type="submit" size="sm" variant="ghost">{l.status === 'active' ? 'Deactivate' : 'Activate'}</Button>
+                                </form>
+                              )}
                             </span>
                           )}
                         </td>

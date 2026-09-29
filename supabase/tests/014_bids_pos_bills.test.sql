@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(22);
+select plan(24);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -84,6 +84,10 @@ with x as (insert into public.bills (org_id, job_id, po_id, number, title, invoi
 insert into public.bill_items (bill_id, po_item_id, title, amount) select pg_temp.id('bill'), id, title, 2500 from public.po_items where po_id = pg_temp.id('po') and title = 'Framing labour';
 select is((select status::text || ':' || holdback_pct from public.bills where id = pg_temp.id('bill')), 'submitted:10.00', 'sub bill is submitted with the PO holdback');
 select throws_ok(format($q$insert into public.bill_items (bill_id, po_item_id, title, amount) select %L, id, title, 3001 from public.po_items where po_id = %L and title = 'Sheathing'$q$, pg_temp.id('bill'), pg_temp.id('po')), '23514', null, 'cannot bill past the PO line');
+update public.bills set holdback_pct = 0, lien_waiver_required = false, title = 'Draw 1 (rev)' where id = pg_temp.id('bill');
+select is((select holdback_pct || ':' || title from public.bills where id = pg_temp.id('bill')), '10.00:Draw 1 (rev)', 'sub cannot remove the holdback from its bill');
+with x as (insert into public.bills (org_id, job_id, po_id, number, title, holdback_pct, is_holdback_release) values (pg_temp.id('org'), pg_temp.id('job'), pg_temp.id('po'), 0, 'Sneaky', 0, true) returning id) insert into ids select 'sneaky', id from x;
+select is((select holdback_pct || ':' || is_holdback_release from public.bills where id = pg_temp.id('sneaky')), '10.00:false', 'sub cannot file a holdback-free bill');
 reset role;
 
 select pg_temp.login('owner'); update public.jobs set status = 'open' where id = pg_temp.id('job'); reset role;
