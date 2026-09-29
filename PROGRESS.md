@@ -65,6 +65,8 @@ Last updated: 2026-09-29 (overnight build)
 
 ## Needs you
 
+Step-by-step go-live guide: `docs/DEPLOY.md` (Supabase in Canada, R2, Vercel, Postmark, cron).
+
 1. **Supabase project.** Creating `mybuilder` in the myBuilder org fails: both
    `shivamjoshi.close@gmail.com` and `ShivamJoshii` already have 2 active free projects
    (the limit counts every org where you're an admin). Pause/delete one project per login,
