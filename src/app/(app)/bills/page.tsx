@@ -28,7 +28,7 @@ export default async function BillsPage({ searchParams }: PageProps<'/bills'>) {
   if (mode === 'builder') q = q.in('job_id', picked.map((j) => j.id))
   if (status) q = q.eq('status', status as 'draft')
   const { data: bills } = mode === 'builder' && !picked.length ? { data: [] } : await q
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const rows = (bills ?? []).map((b) => {
     const sub = (b.bill_items ?? []).reduce((s, i) => s + Number(i.amount), 0)
     const hb = Math.round(sub * Number(b.holdback_pct)) / 100

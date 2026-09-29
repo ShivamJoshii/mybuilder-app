@@ -32,7 +32,7 @@ export default async function SubPage({ params }: PageProps<'/settings/subs/[id]
             return <Link key={job.id} href={`/jobs/${job.id}`} className="mr-3 text-brand hover:underline">{job.title}</Link>
           })}{!(jobs ?? []).length && <span className="text-text-3">Not on any jobs yet</span>}</div>
         </Card>
-        <Certificates builderId={ctx.workspace.orgId} subId={l.sub_org_id} uploaderOrgId={ctx.workspace.orgId} canEdit={can(ctx, 'subs_vendors', 'edit')} path={`/settings/subs/${id}`} />
+        <Certificates builderId={ctx.workspace.orgId} subId={l.sub_org_id} uploaderOrgId={ctx.workspace.orgId} canEdit={can(ctx, 'subs_vendors', 'edit')} path={`/settings/subs/${id}`} tz={ctx.tz} />
       </div>
     </>
   )

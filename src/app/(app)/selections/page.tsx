@@ -41,7 +41,7 @@ export default async function SelectionsPage({ searchParams }: PageProps<'/selec
   const { data: choices } = mode !== 'sub' && chosen.length ? await supabase.from('selection_choices').select('id,title,client_price').in('id', chosen) : { data: [] }
   const choice = new Map((choices ?? []).map((c) => [c.id, c]))
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const canAdd = mode === 'builder' && can(ctx, 'selections', 'add')
   const showMoney = mode !== 'sub'
 

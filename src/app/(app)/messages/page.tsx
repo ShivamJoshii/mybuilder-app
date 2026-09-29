@@ -57,7 +57,7 @@ export default async function MessagesPage() {
                   </div>
                   {last?.status === 'queued' && <span className="text-xs text-warning">Queued</span>}
                   {last?.status === 'failed' && <span className="text-xs text-danger">Failed</span>}
-                  <span className="shrink-0 text-xs text-text-3">{formatDateTime(t.last_at)}</span>
+                  <span className="shrink-0 text-xs text-text-3">{formatDateTime(t.last_at, ctx.tz)}</span>
                 </Link>
               )
             })}

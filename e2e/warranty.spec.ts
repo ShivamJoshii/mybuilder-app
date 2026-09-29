@@ -87,7 +87,7 @@ test('warranty: client reports, builder books a sub, sub completes, client rates
   await signOut(page)
   await signIn(page, clientEmail)
   await page.goto(claimUrl)
-  await page.getByLabel('5').check()
+  await page.getByRole('radio', { name: '5', exact: true }).check()
   await page.getByLabel('Feedback').fill('Fixed the same day, thanks!')
   await page.getByRole('button', { name: 'Send feedback' }).click()
   await expect(page.getByText('Fixed the same day, thanks!')).toBeVisible()

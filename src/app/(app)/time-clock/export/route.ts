@@ -4,18 +4,17 @@ import { createClient } from '@/lib/supabase/server'
 import { todayIn, zonedToUtc } from '@/lib/utils'
 import { addDays, mondayOf, OT_RULES, weekOvertime } from '@/lib/overtime'
 
-const tz = 'America/Edmonton'
-const localDate = (iso: string) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
+const localDate = (iso: string, tz: string) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
 const cell = (v: string | number) => { const s = String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s }
 
 /** Weekly hours per person (approved shifts) for payroll import. */
 export async function GET(req: NextRequest) {
   const ctx = await getAppContext()
   if (ctx.workspace.mode !== 'builder' || !hasAction(ctx, 'time_clock.view_others')) return new NextResponse('Forbidden', { status: 403 })
-  const week = mondayOf(req.nextUrl.searchParams.get('week') ?? todayIn())
+  const week = mondayOf(req.nextUrl.searchParams.get('week') ?? todayIn(ctx.tz))
   const supabase = await createClient()
   const [{ data: shifts }, { data: org }, { data: members }] = await Promise.all([
-    supabase.from('time_shifts').select('user_id,clock_in,clock_out,break_minutes,status').gte('clock_in', zonedToUtc(`${week}T00:00`)).lt('clock_in', zonedToUtc(`${addDays(week, 7)}T00:00`)).eq('status', 'approved'),
+    supabase.from('time_shifts').select('user_id,clock_in,clock_out,break_minutes,status').gte('clock_in', zonedToUtc(`${week}T00:00`, ctx.tz)).lt('clock_in', zonedToUtc(`${addDays(week, 7)}T00:00`, ctx.tz)).eq('status', 'approved'),
     supabase.from('organizations').select('province').eq('id', ctx.workspace.orgId).single(),
     supabase.from('org_members').select('user_id,profiles(first_name,last_name,email)').eq('org_id', ctx.workspace.orgId),
   ])
@@ -25,7 +24,7 @@ export async function GET(req: NextRequest) {
   for (const m of members ?? []) {
     const mine = (shifts ?? []).filter((s) => s.user_id === m.user_id)
     if (!mine.length) continue
-    const perDay = days.map((d) => mine.filter((s) => localDate(s.clock_in) === d).reduce((t, s) => t + Math.max(0, (Date.parse(s.clock_out!) - Date.parse(s.clock_in)) / 3_600_000 - s.break_minutes / 60), 0))
+    const perDay = days.map((d) => mine.filter((s) => localDate(s.clock_in, ctx.tz) === d).reduce((t, s) => t + Math.max(0, (Date.parse(s.clock_out!) - Date.parse(s.clock_in)) / 3_600_000 - s.break_minutes / 60), 0))
     const t = weekOvertime(perDay, rule)
     const p = m.profiles as { first_name: string; last_name: string; email: string } | null
     rows.push([p?.last_name ?? '', p?.first_name ?? '', p?.email ?? '', week, addDays(week, 6), t.regular.toFixed(2), t.overtime.toFixed(2), t.total.toFixed(2)])

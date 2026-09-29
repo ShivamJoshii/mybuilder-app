@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getAppContext, requireBuilder } from '@/lib/context'
+import { zonedToUtc } from '@/lib/utils'
 
 export type TodoFormState = { error?: string; fieldErrors?: Record<string, string> }
 
@@ -36,7 +37,7 @@ export async function createTodo(_: TodoFormState, fd: FormData): Promise<TodoFo
   }
   const d = parsed.data
   // Deadline is stored as an instant; date-only deadlines are end of day in the company time zone (approx. local)
-  const due_at = d.due_date ? new Date(`${d.due_date}T${d.due_time ?? '23:59'}:00`).toISOString() : null
+  const due_at = d.due_date ? zonedToUtc(`${d.due_date}T${d.due_time ?? '23:59'}`, ctx.tz) : null
   const supabase = await createClient()
   const { data: todo, error } = await supabase.from('todos').insert({
     org_id: ctx.workspace.orgId, job_id: d.job_id, title: d.title, notes: d.notes, priority: d.priority,

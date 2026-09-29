@@ -39,7 +39,7 @@ export default async function BidsPage() {
                       <td className="px-4 py-2"><Link href={`/bids/${r.package_id}`} className="font-medium text-brand hover:underline">{r.title}</Link></td>
                       <td className="px-4 py-2">{r.builder_name}</td>
                       <td className="px-4 py-2">{r.job_title}{r.job_city ? `, ${r.job_city}` : ''}</td>
-                      <td className="px-4 py-2">{formatDateTime(r.due_at)}</td>
+                      <td className="px-4 py-2">{formatDateTime(r.due_at, ctx.tz)}</td>
                       <td className="px-4 py-2"><Badge tone={BID_REQUEST_STATUS[r.status].tone}>{BID_REQUEST_STATUS[r.status].label}</Badge></td>
                       <td className="px-4 py-2 text-right tabular-nums">{r.total != null ? formatCAD(Number(r.total)) : ''}</td>
                     </tr>
@@ -81,7 +81,7 @@ export default async function BidsPage() {
                       <td className="px-4 py-2"><Link href={`/bids/${p.id}`} className="font-medium text-brand hover:underline">{p.title}</Link></td>
                       <td className="px-4 py-2">{jobName.get(p.job_id)}</td>
                       <td className="px-4 py-2"><Badge tone={BID_STATUS[p.status].tone}>{BID_STATUS[p.status].label}</Badge></td>
-                      <td className="px-4 py-2">{formatDateTime(p.due_at)}</td>
+                      <td className="px-4 py-2">{formatDateTime(p.due_at, ctx.tz)}</td>
                       <td className="px-4 py-2">{subm.length} of {reqs.length}</td>
                       <td className="px-4 py-2 text-right tabular-nums">{low != null ? formatCAD(low) : ''}</td>
                     </tr>

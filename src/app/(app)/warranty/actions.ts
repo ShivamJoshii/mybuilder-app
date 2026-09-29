@@ -53,12 +53,12 @@ export async function updateClaim(id: string, _: ActionState, fd: FormData): Pro
 }
 
 export async function addAppointment(claimId: string, _: ActionState, fd: FormData): Promise<ActionState> {
-  await getAppContext()
+  const ctx = await getAppContext()
   const p = z.object({ starts: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, 'Pick a date and time'), hours: z.coerce.number().min(0.25).max(24), assignee: who, notes: z.string().max(4000) })
     .safeParse({ starts: fd.get('starts'), hours: fd.get('hours') || 2, assignee: fd.get('assignee') ?? '', notes: fd.get('notes') ?? '' })
   if (!p.success) return { error: p.error.issues[0].message }
   const a = split(p.data.assignee)
-  const starts = zonedToUtc(p.data.starts)
+  const starts = zonedToUtc(p.data.starts, ctx.tz)
   const ends = new Date(Date.parse(starts) + p.data.hours * 3_600_000).toISOString()
   const supabase = await createClient()
   const { error } = await supabase.from('warranty_appointments').insert({ claim_id: uuid.parse(claimId), starts_at: starts, ends_at: ends, assignee_user_id: a.user, assignee_sub_org_id: a.sub, notes: p.data.notes || null })

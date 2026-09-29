@@ -26,7 +26,7 @@ export default async function AccountingPage() {
   ])
   const accounts = { ...DEFAULTS, ...((s?.accounts ?? {}) as Record<string, string>) }
   const codeAccounts = (s?.code_accounts ?? {}) as Record<string, string>
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const monthStart = `${today.slice(0, 8)}01`
   return (
     <>

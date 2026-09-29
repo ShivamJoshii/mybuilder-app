@@ -14,7 +14,7 @@ const pkgSchema = z.object({
   title: z.string().trim().min(1, 'Enter a title').max(200), scope: z.string().max(20000),
   due: z.union([z.literal(''), z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)]),
 })
-const dueAt = (d: string) => (d ? zonedToUtc(d) : null)   // entered in company time
+const dueAt = (d: string, tz: string) => (d ? zonedToUtc(d, tz) : null)   // entered in company time
 
 export async function createBidPackage(_: ActionState, fd: FormData): Promise<ActionState> {
   const ctx = await getAppContext()
@@ -23,18 +23,18 @@ export async function createBidPackage(_: ActionState, fd: FormData): Promise<Ac
   const p = pkgSchema.safeParse({ title: fd.get('title'), scope: fd.get('scope') ?? '', due: fd.get('due') ?? '' })
   if (!p.success) return { error: p.error.issues[0].message }
   const supabase = await createClient()
-  const { data, error } = await supabase.from('bid_packages').insert({ org_id: job.org_id, job_id: job.id, number: 0, title: p.data.title, scope: p.data.scope || null, due_at: dueAt(p.data.due) }).select('id').single()
+  const { data, error } = await supabase.from('bid_packages').insert({ org_id: job.org_id, job_id: job.id, number: 0, title: p.data.title, scope: p.data.scope || null, due_at: dueAt(p.data.due, ctx.tz) }).select('id').single()
   if (error || !data) return { error: 'Could not create the bid package.' }
   revalidatePath('/bids')
   redirect(`/bids/${data.id}`)
 }
 
 export async function updateBidPackage(id: string, _: ActionState, fd: FormData): Promise<ActionState> {
-  await getAppContext()
+  const ctx = await getAppContext()
   const p = pkgSchema.safeParse({ title: fd.get('title'), scope: fd.get('scope') ?? '', due: fd.get('due') ?? '' })
   if (!p.success) return { error: p.error.issues[0].message }
   const supabase = await createClient()
-  const { data } = await supabase.from('bid_packages').update({ title: p.data.title, scope: p.data.scope || null, due_at: dueAt(p.data.due) }).eq('id', uuid.parse(id)).select('id')
+  const { data } = await supabase.from('bid_packages').update({ title: p.data.title, scope: p.data.scope || null, due_at: dueAt(p.data.due, ctx.tz) }).eq('id', uuid.parse(id)).select('id')
   if (!data?.length) return { error: 'Could not save.' }
   revalidatePath(`/bids/${id}`)
   return { ok: 'Saved.' }

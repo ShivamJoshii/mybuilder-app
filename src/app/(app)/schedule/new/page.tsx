@@ -23,7 +23,7 @@ export default async function NewItemPage() {
   const picked = selectedJobs(ctx)
   const first = picked.length === 1 ? picked[0].id : jobs[0].id
   return (
-    <ItemForm title="New schedule item" action={createItem} cancelHref="/schedule" today={todayIn()}
+    <ItemForm title="New schedule item" action={createItem} cancelHref="/schedule" today={todayIn(ctx.tz)}
       jobs={[jobs.find((j) => j.id === first)!, ...jobs.filter((j) => j.id !== first)].map((j) => ({ id: j.id, title: j.title }))}
       assignable={await fetchAssignable(ctx.workspace.orgId, ids)} phases={byJob} values={{ job_id: first, color: jobs.find((j) => j.id === first)?.color }} />
   )

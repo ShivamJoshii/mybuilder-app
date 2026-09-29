@@ -15,6 +15,7 @@ import { TodoCheck } from '../todo-check'
 import { ChecklistItem } from './checklist-item'
 import { deleteTodo } from '../actions'
 import { CustomFields } from '@/components/kit/custom-fields'
+import { formatDateTime } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'To-do' }
 
@@ -50,7 +51,7 @@ export default async function TodoPage({ params }: PageProps<'/todos/[id]'>) {
               {todo.completed_at ? <Badge tone="success">Complete</Badge> : <Badge>Pending</Badge>}
               <Badge tone={todo.priority === 'high' ? 'danger' : todo.priority === 'low' ? 'neutral' : 'brand'}>{todo.priority} priority</Badge>
               {todo.due_at && <Badge tone={!todo.completed_at && new Date(todo.due_at) < new Date() ? 'danger' : 'neutral'}>
-                Due {new Date(todo.due_at).toLocaleString('en-CA', { month: 'short', day: 'numeric', year: 'numeric', ...(todo.has_due_time ? { hour: 'numeric', minute: '2-digit' } : {}) })}
+                Due {todo.has_due_time ? formatDateTime(todo.due_at, ctx.tz) : formatDateTime(todo.due_at, ctx.tz).replace(/,\s*\d{1,2}:\d{2}.*$/, '')}
               </Badge>}
             </div>
           </div>

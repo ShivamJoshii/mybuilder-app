@@ -59,8 +59,8 @@ export default async function BillPage({ params }: PageProps<'/bills/[id]'>) {
           {b.is_holdback_release && <Badge>Holdback release</Badge>}
           <Badge>From {(b.sub as { name: string } | null)?.name ?? b.vendor_name}</Badge>
           <Badge>Dated {formatDate(b.invoice_date)}</Badge>
-          {b.due_date && <Badge tone={b.due_date < todayIn() && b.status === 'approved' ? 'danger' : 'neutral'}>Due {formatDate(b.due_date)}</Badge>}
-          {b.lien_waiver_required && <Badge tone={waiverMissing ? 'warning' : 'success'}>{waiverMissing ? 'Lien waiver needed' : `Lien waiver received ${formatDateTime(b.lien_waiver_received_at)}`}</Badge>}
+          {b.due_date && <Badge tone={b.due_date < todayIn(ctx.tz) && b.status === 'approved' ? 'danger' : 'neutral'}>Due {formatDate(b.due_date)}</Badge>}
+          {b.lien_waiver_required && <Badge tone={waiverMissing ? 'warning' : 'success'}>{waiverMissing ? 'Lien waiver needed' : `Lien waiver received ${formatDateTime(b.lien_waiver_received_at, ctx.tz)}`}</Badge>}
         </div>
         {b.rejected_reason && <Alert className="mt-3">Rejected: {b.rejected_reason}</Alert>}
         <table className="mt-5 w-full text-[13px]">
@@ -93,7 +93,7 @@ export default async function BillPage({ params }: PageProps<'/bills/[id]'>) {
         <Card>
           <CardHeader title="Record payment" description={waiverMissing ? 'Mark the lien waiver as received before paying.' : 'Money moves outside MyBuilder for now; this records it.'} />
           <ActionForm action={payBill.bind(null, id)} className="flex flex-wrap items-end gap-3 p-4">
-            <label className="text-[13px] font-medium text-text-2">Paid on<Input name="paid_on" type="date" className="mt-1" defaultValue={todayIn()} required /></label>
+            <label className="text-[13px] font-medium text-text-2">Paid on<Input name="paid_on" type="date" className="mt-1" defaultValue={todayIn(ctx.tz)} required /></label>
             <label className="text-[13px] font-medium text-text-2">Method<Select name="method" className="mt-1 w-44" defaultValue="eft">{Object.entries(PAYMENT_METHODS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select></label>
             <label className="text-[13px] font-medium text-text-2">Reference<Input name="ref" className="mt-1 w-40" maxLength={80} placeholder="Cheque # / EFT ref" /></label>
             <Button type="submit" variant="primary" disabled={waiverMissing}>Record {formatCAD(payable)} paid</Button>

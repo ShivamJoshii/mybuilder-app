@@ -10,11 +10,11 @@ import { chatFeed, sendChat } from './actions'
 
 type Msg = { id: string; author_id: string; author: string; body: string; created_at: string }
 
-const time = (iso: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Edmonton', hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' }).format(new Date(iso))
+const time = (iso: string, tz: string) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' }).format(new Date(iso))
 const ini = (n: string) => n.split(' ').map((x) => x[0]).join('').slice(0, 2).toUpperCase()
 
 /** Conversation view. New messages arrive over Supabase Realtime; polling is the fallback when the socket is down. */
-export function ChatRoom({ conversationId, me, initial }: { conversationId: string; me: string; initial: Msg[] }) {
+export function ChatRoom({ conversationId, me, initial, tz }: { conversationId: string; me: string; initial: Msg[]; tz: string }) {
   const [msgs, setMsgs] = useState<Msg[]>(initial)
   const [text, setText] = useState('')
   const [error, setError] = useState('')
@@ -76,7 +76,7 @@ export function ChatRoom({ conversationId, me, initial }: { conversationId: stri
               <div className={cn('max-w-[75%] rounded-lg px-3 py-2 text-[14px]', mine ? 'bg-brand text-white' : 'bg-surface-2')}>
                 {!mine && <div className="text-xs font-medium text-text-2">{m.author}</div>}
                 <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                <div className={cn('mt-0.5 text-[11px]', mine ? 'text-white/70' : 'text-text-3')}>{time(m.created_at)}</div>
+                <div className={cn('mt-0.5 text-[11px]', mine ? 'text-white/70' : 'text-text-3')}>{time(m.created_at, tz)}</div>
               </div>
             </div>
           )

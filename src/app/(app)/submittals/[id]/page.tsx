@@ -94,11 +94,11 @@ export default async function SubmittalPage({ params }: PageProps<'/submittals/[
           <Card>
             <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2 text-[13px]">
               <span className="font-medium">Revision {r.revision}</span>
-              <span className="text-text-3">submitted by {nm(r.by as P)} · {formatDateTime(r.submitted_at)}</span>
+              <span className="text-text-3">submitted by {nm(r.by as P)} · {formatDateTime(r.submitted_at, ctx.tz)}</span>
               {r.decision && <Badge tone={r.decision.startsWith('approved') ? 'success' : 'danger'} className="ml-auto">{DECISIONS[r.decision]}</Badge>}
             </div>
             {r.notes && <p className="whitespace-pre-wrap px-4 py-2 text-[13px]">{r.notes}</p>}
-            {r.decision && <div className="border-t border-border bg-surface-2 px-4 py-2 text-[13px]"><span className="font-medium">{nm(r.dec as P)}:</span> {r.decision_notes || DECISIONS[r.decision]} <span className="text-xs text-text-3">· {formatDateTime(r.decided_at)}</span></div>}
+            {r.decision && <div className="border-t border-border bg-surface-2 px-4 py-2 text-[13px]"><span className="font-medium">{nm(r.dec as P)}:</span> {r.decision_notes || DECISIONS[r.decision]} <span className="text-xs text-text-3">· {formatDateTime(r.decided_at, ctx.tz)}</span></div>}
           </Card>
           <Attachments jobId={s.job_id} recordType="submittal_revision" recordId={r.id} path={`/submittals/${id}`} share={{ subs: true, clients: false }}
             canAdd={!r.decision && (mySub || canEdit)} />

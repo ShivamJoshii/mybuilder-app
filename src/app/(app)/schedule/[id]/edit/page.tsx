@@ -22,7 +22,7 @@ export default async function EditItemPage({ params }: PageProps<'/schedule/[id]
   const job = ctx.jobs.find((j) => j.id === base.job_id)!
   return (
     <ItemForm title={`Edit ${item.title}`} action={updateItem.bind(null, id)} cancelHref={`/schedule/${id}`} isEdit online={Boolean(online.get(base.job_id))}
-      today={todayIn()} jobs={[{ id: job.id, title: job.title }]} assignable={await fetchAssignable(ctx.workspace.orgId, [job.id])}
+      today={todayIn(ctx.tz)} jobs={[{ id: job.id, title: job.title }]} assignable={await fetchAssignable(ctx.workspace.orgId, [job.id])}
       phases={{ [job.id]: phases.map((p) => p.name) }}
       values={{ ...item, ...(await fetchItemNotes(id)), phase: phases.find((p) => p.id === item.phase_id)?.name ?? null,
         assignees: item.assignees.map((a) => (a.user_id ? `u:${a.user_id}` : `s:${a.sub_org_id}`)) }} />

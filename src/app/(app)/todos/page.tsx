@@ -18,11 +18,11 @@ export const metadata: Metadata = { title: 'To-dos' }
 
 const DEFAULT: QRow[] = [{ field: 'assignee', op: 'is', value: 'me' }, { field: 'status', op: 'is', value: 'open' }]
 
-function due(t: { due_at: string | null; has_due_time: boolean; completed_at: string | null }) {
+function due(t: { due_at: string | null; has_due_time: boolean; completed_at: string | null }, tz: string) {
   if (!t.due_at) return null
   const d = new Date(t.due_at)
   const late = !t.completed_at && d < new Date()
-  const text = d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' }) + (t.has_due_time ? ` ${d.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' })}` : '')
+  const text = d.toLocaleDateString('en-CA', { timeZone: tz, month: 'short', day: 'numeric' }) + (t.has_due_time ? ` ${d.toLocaleTimeString('en-CA', { timeZone: tz, hour: 'numeric', minute: '2-digit' })}` : '')
   return <span className={late ? 'font-medium text-danger' : 'text-text-2'}>{late ? `Overdue · ${text}` : text}</span>
 }
 
@@ -81,7 +81,7 @@ export default async function TodosPage({ searchParams }: PageProps<'/todos'>) {
                     </div>
                   </div>
                   {t.priority === 'high' && <Badge tone="danger">High</Badge>}
-                  <span className="shrink-0 text-xs">{due(t)}</span>
+                  <span className="shrink-0 text-xs">{due(t, ctx.tz)}</span>
                 </li>
               ))}
             </ul>

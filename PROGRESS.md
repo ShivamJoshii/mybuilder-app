@@ -48,6 +48,7 @@ Last updated: 2026-09-29 (overnight build)
 | Job templates: save any job as a template; new jobs copy its schedule (with links), to-dos + checklists, selections + choices, specs, estimate and folders, shifted to the new start date; templates never get subs/clients and stay out of "all jobs" | Built, browser-tested |
 | Reminders (pg_cron every 15 min): to-do reminders + 7am digest, schedule reminders to assignees, bid deadlines, selection deadlines to clients, expiring WCB/insurance to both sides — each sent once | Built, tested (DB) |
 | Notification email worker (`/api/cron/deliver`): claims queued emails, sends via Postmark, retries up to 5 times; text/push marked skipped until configured | Built, tested against a stub |
+| Company time zones end to end (entry, display, reminders, time clock, payroll export) | Built, browser-tested |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
@@ -103,7 +104,7 @@ Last updated: 2026-09-29 (overnight build)
   mapping is still to confirm with a Wagepoint account.
 - Forms keep what you typed when the server rejects it (React 19 otherwise resets forms after every action).
 - Invited clients get a copyable invite link on the job page until email sending is on.
-- Reminders run on Mountain time (7am digest). A per-company time zone setting is a small follow-up.
+- Every date/time the app reads or writes uses the company's time zone (Settings → Company), so an Ontario builder sees Eastern time and a sub on their job sees the builder's time; reminders fire at 7am company time.
 - Security audit fixes (migration `…003300_security_hardening`):
   - Adding a sub that already has a MyBuilder company creates a **pending** link; their admin accepts the
     emailed invite before the builder sees their people or can send them work. Subs the builder creates are linked at once.
@@ -123,7 +124,7 @@ Last updated: 2026-09-29 (overnight build)
 | --- | --- | --- |
 | Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance, job templates, reminders | 364 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing | 21 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance, job templates | 23 flows (run against a production build) | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance, job templates, time zones | 24 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

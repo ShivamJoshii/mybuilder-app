@@ -26,7 +26,7 @@ export default async function InvoicesPage() {
   const totals = await Promise.all((invs ?? []).map(async (i) => [i.id, (await supabase.rpc('invoice_totals', { p: i.id })).data?.[0]] as const))
   const T = new Map(totals)
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const open = (invs ?? []).filter((i) => i.status === 'released')
   const outstanding = open.reduce((s, i) => s + Number(T.get(i.id)?.balance ?? 0), 0)
   const canAdd = mode === 'builder' && can(ctx, 'invoices', 'add')

@@ -128,7 +128,7 @@ export default async function InvoicePage({ params }: PageProps<'/invoices/[id]'
           </ul>
           {canEdit && inv.status === 'released' && (
             <ActionForm action={recordPayment.bind(null, id)} className="flex flex-wrap items-end gap-3 border-t border-border p-4">
-              <label className="text-[13px] font-medium text-text-2">Received on<Input name="paid_on" type="date" className="mt-1" defaultValue={todayIn()} required /></label>
+              <label className="text-[13px] font-medium text-text-2">Received on<Input name="paid_on" type="date" className="mt-1" defaultValue={todayIn(ctx.tz)} required /></label>
               <label className="text-[13px] font-medium text-text-2">Amount<Input name="amount" type="number" step="0.01" className="mt-1 w-36" defaultValue={t ? Number(t.balance).toFixed(2) : ''} required /></label>
               <label className="text-[13px] font-medium text-text-2">Method<Select name="method" className="mt-1 w-44" defaultValue="eft">{Object.entries(PAYMENT_METHODS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select></label>
               <label className="text-[13px] font-medium text-text-2">Reference<Input name="ref" className="mt-1 w-36" maxLength={80} /></label>

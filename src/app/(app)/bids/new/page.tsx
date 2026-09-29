@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Field, Input, Select, Textarea } from '@/components/ui/input'
 import { ActionForm } from '@/components/kit/action-form'
 import { createBidPackage } from '../actions'
+import { tzLabel } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'New bid package' }
 
@@ -25,7 +26,7 @@ export default async function NewBidPage() {
               </Select>
             </Field>
             <Field label="Title" htmlFor="title" required><Input id="title" name="title" required maxLength={200} placeholder="e.g. Framing labour" /></Field>
-            <Field label="Bids due" htmlFor="due" hint="Mountain time. Subs can't submit after this."><Input id="due" name="due" type="datetime-local" /></Field>
+            <Field label="Bids due" htmlFor="due" hint={`${tzLabel(ctx.tz)}. Subs can't submit after this.`}><Input id="due" name="due" type="datetime-local" /></Field>
             <Field label="Scope of work" htmlFor="scope"><Textarea id="scope" name="scope" rows={6} maxLength={20000} /></Field>
             <Button type="submit" variant="primary">Create bid package</Button>
           </ActionForm>

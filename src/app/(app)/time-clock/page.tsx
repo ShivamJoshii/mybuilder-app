@@ -21,9 +21,8 @@ export const metadata: Metadata = { title: 'Time clock' }
 const STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
   open: { label: 'Clocked in', tone: 'brand' }, submitted: { label: 'Needs approval', tone: 'warning' }, approved: { label: 'Approved', tone: 'success' }, rejected: { label: 'Rejected', tone: 'danger' },
 }
-const tz = 'America/Edmonton'
-const localDate = (iso: string) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
-const localTime = (iso: string | null) => (iso ? new Intl.DateTimeFormat('en-CA', { timeZone: tz, hour: 'numeric', minute: '2-digit' }).format(new Date(iso)) : '')
+const localDate = (iso: string, tz: string) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
+const localTime = (iso: string | null, tz: string) => (iso ? new Intl.DateTimeFormat('en-CA', { timeZone: tz, hour: 'numeric', minute: '2-digit' }).format(new Date(iso)) : '')
 const dayLabel = (d: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(`${d}T12:00:00Z`))
 const hours = (s: { clock_in: string; clock_out: string | null; break_minutes: number }) =>
   s.clock_out ? Math.max(0, Math.round(((Date.parse(s.clock_out) - Date.parse(s.clock_in)) / 3_600_000 - s.break_minutes / 60) * 100) / 100) : 0
@@ -34,8 +33,8 @@ export default async function TimeClockPage({ searchParams }: PageProps<'/time-c
   const sp = await searchParams
   const ctx = await requireBuilder('time_clock')
   const tab = sp.tab === 'team' || sp.tab === 'rates' ? sp.tab : 'mine'
-  const week = mondayOf(typeof sp.week === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(sp.week) ? sp.week : todayIn())
-  const from = zonedToUtc(`${week}T00:00`), to = zonedToUtc(`${addDays(week, 7)}T00:00`)
+  const week = mondayOf(typeof sp.week === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(sp.week) ? sp.week : todayIn(ctx.tz))
+  const from = zonedToUtc(`${week}T00:00`, ctx.tz), to = zonedToUtc(`${addDays(week, 7)}T00:00`, ctx.tz)
   const supabase = await createClient()
   const org = ctx.workspace.orgId
   const viewOthers = hasAction(ctx, 'time_clock.view_others')
@@ -59,7 +58,7 @@ export default async function TimeClockPage({ searchParams }: PageProps<'/time-c
   const byUser = new Map<string, Shift[]>()
   for (const s of (shifts ?? []) as Shift[]) byUser.set(s.user_id, [...(byUser.get(s.user_id) ?? []), s])
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i))
-  const summary = (list: Shift[]) => weekOvertime(days.map((d) => list.filter((s) => localDate(s.clock_in) === d && s.status !== 'rejected').reduce((t, s) => t + hours(s), 0)), rule)
+  const summary = (list: Shift[]) => weekOvertime(days.map((d) => list.filter((s) => localDate(s.clock_in, ctx.tz) === d && s.status !== 'rejected').reduce((t, s) => t + hours(s), 0)), rule)
   const { data: rates } = tab === 'rates' ? await supabase.from('labor_rates').select('user_id,hourly_cost').eq('org_id', org) : { data: [] }
   const rate = new Map((rates ?? []).map((r) => [r.user_id, Number(r.hourly_cost)]))
 
@@ -84,13 +83,13 @@ export default async function TimeClockPage({ searchParams }: PageProps<'/time-c
       <tbody className="divide-y divide-border">
         {list.map((s) => (
           <tr key={s.id}>
-            {selectable && <td className="px-3 py-2">{s.status === 'submitted' && s.user_id !== ctx.userId && <Checkbox name="shift" value={s.id} aria-label={`Select shift ${person.get(s.user_id)} ${localDate(s.clock_in)}`} />}</td>}
+            {selectable && <td className="px-3 py-2">{s.status === 'submitted' && s.user_id !== ctx.userId && <Checkbox name="shift" value={s.id} aria-label={`Select shift ${person.get(s.user_id)} ${localDate(s.clock_in, ctx.tz)}`} />}</td>}
             {showPerson && <td className="px-3 py-2">{person.get(s.user_id)}</td>}
-            <td className="px-3 py-2">{dayLabel(localDate(s.clock_in))}</td>
+            <td className="px-3 py-2">{dayLabel(localDate(s.clock_in, ctx.tz))}</td>
             <td className="px-3 py-2">{jobName.get(s.job_id)}{s.in_lat != null && <span title="Location recorded" className="ml-1 text-text-3">📍</span>}</td>
             <td className="px-3 py-2 text-text-3">{s.cost_code_id ? codeName.get(s.cost_code_id) : ''}</td>
-            <td className="px-3 py-2">{localTime(s.clock_in)}</td>
-            <td className="px-3 py-2">{localTime(s.clock_out)}</td>
+            <td className="px-3 py-2">{localTime(s.clock_in, ctx.tz)}</td>
+            <td className="px-3 py-2">{localTime(s.clock_out, ctx.tz)}</td>
             <td className="px-3 py-2 text-right">{s.break_minutes ? `${s.break_minutes}m` : ''}</td>
             <td className="px-3 py-2 text-right tabular-nums">{s.clock_out ? hours(s).toFixed(2) : ''}</td>
             <td className="px-3 py-2"><Badge tone={STATUS[s.status].tone}>{STATUS[s.status].label}</Badge></td>
@@ -121,7 +120,7 @@ export default async function TimeClockPage({ searchParams }: PageProps<'/time-c
                 <ActionForm action={addShift} className="grid gap-3 p-4 sm:grid-cols-4">
                   <label className="text-[13px] font-medium text-text-2 sm:col-span-2">Job<Select name="job" className="mt-1" required defaultValue=""><option value="" disabled>Pick a job</option>{ctx.jobs.map((j) => <option key={j.id} value={j.id}>{j.title}</option>)}</Select></label>
                   <label className="text-[13px] font-medium text-text-2 sm:col-span-2">Cost code<Select name="cost_code" className="mt-1" defaultValue=""><option value="">—</option>{codes.map((c) => <option key={c.id} value={c.id}>{c.code} {c.title}</option>)}</Select></label>
-                  <label className="text-[13px] font-medium text-text-2">Date<Input name="date" type="date" className="mt-1" defaultValue={todayIn()} required /></label>
+                  <label className="text-[13px] font-medium text-text-2">Date<Input name="date" type="date" className="mt-1" defaultValue={todayIn(ctx.tz)} required /></label>
                   <label className="text-[13px] font-medium text-text-2">Start<Input name="start" type="time" className="mt-1" defaultValue="07:00" required /></label>
                   <label className="text-[13px] font-medium text-text-2">End<Input name="end" type="time" className="mt-1" defaultValue="15:30" required /></label>
                   <label className="text-[13px] font-medium text-text-2">Break (min)<Input name="break_minutes" type="number" min="0" max="720" className="mt-1" defaultValue="30" /></label>

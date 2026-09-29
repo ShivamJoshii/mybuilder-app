@@ -71,7 +71,7 @@ export default async function RfisPage({ searchParams }: PageProps<'/rfis'>) {
     { type: 'files', name: 'files', label: 'Files' },
   ]
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const columns: Column<Row>[] = [
     { key: 'number', label: '#', className: 'w-12 text-text-3', render: (r) => r.number },
     { key: 'title', label: 'Title', render: (r) => <Link href={`/rfis/${r.id}`} className="font-medium text-brand hover:underline">{r.title}</Link> },

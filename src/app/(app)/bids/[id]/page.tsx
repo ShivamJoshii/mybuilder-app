@@ -15,7 +15,7 @@ import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { LinesEditor, type Line } from '@/components/kit/lines-editor'
 import { Attachments } from '@/components/kit/attachments'
-import { cn, formatCAD, formatDateTime, utcToZonedInput } from '@/lib/utils'
+import { cn, formatCAD, formatDateTime, utcToZonedInput, tzLabel } from '@/lib/utils'
 import { BID_REQUEST_STATUS, BID_STATUS } from '@/lib/estimate'
 import { PricingForm } from './pricing-form'
 import { awardBid, declineBid, releaseBids, saveBidLines, setBidSheets, setInvites, submitBid, updateBidPackage } from '../actions'
@@ -56,7 +56,7 @@ export default async function BidPage({ params }: PageProps<'/bids/[id]'>) {
   const canEdit = builder && can(ctx, 'bids', 'edit')
   const st = BID_STATUS[p.status]
   const its = (items ?? []).map((i) => ({ ...i, quantity: Number(i.quantity) }))
-  const due = p.due_at ? formatDateTime(p.due_at) : null
+  const due = p.due_at ? formatDateTime(p.due_at, ctx.tz) : null
   const pastDue = p.due_at ? new Date(p.due_at).getTime() < new Date().getTime() : false
 
   const header = (
@@ -129,7 +129,7 @@ export default async function BidPage({ params }: PageProps<'/bids/[id]'>) {
           <CardHeader title="Details" />
           <ActionForm action={updateBidPackage.bind(null, id)} resetOnSuccess={false} className="grid gap-3 p-4 sm:grid-cols-2">
             <label className="text-[13px] font-medium text-text-2">Title<Input name="title" className="mt-1" defaultValue={p.title} required maxLength={200} /></label>
-            <label className="text-[13px] font-medium text-text-2">Bids due (Mountain time)<Input name="due" type="datetime-local" className="mt-1" defaultValue={utcToZonedInput(p.due_at)} /></label>
+            <label className="text-[13px] font-medium text-text-2">Bids due ({tzLabel(ctx.tz)})<Input name="due" type="datetime-local" className="mt-1" defaultValue={utcToZonedInput(p.due_at, ctx.tz)} /></label>
             <label className="text-[13px] font-medium text-text-2 sm:col-span-2">Scope of work<Textarea name="scope" className="mt-1" rows={4} defaultValue={p.scope ?? ''} maxLength={20000} /></label>
             <div><Button type="submit">Save details</Button></div>
           </ActionForm>

@@ -35,7 +35,7 @@ export default async function SchedulePage({ searchParams }: PageProps<'/schedul
   const tab = one(sp.tab) === 'exceptions' ? 'exceptions' : 'schedule'
   const view = (['calendar', 'list', 'gantt'] as const).find((v) => v === one(sp.view)) ?? 'calendar'
   const picked = selectedJobs(ctx)
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const editor = mode === 'builder' && can(ctx, 'schedule', 'edit')
 
   const qs = (patch: Record<string, string | undefined>) => {

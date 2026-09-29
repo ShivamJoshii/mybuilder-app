@@ -24,7 +24,7 @@ export default async function LeadActivitiesPage({ searchParams }: PageProps<'/l
   if (mine) q = q.eq('assigned_to', ctx.userId)
   q = open ? q.is('completed_at', null) : q.not('completed_at', 'is', null)
   const { data } = await q
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const label = new Map<string, string>(ACTIVITY_TYPES.map((t) => [t.value, t.label]))
   const tab = (k: string, v: string, text: string, on: boolean) => {
     const p = new URLSearchParams(Object.entries(sp).flatMap(([a, b]) => (typeof b === 'string' ? [[a, b]] : [])))

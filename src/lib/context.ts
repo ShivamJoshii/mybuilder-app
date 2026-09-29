@@ -66,7 +66,11 @@ export type AppContext = {
   permissions: Permissions
   jobs: PickerJob[]
   selection: { allJobs: boolean; jobIds: string[] }
+  /** IANA time zone of the company whose work is on screen (the builder's, for portals). */
+  tz: string
 }
+
+export const DEFAULT_TZ = 'America/Edmonton'
 
 const NO_PERMS: Permissions = { modules: {}, actions: [] }
 
@@ -106,6 +110,9 @@ export const getAppContext = cache(async (): Promise<AppContext> => {
     : workspace.mode === 'sub' ? (workspace.builderOrgId ?? workspace.subOrgId)
     : workspace.orgId
 
+  const tzOrg = workspace.mode === 'sub' ? workspace.builderOrgId : workspace.orgId
+  const tzP = tzOrg ? supabase.from('organizations').select('timezone').eq('id', tzOrg).maybeSingle() : Promise.resolve({ data: null })
+
   const permissions: Permissions =
     workspace.mode === 'builder'
       ? (((await supabase.rpc('my_permissions', { p_org: workspace.orgId })).data as Permissions | null) ?? NO_PERMS)
@@ -140,7 +147,10 @@ export const getAppContext = cache(async (): Promise<AppContext> => {
     jobIds: (sel?.job_ids ?? []).filter((id: string) => visible.has(id)),
   }
 
+  const tz = ((await tzP).data as { timezone: string | null } | null)?.timezone || DEFAULT_TZ
+
   return {
+    tz,
     userId: user.id,
     email: user.email,
     profile: profile ?? { first_name: '', last_name: '', email: user.email, phone: null },

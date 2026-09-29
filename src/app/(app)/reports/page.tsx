@@ -25,7 +25,7 @@ export default async function ReportsPage({ searchParams }: PageProps<'/reports'
   const tab = TABS.some(([k]) => k === sp.tab) ? (sp.tab as string) : 'wip'
   const supabase = await createClient()
   const org = ctx.workspace.orgId
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
 
   const nav = (
     <nav className="mt-3 flex gap-4 text-[13px] print:hidden">

@@ -74,3 +74,10 @@ export function formatDateTime(iso: string | null | undefined, tz = 'America/Edm
   if (!iso) return ''
   return new Intl.DateTimeFormat('en-CA', { timeZone: tz, month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
 }
+
+const TZ_NAMES: Record<string, string> = {
+  'America/Vancouver': 'Pacific time', 'America/Edmonton': 'Mountain time', 'America/Regina': 'Saskatchewan time', 'America/Winnipeg': 'Central time',
+  'America/Toronto': 'Eastern time', 'America/Halifax': 'Atlantic time', 'America/St_Johns': 'Newfoundland time',
+}
+/** "Mountain time" etc. for form hints. */
+export const tzLabel = (tz: string) => TZ_NAMES[tz] ?? tz.replace(/^.*\//, '').replace(/_/g, ' ') + ' time'

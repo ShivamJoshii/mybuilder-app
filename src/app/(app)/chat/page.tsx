@@ -53,7 +53,7 @@ export default async function ChatPage({ searchParams }: PageProps<'/chat'>) {
                 <div className="font-medium">{label(current)}</div>
                 <div className="text-xs text-text-3">{current.title ? (current.members ?? []).join(', ') : ''}{current.job_id ? `${current.title ? ' · ' : ''}${jobName.get(current.job_id) ?? ''}` : ''}</div>
               </div>
-              <ChatRoom key={current.conversation_id} conversationId={current.conversation_id} me={ctx.userId} initial={feed} />
+              <ChatRoom key={current.conversation_id} conversationId={current.conversation_id} me={ctx.userId} initial={feed} tz={ctx.tz} />
             </Card>
           ) : <div className="p-5 text-[13px] text-text-3">Pick a conversation.</div>}
         </div>

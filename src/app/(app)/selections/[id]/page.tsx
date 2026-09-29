@@ -49,7 +49,7 @@ export default async function SelectionPage({ params }: PageProps<'/selections/[
   const allowance = s.allowance != null ? Number(s.allowance) : null
   const picked = choices.find((c) => c.id === s.selected_choice_id)
   const diff = picked?.client_price != null && allowance != null ? picked.client_price - allowance : null
-  const overdue = s.deadline && s.deadline < todayIn() && (s.status === 'pending' || s.status === 'draft')
+  const overdue = s.deadline && s.deadline < todayIn(ctx.tz) && (s.status === 'pending' || s.status === 'draft')
   const canChoose = open && ((mode === 'client' && s.share_client) || (canEdit && hasAction(ctx, 'selections.approve_for_client')))
 
   return (

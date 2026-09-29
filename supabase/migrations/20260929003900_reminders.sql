@@ -38,10 +38,14 @@ returns uuid[] language sql stable security definer set search_path = '' as $$
   select coalesce(array_agg(user_id), '{}') from public.org_members where org_id = p_sub and status = 'active';
 $$;
 
+create or replace function private.org_tz(p_org uuid)
+returns text language sql stable security definer set search_path = '' as $$
+  select coalesce((select timezone from public.organizations where id = p_org), 'America/Edmonton');
+$$;
+
 create or replace function private.run_reminders(p_now timestamptz default now())
 returns int language plpgsql security definer set search_path = '' as $$
-declare r record; n int := 0; v_title text; v_today date := (p_now at time zone 'America/Edmonton')::date;
-        v_hour int := extract(hour from p_now at time zone 'America/Edmonton');
+declare r record; n int := 0; v_title text;
 begin
   -- 1. To-do reminders: N minutes before the due time
   for r in
@@ -55,36 +59,34 @@ begin
       'todo.reminder', r.id, r.due_at::text, r.org_id, r.job_id, 'Due soon: ' || r.title, null, '/todos/' || r.id);
   end loop;
 
-  -- 2. Daily to-do digest at 7am: due today, tomorrow or overdue
-  if v_hour >= 7 then
-    for r in
-      with mine as (
-        select coalesce(a.user_id, m.user_id) as uid, t.id, t.org_id, t.due_at
-        from public.todos t join public.todo_assignees a on a.todo_id = t.id
-        left join public.org_members m on m.org_id = a.sub_org_id and m.status = 'active'
-        where t.completed_at is null and t.deleted_at is null and t.due_at is not null
-          and (t.due_at at time zone 'America/Edmonton')::date <= v_today + 1
-      )
-      select uid, min(org_id::text)::uuid org_id, count(*) filter (where (due_at at time zone 'America/Edmonton')::date < v_today) overdue,
-             count(*) filter (where (due_at at time zone 'America/Edmonton')::date >= v_today) upcoming
-      from mine where uid is not null group by uid
-    loop
-      n := n + private.remind(array[r.uid], 'todo.daily_reminder', r.uid, v_today::text, r.org_id, null,
-        'To-dos: ' || r.upcoming || ' due today or tomorrow' || case when r.overdue > 0 then ', ' || r.overdue || ' past due' else '' end, null, '/todos');
-    end loop;
-  end if;
+  -- 2. Daily to-do digest from 7am company time: due today, tomorrow or overdue
+  for r in
+    with mine as (
+      select coalesce(a.user_id, m.user_id) as uid, t.id, t.org_id, (t.due_at at time zone private.org_tz(t.org_id))::date due_day,
+             (p_now at time zone private.org_tz(t.org_id))::date today, extract(hour from p_now at time zone private.org_tz(t.org_id)) hr
+      from public.todos t join public.todo_assignees a on a.todo_id = t.id
+      left join public.org_members m on m.org_id = a.sub_org_id and m.status = 'active'
+      where t.completed_at is null and t.deleted_at is null and t.due_at is not null
+    )
+    select uid, min(org_id::text)::uuid org_id, min(today) today, count(*) filter (where due_day < today) overdue,
+           count(*) filter (where due_day between today and today + 1) upcoming
+    from mine where uid is not null and hr >= 7 and due_day <= today + 1 group by uid
+  loop
+    n := n + private.remind(array[r.uid], 'todo.daily_reminder', r.uid, r.today::text, r.org_id, null,
+      'To-dos: ' || r.upcoming || ' due today or tomorrow' || case when r.overdue > 0 then ', ' || r.overdue || ' past due' else '' end, null, '/todos');
+  end loop;
 
   -- 3. Schedule items: reminder_days before the start
   for r in
-    select i.* from public.schedule_items i join public.jobs j on j.id = i.job_id
+    select i.*, (p_now at time zone private.org_tz(i.org_id))::date today from public.schedule_items i join public.jobs j on j.id = i.job_id
     where i.deleted_at is null and i.completed_at is null and i.reminder_days is not null and not j.is_template and j.deleted_at is null
-      and i.start_date - i.reminder_days <= v_today and i.start_date >= v_today
+      and i.start_date - i.reminder_days <= (p_now at time zone private.org_tz(i.org_id))::date and i.start_date >= (p_now at time zone private.org_tz(i.org_id))::date
   loop
     n := n + private.remind(
       (select coalesce(array_agg(a.user_id) filter (where a.user_id is not null), '{}') from public.schedule_assignees a where a.item_id = r.id)
         || (select coalesce(array_agg(m.user_id), '{}') from public.schedule_assignees a join public.org_members m on m.org_id = a.sub_org_id and m.status = 'active' where a.item_id = r.id),
       'schedule.reminder', r.id, r.start_date::text, r.org_id, r.job_id,
-      r.title || ' starts ' || case when r.start_date = v_today then 'today' when r.start_date = v_today + 1 then 'tomorrow' else to_char(r.start_date, 'Mon DD') end,
+      r.title || ' starts ' || case when r.start_date = r.today then 'today' when r.start_date = r.today + 1 then 'tomorrow' else to_char(r.start_date, 'Mon DD') end,
       null, '/schedule/' || r.id);
   end loop;
 
@@ -100,7 +102,8 @@ begin
   -- 5. Selection deadlines: 3 days out, to the job's clients
   for r in
     select s.* from public.selections s
-    where s.status = 'pending' and s.deleted_at is null and s.share_client and s.deadline between v_today and v_today + 3
+    where s.status = 'pending' and s.deleted_at is null and s.share_client
+      and s.deadline between (p_now at time zone private.org_tz(s.org_id))::date and (p_now at time zone private.org_tz(s.org_id))::date + 3
   loop
     n := n + private.remind((select coalesce(array_agg(c.user_id), '{}') from public.job_clients c where c.job_id = r.job_id),
       'selection.deadline', r.id, r.deadline::text, r.org_id, r.job_id, 'Please choose by ' || to_char(r.deadline, 'Mon DD') || ': ' || r.title, null, '/selections/' || r.id);
@@ -108,8 +111,9 @@ begin
 
   -- 6. Certificates expiring within 30 days (and on expiry): the sub's people and the builder's sub managers
   for r in
-    select c.*, (c.expires_on < v_today) expired from public.sub_certificates c
-    where c.expires_on is not null and c.expires_on <= v_today + 30 and c.expires_on >= v_today - 1
+    select c.*, (c.expires_on < (p_now at time zone private.org_tz(c.builder_org_id))::date) expired from public.sub_certificates c
+    where c.expires_on is not null and c.expires_on <= (p_now at time zone private.org_tz(c.builder_org_id))::date + 30
+      and c.expires_on >= (p_now at time zone private.org_tz(c.builder_org_id))::date - 1
       and exists (select 1 from public.builder_sub_links l where l.builder_org_id = c.builder_org_id and l.sub_org_id = c.sub_org_id and l.status = 'active')
       and not exists (select 1 from public.sub_certificates newer where newer.builder_org_id = c.builder_org_id and newer.sub_org_id = c.sub_org_id
                         and newer.kind = c.kind and newer.expires_on > c.expires_on)

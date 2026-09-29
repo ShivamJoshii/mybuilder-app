@@ -13,7 +13,7 @@ import { Input, Select, Textarea } from '@/components/ui/input'
 import { ActionForm } from '@/components/kit/action-form'
 import { Attachments } from '@/components/kit/attachments'
 import { CommentThread } from '@/components/kit/comments'
-import { formatDate, formatDateTime } from '@/lib/utils'
+import { formatDate, formatDateTime, tzLabel } from '@/lib/utils'
 import { APPT_STATUS, CLAIM_CATEGORIES, CLAIM_STATUS, PRIORITY } from '@/lib/warranty'
 import { addAppointment, leaveFeedback, updateAppointment, updateClaim } from '../actions'
 import { CustomFields } from '@/components/kit/custom-fields'
@@ -106,7 +106,7 @@ export default async function ClaimPage({ params }: PageProps<'/warranty/[id]'>)
             return (
               <li key={a.id} className="space-y-2 px-4 py-3" data-appt={a.id}>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{formatDateTime(a.starts_at)}</span>
+                  <span className="font-medium">{formatDateTime(a.starts_at, ctx.tz)}</span>
                   {tech && <span className="text-text-3">· {tech}</span>}
                   <Badge tone={as.tone}>{as.label}</Badge>
                   <div className="ml-auto flex gap-2">
@@ -130,7 +130,7 @@ export default async function ClaimPage({ params }: PageProps<'/warranty/[id]'>)
         </ul>
         {canEdit && c.status !== 'closed' && (
           <ActionForm action={addAppointment.bind(null, id)} className="grid gap-3 border-t border-border p-4 sm:grid-cols-4">
-            <label className="text-[13px] font-medium text-text-2 sm:col-span-2">When (Mountain time)<Input name="starts" type="datetime-local" className="mt-1" required /></label>
+            <label className="text-[13px] font-medium text-text-2 sm:col-span-2">When ({tzLabel(ctx.tz)})<Input name="starts" type="datetime-local" className="mt-1" required /></label>
             <label className="text-[13px] font-medium text-text-2">Hours<Input name="hours" type="number" step="0.25" min="0.25" max="24" defaultValue="2" className="mt-1" /></label>
             <label className="text-[13px] font-medium text-text-2">Who{peopleSelect('assignee', assigneeValue, 'Technician')}</label>
             <label className="text-[13px] font-medium text-text-2 sm:col-span-3">Notes for the visit<Input name="notes" className="mt-1" maxLength={4000} /></label>

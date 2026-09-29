@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { CommentThread } from '@/components/kit/comments'
 import { Attachments } from '@/components/kit/attachments'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateTime } from '@/lib/utils'
 import { deleteLog } from '../actions'
 import { CustomFields } from '@/components/kit/custom-fields'
 
@@ -68,7 +68,7 @@ export default async function LogPage({ params }: PageProps<'/daily-logs/[id]'>)
           </div>
         ) : null}
         <div className="border-t border-border px-4 py-2 text-xs text-text-3">
-          By {author ? `${author.first_name} ${author.last_name}`.trim() || author.email : 'unknown'} · {new Date(log.created_at).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' })}
+          By {author ? `${author.first_name} ${author.last_name}`.trim() || author.email : 'unknown'} · {formatDateTime(log.created_at, ctx.tz)}
         </div>
       </Card>
       <CustomFields module="daily_logs" recordId={id} orgId={log.org_id} path={`/daily-logs/${id}`} canEdit={ctx.workspace.mode === 'builder' && can(ctx, 'daily_logs', 'edit')} audience={ctx.workspace.mode === 'builder' ? 'internal' : ctx.workspace.mode} />

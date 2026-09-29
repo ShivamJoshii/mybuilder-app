@@ -37,7 +37,7 @@ export default async function ThreadPage({ params }: PageProps<'/messages/[id]'>
             {m.status === 'queued' && <Badge tone="warning">Queued</Badge>}
             {m.status === 'failed' && <Badge tone="danger">Failed</Badge>}
             {m.attachments > 0 && <Badge><Paperclip className="mr-1 size-3" />{m.attachments}</Badge>}
-            <span className="ml-auto text-xs text-text-3">{formatDateTime(m.created_at)}</span>
+            <span className="ml-auto text-xs text-text-3">{formatDateTime(m.created_at, ctx.tz)}</span>
           </div>
           <p className="whitespace-pre-wrap px-4 py-3 text-[14px]">{m.body_text}</p>
         </Card>

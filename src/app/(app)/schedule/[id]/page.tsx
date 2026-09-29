@@ -12,7 +12,7 @@ import { Input, Select } from '@/components/ui/input'
 import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { CommentThread } from '@/components/kit/comments'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateTime } from '@/lib/utils'
 import { addLink, removeLink, deleteItem, setComplete, respond } from '../actions'
 
 export const metadata: Metadata = { title: 'Schedule item' }
@@ -119,7 +119,7 @@ export default async function ItemPage({ params }: PageProps<'/schedule/[id]'>) 
             {(shifts ?? []).map((s) => (
               <li key={s.id} className="px-4 py-2">
                 {formatDate(s.old_start)} → <strong>{formatDate(s.new_start)}</strong>
-                <span className="text-text-3"> · {s.reason ?? 'No reason'}{s.cascaded ? ' (moved by a predecessor)' : ''} · {new Date(s.shifted_at).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                <span className="text-text-3"> · {s.reason ?? 'No reason'}{s.cascaded ? ' (moved by a predecessor)' : ''} · {formatDateTime(s.shifted_at, ctx.tz)}</span>
               </li>
             ))}
           </ul>

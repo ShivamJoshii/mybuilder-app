@@ -14,7 +14,7 @@ const w = (key: string, title: string, href: string, items: WidgetItem[], empty:
 export async function summaryWidgets(ctx: AppContext, jobIds: string[]): Promise<Widget[]> {
   if (!jobIds.length) return []
   const supabase = await createClient()
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const week = isoAddDays(today, 7)
   const fortnight = isoAddDays(today, 14)
   const mode = ctx.workspace.mode

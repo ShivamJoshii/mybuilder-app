@@ -79,7 +79,7 @@ export async function createJob(_: JobFormState, formData: FormData): Promise<Jo
   const template = z.string().uuid().safeParse(formData.get('template_id'))
   if (template.success) {
     const parts = formData.getAll('template_parts').map(String).filter((p) => ['schedule', 'todos', 'selections', 'specs', 'estimate', 'folders'].includes(p))
-    const { error: copyError } = await supabase.rpc('copy_job_content', { p_from: template.data, p_to: data.id, p_start: job.projected_start ?? todayIn(), p_parts: parts })
+    const { error: copyError } = await supabase.rpc('copy_job_content', { p_from: template.data, p_to: data.id, p_start: job.projected_start ?? todayIn(ctx.tz), p_parts: parts })
     if (copyError) return { error: 'The job was created, but the template could not be copied.' }
   }
   if (can(ctx, 'jobs', 'price') && (contract_price != null || internal_notes != null)) {

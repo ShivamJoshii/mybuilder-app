@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { costCodes, linkedSubs } from '@/lib/financial'
 import { PageHeader } from '@/components/shell/page-header'
 import { BillForm } from './bill-form'
+import { todayIn } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'New bill' }
 
@@ -37,7 +38,7 @@ export default async function NewBillPage({ searchParams }: PageProps<'/bills/ne
     <>
       <PageHeader title={mode === 'sub' ? 'Submit a bill' : 'New bill'} jobName={po?.title} />
       <div className="mx-auto max-w-4xl p-5">
-        <BillForm po={po} isSub={mode === 'sub'}
+        <BillForm po={po} isSub={mode === 'sub'} today={todayIn(ctx.tz)}
           jobs={(picked.length ? picked : ctx.jobs).map(({ id, title }) => ({ id, title }))}
           subs={builderOrg && !po ? await linkedSubs(builderOrg) : []} codes={builderOrg && !po ? await costCodes(builderOrg) : []} />
       </div>

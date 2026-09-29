@@ -14,8 +14,8 @@ import { CERT_KINDS, COMPLIANCE_STATUS, certState, type CertKind } from '@/lib/c
 import { addCertificate, deleteCertificate } from '@/app/(app)/settings/compliance-actions'
 
 /** Certificates a sub keeps on file with one builder, plus the overall compliance status. */
-export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, path, title }: {
-  builderId: string; subId: string; uploaderOrgId: string; canEdit: boolean; path: string; title?: string
+export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, path, title, tz }: {
+  builderId: string; subId: string; uploaderOrgId: string; canEdit: boolean; path: string; title?: string; tz: string
 }) {
   const supabase = await createClient()
   const [{ data: certs }, { data: status }, folder] = await Promise.all([
@@ -25,7 +25,7 @@ export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, p
   ])
   const st = COMPLIANCE_STATUS[status?.[0]?.status ?? 'ok']
   const detail = status?.[0]?.detail
-  const today = todayIn()
+  const today = todayIn(tz)
   const tone = { ok: 'success', expiring: 'warning', expired: 'danger' } as const
 
   return (

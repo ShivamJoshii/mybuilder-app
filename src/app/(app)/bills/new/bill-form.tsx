@@ -7,15 +7,15 @@ import { Input, Select } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert } from '@/components/ui/alert'
 import { Card } from '@/components/ui/card'
-import { formatCAD, todayIn } from '@/lib/utils'
+import { formatCAD } from '@/lib/utils'
 import { createBill } from '../actions'
 
 type PoLine = { id: string; title: string; total: number; billed: number }
 type Free = { key: string; title: string; cost_code_id: string; amount: string }
 
-export function BillForm({ po, jobs, subs, codes, isSub }: {
+export function BillForm({ po, jobs, subs, codes, isSub, today }: {
   po: { id: string; job_id: string; title: string; holdback_pct: number; lien_waiver_required: boolean; lines: PoLine[]; next: number } | null
-  jobs: { id: string; title: string }[]; subs: { sub_org_id: string; company_name: string }[]; codes: { id: string; code: string; title: string }[]; isSub: boolean
+  jobs: { id: string; title: string }[]; subs: { sub_org_id: string; company_name: string }[]; codes: { id: string; code: string; title: string }[]; isSub: boolean; today: string
 }) {
   const router = useRouter()
   const [pending, start] = useTransition()
@@ -25,7 +25,7 @@ export function BillForm({ po, jobs, subs, codes, isSub }: {
   const [vendor, setVendor] = useState('')
   const [ref, setRef] = useState('')
   const [title, setTitle] = useState(po ? `${po.title} — draw ${po.next}` : '')
-  const [date, setDate] = useState(todayIn())
+  const [date, setDate] = useState(today)
   const [due, setDue] = useState('')
   const [amounts, setAmounts] = useState<Record<string, string>>({})
   const [free, setFree] = useState<Free[]>([{ key: '1', title: '', cost_code_id: '', amount: '' }])

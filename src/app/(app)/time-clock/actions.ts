@@ -41,8 +41,8 @@ export async function addShift(_: ActionState, fd: FormData): Promise<ActionStat
   if (!p.success) return { error: p.error.issues[0].message }
   const job = ctx.jobs.find((j) => j.id === p.data.job)
   if (!job) return { error: 'Pick a job.' }
-  const clock_in = zonedToUtc(`${p.data.date}T${p.data.start}`)
-  let clock_out = zonedToUtc(`${p.data.date}T${p.data.end}`)
+  const clock_in = zonedToUtc(`${p.data.date}T${p.data.start}`, ctx.tz)
+  let clock_out = zonedToUtc(`${p.data.date}T${p.data.end}`, ctx.tz)
   if (clock_out <= clock_in) clock_out = new Date(Date.parse(clock_out) + 86_400_000).toISOString()   // overnight
   const supabase = await createClient()
   const { error } = await supabase.from('time_shifts').insert({

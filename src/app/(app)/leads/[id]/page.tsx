@@ -137,7 +137,7 @@ export default async function LeadPage({ params }: PageProps<'/leads/[id]'>) {
         {can(ctx, 'leads', 'add') && (
           <ActionForm action={addActivity.bind(null, id)} className="grid gap-3 border-t border-border p-4 sm:grid-cols-4">
             <Field label="Type" htmlFor="a_type"><Select id="a_type" name="type">{ACTIVITY_TYPES.filter((t) => t.value !== 'website_form').map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</Select></Field>
-            <Field label="Date" htmlFor="a_date"><Input id="a_date" name="activity_date" type="date" defaultValue={todayIn()} required /></Field>
+            <Field label="Date" htmlFor="a_date"><Input id="a_date" name="activity_date" type="date" defaultValue={todayIn(ctx.tz)} required /></Field>
             <Field label="Time" htmlFor="a_time"><Input id="a_time" name="start_time" type="time" /></Field>
             <Field label="Assigned to" htmlFor="a_to"><Select id="a_to" name="assigned_to" defaultValue={ctx.userId}>{l.salespeople.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</Select></Field>
             <Field label="Subject" htmlFor="a_title" className="sm:col-span-4"><Input id="a_title" name="title" maxLength={120} /></Field>

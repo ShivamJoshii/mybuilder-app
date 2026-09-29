@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { ActionForm } from '@/components/kit/action-form'
 import { Uploader } from '@/components/kit/uploader'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatDate, formatDateTime } from '@/lib/utils'
 import { createFolder } from './actions'
 import { FileActions } from './file-actions'
 import { FolderSharing } from './folder-sharing'
@@ -187,7 +187,7 @@ export async function FilesPage({ kind, sp }: { kind: Kind; sp: Sp }) {
                     <Icon className="size-5 shrink-0 text-text-3" />
                     <div className="min-w-0 flex-1">
                       <a href={`/files/${f.id}/download?inline=1`} target="_blank" rel="noreferrer" className="block truncate font-medium text-brand hover:underline">{f.name}</a>
-                      <div className="text-xs text-text-3">{new Date(f.created_at).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' })} · {p ? `${p.first_name} ${p.last_name}`.trim() || p.email : ''}{f.uploader_type === 'sub' ? ' (sub)' : ''} · {size(f.size_bytes)}{f.version > 1 ? ` · v${f.version}` : ''}</div>
+                      <div className="text-xs text-text-3">{formatDateTime(f.created_at, ctx.tz)} · {p ? `${p.first_name} ${p.last_name}`.trim() || p.email : ''}{f.uploader_type === 'sub' ? ' (sub)' : ''} · {size(f.size_bytes)}{f.version > 1 ? ` · v${f.version}` : ''}</div>
                     </div>
                     {mode === 'builder' && <span className="hidden gap-1 sm:flex">{f.share_subs && <Badge tone="brand">Subs</Badge>}{f.share_clients && <Badge tone="brand">Client</Badge>}</span>}
                     {(canEdit || f.uploaded_by === ctx.userId) && <Uploader folderId={current.id} replaceFileId={f.id} label="New version" audience="none" />}

@@ -27,7 +27,7 @@ export default async function SubmittalsPage({ searchParams }: PageProps<'/submi
     .is('deleted_at', null).order('number')
   if (internal) q = q.in('job_id', picked.map((j) => j.id))
   const { data } = internal && !picked.length ? { data: [] } : await q
-  const today = todayIn()
+  const today = todayIn(ctx.tz)
   const rows = (data ?? []).filter((s) => !ball || SUBMITTAL_STATUS[s.status].ball === ball || (ball === 'me' && s.reviewer_user_id === ctx.userId && s.status === 'submitted'))
   const canAdd = mode === 'builder' && can(ctx, 'submittals', 'add')
   return (
