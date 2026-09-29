@@ -36,5 +36,6 @@ export default async function NewRfiPage() {
   }
   const picked = selectedJobs(ctx)
   return <RfiForm jobs={jobs.map((j) => ({ id: j.id, title: j.title }))} assignees={assignees} targets={await linkableRecords(ids)}
-    defaultJob={picked.length === 1 ? picked[0].id : undefined} />
+    defaultJob={picked.length === 1 ? picked[0].id : undefined}
+    defaultDue={new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10)} />
 }

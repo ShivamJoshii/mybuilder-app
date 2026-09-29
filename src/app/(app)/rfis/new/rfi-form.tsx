@@ -10,8 +10,8 @@ type Opt = { value: string; label: string; group: string }
 type Target = { type: string; id: string; job_id: string; label: string }
 const TYPE_LABEL: Record<string, string> = { todo: 'To-do', daily_log: 'Daily log', rfi: 'RFI' }
 
-export function RfiForm({ jobs, assignees, targets, defaultJob }: {
-  jobs: { id: string; title: string }[]; assignees: Record<string, Opt[]>; targets: Target[]; defaultJob?: string
+export function RfiForm({ jobs, assignees, targets, defaultJob, defaultDue }: {
+  jobs: { id: string; title: string }[]; assignees: Record<string, Opt[]>; targets: Target[]; defaultJob?: string; defaultDue: string
 }) {
   const [state, action] = useActionState<RfiFormState, FormData>(createRfi, {})
   const [job, setJob] = useState(defaultJob ?? jobs[0]?.id ?? '')
@@ -21,7 +21,6 @@ export function RfiForm({ jobs, assignees, targets, defaultJob }: {
   const opts = assignees[job] ?? []
   const groups = [...new Set(opts.map((o) => o.group))]
   const choices = targets.filter((t) => t.job_id === job && t.type === pickType && !related.some((r) => r.id === t.id))
-  const in7 = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10)
 
   return (
     <RecordForm title="New RFI" action={action} cancelHref="/rfis" error={state.error} saveLabel="Send" draftLabel="Save">
@@ -32,7 +31,7 @@ export function RfiForm({ jobs, assignees, targets, defaultJob }: {
             {jobs.map((j) => <option key={j.id} value={j.id}>{j.title}</option>)}
           </Select>
         </Field>
-        <Field label="Due date" htmlFor="due_date" required error={fe.due_date}><Input id="due_date" name="due_date" type="date" defaultValue={in7} required /></Field>
+        <Field label="Due date" htmlFor="due_date" required error={fe.due_date}><Input id="due_date" name="due_date" type="date" defaultValue={defaultDue} required /></Field>
         <Field label="Assignee" htmlFor="assignee" className="sm:col-span-2">
           <Select id="assignee" name="assignee" defaultValue="builder">
             <option value="builder">The builder (unassigned)</option>
