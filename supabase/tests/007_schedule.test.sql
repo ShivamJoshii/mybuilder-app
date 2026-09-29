@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(11);
+select plan(13);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -31,6 +31,7 @@ with x as (insert into public.job_clients (job_id, first_name, email) values (pg
 select public.invite_job_client(pg_temp.id('jc'));
 with x as (insert into public.schedule_items (org_id, job_id, title, start_date, duration, end_date, show_client) values (pg_temp.id('org'), pg_temp.id('job'), 'Framing', '2026-10-05', 5, '2026-10-09', true) returning id) insert into ids select 'frame', id from x;
 with x as (insert into public.schedule_items (org_id, job_id, title, start_date, duration, end_date, show_subs) values (pg_temp.id('org'), pg_temp.id('job'), 'Electrical', '2026-10-12', 3, '2026-10-14', true) returning id) insert into ids select 'elec', id from x;
+
 insert into public.schedule_assignees (item_id, sub_org_id) values (pg_temp.id('frame'), pg_temp.id('so1'));
 insert into public.schedule_links (predecessor_id, successor_id) values (pg_temp.id('frame'), pg_temp.id('elec'));
 reset role;
@@ -48,11 +49,13 @@ reset role;
 
 select pg_temp.login('owner');
 insert into public.job_schedule_settings (job_id, org_id, is_online, online_at) values (pg_temp.id('job'), pg_temp.id('org'), true, now());
+insert into public.schedule_item_notes (item_id, audience, body) select id, a, a || ' note' from public.schedule_items, unnest(array['internal', 'sub', 'client']) a where job_id = pg_temp.id('job');
 reset role;
 
 select pg_temp.login('sub');
 select is((select count(*)::int from public.schedule_items), 1, 'online: sub sees only its assigned item');
 select is((select count(*)::int from public.schedule_links), 0, 'sub cannot see links to items it cannot see');
+select is((select string_agg(distinct audience, ',') from public.schedule_item_notes), 'sub', 'sub reads only sub notes');
 select lives_ok(format($q$select public.respond_schedule_item(%L, true)$q$, pg_temp.id('frame')), 'sub confirms');
 select throws_ok(format($q$select public.respond_schedule_item(%L, true)$q$, pg_temp.id('elec')), '42501', null, 'cannot confirm an item you are not on');
 update public.schedule_items set start_date = '2026-11-01' where id = pg_temp.id('frame');
@@ -61,6 +64,7 @@ select is((select start_date::text from public.schedule_items where id = pg_temp
 
 select pg_temp.login('client');
 select is((select count(*)::int from public.schedule_items), 1, 'client sees only items shown to the client');
+select is((select string_agg(distinct audience, ',') from public.schedule_item_notes), 'client', 'client reads only client notes');
 reset role;
 
 select pg_temp.login('owner');

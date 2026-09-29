@@ -28,9 +28,9 @@ export async function createChangeOrder(_: ActionState, fd: FormData): Promise<A
   const supabase = await createClient()
   const { data, error } = await supabase.from('change_orders').insert({
     org_id: job.org_id, job_id: job.id, number: 0, title: d.title, description: d.description || null,
-    internal_notes: ctx.workspace.mode === 'builder' ? d.internal_notes || null : null,
   }).select('id').single()
   if (error || !data) return { error: ctx.workspace.mode === 'client' ? 'Your builder has not turned on change requests for this job.' : 'Could not create the change order.' }
+  if (ctx.workspace.mode === 'builder' && d.internal_notes) await supabase.from('change_order_private').update({ internal_notes: d.internal_notes }).eq('change_order_id', data.id)
   revalidatePath('/change-orders')
   redirect(`/change-orders/${data.id}`)
 }
@@ -51,10 +51,10 @@ export async function updateChangeOrder(id: string, _: ActionState, fd: FormData
   const d = parsed.data
   const supabase = await createClient()
   const { data, error } = await supabase.from('change_orders').update({
-    title: d.title, description: d.description || null, internal_notes: d.internal_notes || null,
-    approval_deadline: d.approval_deadline || null, collect_signature: d.collect_signature,
+    title: d.title, description: d.description || null, approval_deadline: d.approval_deadline || null, collect_signature: d.collect_signature,
   }).eq('id', uuid.parse(id)).select('id')
   if (error || !data?.length) return { error: 'Could not save. Only drafts can be changed.' }
+  await supabase.from('change_order_private').update({ internal_notes: d.internal_notes || null }).eq('change_order_id', id)
   revalidatePath(`/change-orders/${id}`)
   return { ok: 'Details saved.' }
 }

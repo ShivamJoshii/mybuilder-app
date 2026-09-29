@@ -36,6 +36,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
   const seeCost = builder && can(ctx, 'change_orders', 'cost')
   const draft = co.status === 'draft'
 
+  const { data: priv } = builder ? await supabase.from('change_order_private').select('internal_notes,default_markup_pct').eq('change_order_id', id).maybeSingle() : { data: null }
   const [{ data: org }, { data: job }, { data: sigs }] = await Promise.all([
     supabase.from('organizations').select('name,phone,email,street,city,province,postal_code').eq('id', co.org_id).single(),
     supabase.from('jobs').select('title,street,city,province').eq('id', co.job_id).single(),
@@ -94,7 +95,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
           <ActionForm action={updateChangeOrder.bind(null, id)} resetOnSuccess={false} className="grid gap-3 p-4 md:grid-cols-2">
             <label className="text-[13px] font-medium text-text-2 md:col-span-2">Title<Input name="title" className="mt-1" defaultValue={co.title} required maxLength={200} /></label>
             <label className="text-[13px] font-medium text-text-2">Description (client sees this)<Textarea name="description" className="mt-1" defaultValue={co.description ?? ''} rows={3} maxLength={8000} /></label>
-            <label className="text-[13px] font-medium text-text-2">Internal notes<Textarea name="internal_notes" className="mt-1" defaultValue={co.internal_notes ?? ''} rows={3} maxLength={8000} /></label>
+            <label className="text-[13px] font-medium text-text-2">Internal notes<Textarea name="internal_notes" className="mt-1" defaultValue={priv?.internal_notes ?? ''} rows={3} maxLength={8000} /></label>
             <label className="text-[13px] font-medium text-text-2">Approval deadline<Input type="date" name="approval_deadline" className="mt-1" defaultValue={co.approval_deadline ?? ''} /></label>
             <label className="flex items-center gap-2 self-end text-[13px] text-text-2"><Checkbox name="collect_signature" defaultChecked={co.collect_signature} /> Require a signature to approve</label>
             <div className="md:col-span-2"><Button type="submit">Save details</Button></div>
@@ -104,7 +105,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
       {draft && seeCost && (
         <div className="print:hidden">
           <Worksheet key={co.id} save={saveChangeOrderLines.bind(null, id)} editable={canEdit} withGroups={false} saveLabel="Save lines"
-            initial={{ settings: { default_markup_pct: Number(co.default_markup_pct), tax_rate: Number(co.tax_rate), tax_label: co.tax_label }, groups: [], items }}
+            initial={{ settings: { default_markup_pct: Number(priv?.default_markup_pct ?? 20), tax_rate: Number(co.tax_rate), tax_label: co.tax_label }, groups: [], items }}
             codes={codes} catalog={catalog} />
         </div>
       )}
@@ -125,7 +126,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
         <div className="mt-4 text-[13px] text-text-3">Change order #{co.number} · {job?.title}</div>
         <h1 className="text-xl font-semibold">{co.title}</h1>
         {co.description && <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed">{co.description}</p>}
-        {builder && co.internal_notes && <p className="mt-3 rounded-md bg-warning-soft px-3 py-2 text-[13px] print:hidden"><span className="font-medium">Internal: </span>{co.internal_notes}</p>}
+        {builder && priv?.internal_notes && <p className="mt-3 rounded-md bg-warning-soft px-3 py-2 text-[13px] print:hidden"><span className="font-medium">Internal: </span>{priv.internal_notes}</p>}
 
         {lines.length > 0 && (
           <>

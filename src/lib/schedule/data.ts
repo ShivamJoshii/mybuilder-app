@@ -20,9 +20,6 @@ export type SchedItem = {
   show_subs: boolean
   show_client: boolean
   notes_all: string | null
-  notes_internal: string | null
-  notes_sub: string | null
-  notes_client: string | null
   reminder_days: number | null
   assignees: { id: string; user_id: string | null; sub_org_id: string | null; label: string; status: 'pending' | 'confirmed' | 'declined' }[]
 }
@@ -37,7 +34,7 @@ export async function fetchSchedule(jobIds: string[]) {
   const [{ data: items }, { data: settings }, { data: phases }] = await Promise.all([
     supabase.from('schedule_items')
       .select(`id,job_id,phase_id,title,color,start_date,duration,end_date,is_hourly,start_time,end_time,progress,completed_at,
-               show_on_gantt,show_subs,show_client,notes_all,notes_internal,notes_sub,notes_client,reminder_days,
+               show_on_gantt,show_subs,show_client,notes_all,reminder_days,
                schedule_assignees(id,user_id,sub_org_id,status,profiles!schedule_assignees_user_id_fkey(first_name,last_name,email),organizations(name))`)
       .in('job_id', jobIds).is('deleted_at', null).order('start_date').order('title'),
     supabase.from('job_schedule_settings').select('job_id,is_online').in('job_id', jobIds),
@@ -72,4 +69,12 @@ export async function fetchCalendar(jobId: string): Promise<Calendar> {
     workDays: job?.work_days ?? [1, 2, 3, 4, 5],
     exceptions: ((ex ?? []) as (Exception & { job_id: string | null })[]).filter((e) => !e.job_id || e.job_id === jobId),
   }
+}
+
+/** Audience notes the caller may read (RLS filters by audience). */
+export async function fetchItemNotes(itemId: string) {
+  const supabase = await createClient()
+  const { data } = await supabase.from('schedule_item_notes').select('audience,body').eq('item_id', itemId)
+  const m = new Map((data ?? []).map((n) => [n.audience, n.body]))
+  return { notes_internal: m.get('internal') ?? null, notes_sub: m.get('sub') ?? null, notes_client: m.get('client') ?? null }
 }

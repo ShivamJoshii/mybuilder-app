@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { requireBuilder } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { fetchAssignable } from '@/lib/todos'
-import { fetchSchedule } from '@/lib/schedule/data'
+import { fetchItemNotes, fetchSchedule } from '@/lib/schedule/data'
 import { ItemForm } from '../../item-form'
 import { updateItem } from '../../actions'
 
@@ -24,7 +24,7 @@ export default async function EditItemPage({ params }: PageProps<'/schedule/[id]
     <ItemForm title={`Edit ${item.title}`} action={updateItem.bind(null, id)} cancelHref={`/schedule/${id}`} isEdit online={Boolean(online.get(base.job_id))}
       today={todayIn()} jobs={[{ id: job.id, title: job.title }]} assignable={await fetchAssignable(ctx.workspace.orgId, [job.id])}
       phases={{ [job.id]: phases.map((p) => p.name) }}
-      values={{ ...item, phase: phases.find((p) => p.id === item.phase_id)?.name ?? null,
+      values={{ ...item, ...(await fetchItemNotes(id)), phase: phases.find((p) => p.id === item.phase_id)?.name ?? null,
         assignees: item.assignees.map((a) => (a.user_id ? `u:${a.user_id}` : `s:${a.sub_org_id}`)) }} />
   )
 }

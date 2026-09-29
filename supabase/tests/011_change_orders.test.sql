@@ -32,7 +32,8 @@ insert into public.job_subs (job_id, sub_org_id) select pg_temp.id('job'), sub_o
 with x as (insert into public.job_clients (job_id, first_name, email) values (pg_temp.id('job'), 'C', 'c@co.test') returning id) insert into ids select 'jc', id from x;
 select public.invite_job_client(pg_temp.id('jc'));
 update public.job_private set contract_price = 0 where job_id = pg_temp.id('job');
-with x as (insert into public.change_orders (org_id, job_id, title, description, internal_notes) values (pg_temp.id('org'), pg_temp.id('job'), 'Add pot lights', 'Six pot lights in kitchen', 'Margin note') returning id) insert into ids select 'co1', id from x;
+with x as (insert into public.change_orders (org_id, job_id, number, title, description) values (pg_temp.id('org'), pg_temp.id('job'), 0, 'Add pot lights', 'Six pot lights in kitchen') returning id) insert into ids select 'co1', id from x;
+update public.change_order_private set internal_notes = 'Margin note' where change_order_id = pg_temp.id('co1');
 select is((select number from public.change_orders where id = pg_temp.id('co1')), 1, 'change orders are numbered per job');
 select public.save_change_order(pg_temp.id('co1'), '{"tax_rate": 5}', jsonb_build_array(
   jsonb_build_object('id', gen_random_uuid(), 'title', 'Pot light', 'quantity', 6, 'unit_cost', 50, 'markup_value', 20, 'cost_type', 'material', 'sort', 1),
@@ -51,8 +52,8 @@ select throws_ok(format($q$insert into public.change_orders (org_id, job_id, tit
 reset role;
 update public.client_permission_defaults set settings = settings || '{"submit_change_orders": true}' where org_id = pg_temp.id('org');
 select pg_temp.login('client');
-with x as (insert into public.change_orders (org_id, job_id, title, description, internal_notes) values (pg_temp.id('org'), pg_temp.id('job'), 'Bigger deck', 'Can we go 16x20?', 'sneaky') returning id) insert into ids select 'req', id from x;
-select is((select requested_by_client::text || ':' || coalesce(internal_notes, 'null') from public.change_orders where id = pg_temp.id('req')), 'true:null', 'client request is flagged and cannot carry internal notes');
+with x as (insert into public.change_orders (org_id, job_id, number, title, description) values (pg_temp.id('org'), pg_temp.id('job'), 0, 'Bigger deck', 'Can we go 16x20?') returning id) insert into ids select 'req', id from x;
+select is((select requested_by_client::text || ':' || (select count(*) from public.change_order_private)::text from public.change_orders where id = pg_temp.id('req')), 'true:0', 'client request is flagged; builder-only fields stay hidden');
 reset role;
 select pg_temp.login('owner');
 select is((select count(*)::int from public.notifications where type = 'change_order.requested'), 1, 'manager sees the request in their bell');

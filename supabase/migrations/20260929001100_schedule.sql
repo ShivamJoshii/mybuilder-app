@@ -45,9 +45,6 @@ create table public.schedule_items (
   show_subs       boolean not null default false,   -- visible to subs on the job who are not assigned
   show_client     boolean not null default false,
   notes_all       text check (length(notes_all) <= 4000),
-  notes_internal  text check (length(notes_internal) <= 4000),
-  notes_sub       text check (length(notes_sub) <= 4000),
-  notes_client    text check (length(notes_client) <= 4000),
   reminder_days   int check (reminder_days is null or reminder_days between 0 and 60),
   created_by      uuid not null default auth.uid() references public.profiles (id) on delete restrict,
   created_at      timestamptz not null default now(),
@@ -223,6 +220,24 @@ create policy items_insert on public.schedule_items for insert to authenticated
   with check (created_by = (select auth.uid()) and private.can_module(job_id, 'schedule', 'add'));
 create policy items_update on public.schedule_items for update to authenticated
   using (private.can_module(job_id, 'schedule', 'edit')) with check (private.can_module(job_id, 'schedule', 'edit'));
+
+-- Audience notes live in their own rows so each audience only ever reads its own
+create table public.schedule_item_notes (
+  item_id   uuid not null references public.schedule_items (id) on delete cascade,
+  audience  text not null check (audience in ('internal', 'sub', 'client')),
+  body      text not null check (length(body) between 1 and 4000),
+  primary key (item_id, audience)
+);
+alter table public.schedule_item_notes enable row level security;
+create policy item_notes_select on public.schedule_item_notes for select to authenticated
+  using (exists (select 1 from public.schedule_items i where i.id = item_id and (
+           private.can_module(i.job_id, 'schedule', 'view')
+        or (audience = 'sub' and private.is_job_sub(i.job_id) and private.can_see_schedule_item(i.id))
+        or (audience = 'client' and private.is_job_client(i.job_id) and private.can_see_schedule_item(i.id)))));
+create policy item_notes_write on public.schedule_item_notes for all to authenticated
+  using (exists (select 1 from public.schedule_items i where i.id = item_id and private.can_module(i.job_id, 'schedule', 'edit')))
+  with check (exists (select 1 from public.schedule_items i where i.id = item_id and (private.can_module(i.job_id, 'schedule', 'edit') or private.can_module(i.job_id, 'schedule', 'add'))));
+revoke all on public.schedule_item_notes from anon;
 
 create policy assignees_select on public.schedule_assignees for select to authenticated using (private.can_see_schedule_item(item_id));
 create policy assignees_write on public.schedule_assignees for all to authenticated

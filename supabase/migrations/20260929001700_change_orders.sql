@@ -23,12 +23,10 @@ create table public.change_orders (
   number               int not null,
   title                text not null check (length(trim(title)) between 1 and 200),
   description          text check (length(description) <= 8000),      -- client-visible
-  internal_notes       text check (length(internal_notes) <= 8000),
   status               public.co_status not null default 'draft',
   requested_by_client  boolean not null default false,
   approval_deadline    date,
   collect_signature    boolean not null default true,
-  default_markup_pct   numeric(7,3) not null default 20,
   tax_rate             numeric(6,3) not null default 5,
   tax_label            text not null default 'GST',
   snapshot             jsonb,
@@ -42,6 +40,13 @@ create table public.change_orders (
   unique (job_id, number)
 );
 create index change_orders_job on public.change_orders (job_id);
+
+-- Builder-only fields, apart from the row clients can read
+create table public.change_order_private (
+  change_order_id     uuid primary key references public.change_orders (id) on delete cascade,
+  internal_notes      text check (length(internal_notes) <= 8000),
+  default_markup_pct  numeric(7,3) not null default 20
+);
 
 create table public.change_order_items (
   id               uuid primary key default gen_random_uuid(),
@@ -96,11 +101,11 @@ begin
     new.subtotal := null; new.tax := null; new.total := null;
     if private.is_job_internal(new.job_id) then
       new.requested_by_client := false;
-      -- default tax/markup from the job's estimate when there is one
-      select default_markup_pct, tax_rate, tax_label into t from public.estimates where job_id = new.job_id;
-      if found then new.default_markup_pct := t.default_markup_pct; new.tax_rate := t.tax_rate; new.tax_label := t.tax_label; end if;
+      -- default tax from the job's estimate when there is one
+      select tax_rate, tax_label into t from public.estimates where job_id = new.job_id;
+      if found then new.tax_rate := t.tax_rate; new.tax_label := t.tax_label; end if;
     else
-      new.requested_by_client := true; new.internal_notes := null;
+      new.requested_by_client := true;
     end if;
   else
     new.org_id := old.org_id; new.job_id := old.job_id; new.number := old.number; new.created_by := old.created_by;
@@ -113,6 +118,15 @@ begin
   return new;
 end $$;
 create trigger change_orders_fill before insert or update on public.change_orders for each row execute function private.co_fill();
+
+create or replace function private.co_private_row()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  insert into public.change_order_private (change_order_id, default_markup_pct)
+  values (new.id, coalesce((select default_markup_pct from public.estimates where job_id = new.job_id), 20));
+  return null;
+end $$;
+create trigger change_orders_private after insert on public.change_orders for each row execute function private.co_private_row();
 
 create or replace function private.co_visible(p_job uuid, p_status public.co_status, p_by_client boolean, p_created_by uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
@@ -148,10 +162,11 @@ begin
   if c.id is null then raise exception 'Not found' using errcode = 'P0002'; end if;
   if c.status <> 'draft' then raise exception 'Only draft change orders can be changed.' using errcode = '55000'; end if;
   update public.change_orders set
-    default_markup_pct = coalesce((p_settings->>'default_markup_pct')::numeric, default_markup_pct),
     tax_rate = coalesce((p_settings->>'tax_rate')::numeric, tax_rate),
     tax_label = coalesce(nullif(trim(p_settings->>'tax_label'), ''), tax_label)
   where id = p_co;
+  update public.change_order_private set default_markup_pct = coalesce((p_settings->>'default_markup_pct')::numeric, default_markup_pct)
+  where change_order_id = p_co;
   delete from public.change_order_items where change_order_id = p_co
     and id not in (select (v->>'id')::uuid from jsonb_array_elements(coalesce(p_items, '[]')) v);
   insert into public.change_order_items as i (id, change_order_id, cost_code_id, cost_type, title, description, internal_notes,
@@ -253,6 +268,11 @@ insert into public.app_notification_types (key, grp, module, label, sort) values
 alter table public.change_orders enable row level security;
 alter table public.change_order_items enable row level security;
 alter table public.change_order_signatures enable row level security;
+alter table public.change_order_private enable row level security;
+create policy co_private_select on public.change_order_private for select to authenticated using (private.can_module(private.co_job(change_order_id), 'change_orders', 'view'));
+create policy co_private_update on public.change_order_private for update to authenticated
+  using (private.can_module(private.co_job(change_order_id), 'change_orders', 'edit') and private.co_is_draft(change_order_id))
+  with check (private.can_module(private.co_job(change_order_id), 'change_orders', 'edit'));
 
 create policy co_select on public.change_orders for select to authenticated
   using (private.co_visible(job_id, status, requested_by_client, created_by));
@@ -274,7 +294,7 @@ create policy co_items_write on public.change_order_items for all to authenticat
 create policy co_sigs_select on public.change_order_signatures for select to authenticated
   using (public.can_see_change_order(change_order_id));
 
-revoke all on public.change_orders, public.change_order_items, public.change_order_signatures from anon;
+revoke all on public.change_orders, public.change_order_items, public.change_order_signatures, public.change_order_private from anon;
 
 -- Lets the client portal ask what it may do on a job
 create or replace function public.client_can(p_job uuid, p_key text)

@@ -57,6 +57,16 @@ async function phaseId(orgId: string, jobId: string, name: string | null) {
   return data?.id ?? null
 }
 
+/** Audience notes are separate rows so subs/clients can only ever read their own. */
+async function saveNotes(itemId: string, d: { notes_internal: string | null; notes_sub: string | null; notes_client: string | null }) {
+  const supabase = await createClient()
+  const want = { internal: d.notes_internal, sub: d.notes_sub, client: d.notes_client }
+  const keep = Object.entries(want).filter(([, v]) => v).map(([audience, body]) => ({ item_id: itemId, audience, body: body! }))
+  const drop = Object.entries(want).filter(([, v]) => !v).map(([a]) => a)
+  if (keep.length) await supabase.from('schedule_item_notes').upsert(keep)
+  if (drop.length) await supabase.from('schedule_item_notes').delete().eq('item_id', itemId).in('audience', drop)
+}
+
 async function syncAssignees(itemId: string, wanted: string[]) {
   const supabase = await createClient()
   const { data: cur } = await supabase.from('schedule_assignees').select('id,user_id,sub_org_id').eq('item_id', itemId)
@@ -100,11 +110,11 @@ export async function createItem(_: ItemFormState, fd: FormData): Promise<ItemFo
     title: d.title, color: d.color, start_date: start, duration: d.duration, end_date: endFor(start, d.duration, cal),
     progress: d.progress, is_hourly: d.is_hourly, start_time: d.is_hourly ? d.start_time : null, end_time: d.is_hourly ? d.end_time : null,
     show_on_gantt: d.show_on_gantt, show_subs: d.show_subs, show_client: d.show_client,
-    notes_all: d.notes_all, notes_internal: d.notes_internal, notes_sub: d.notes_sub, notes_client: d.notes_client,
-    reminder_days: d.reminder_days, created_by: ctx.userId,
+    notes_all: d.notes_all, reminder_days: d.reminder_days, created_by: ctx.userId,
   }).select('id').single()
   if (error || !data) return { error: 'Could not create the schedule item.' }
   await syncAssignees(data.id, d.assignees)
+  await saveNotes(data.id, d)
   revalidatePath('/schedule')
   redirect(`/schedule/${data.id}`)
 }
@@ -129,10 +139,11 @@ export async function updateItem(id: string, _: ItemFormState, fd: FormData): Pr
     phase_id: await phaseId(ctx.workspace.orgId, before.job_id, d.phase), title: d.title, color: d.color, duration: d.duration,
     progress: d.progress, is_hourly: d.is_hourly, start_time: d.is_hourly ? d.start_time : null, end_time: d.is_hourly ? d.end_time : null,
     show_on_gantt: d.show_on_gantt, show_subs: d.show_subs, show_client: d.show_client,
-    notes_all: d.notes_all, notes_internal: d.notes_internal, notes_sub: d.notes_sub, notes_client: d.notes_client, reminder_days: d.reminder_days,
+    notes_all: d.notes_all, reminder_days: d.reminder_days,
   }).eq('id', id)
   if (error) return { error: 'Could not save the item.' }
   await syncAssignees(id, d.assignees)
+  await saveNotes(id, d)
   if (datesChanged) await cascadeFrom(before.job_id, [id], d.reason)
   revalidatePath('/schedule'); revalidatePath(`/schedule/${id}`)
   redirect(`/schedule/${id}`)

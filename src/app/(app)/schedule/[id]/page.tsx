@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, Check, Pencil, Trash2, X } from 'lucide-react'
 import { getAppContext, can } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
-import { fetchSchedule } from '@/lib/schedule/data'
+import { fetchItemNotes, fetchSchedule } from '@/lib/schedule/data'
 import { Card, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,7 @@ export default async function ItemPage({ params }: PageProps<'/schedule/[id]'>) 
   if (!base) notFound()
   const { items, links, online, phases } = await fetchSchedule([base.job_id])
   const item = items.find((i) => i.id === id)
+  const notes = await fetchItemNotes(id)
   if (!item) notFound()
   const mode = ctx.workspace.mode
   const editor = mode === 'builder' && can(ctx, 'schedule', 'edit')
@@ -71,9 +72,9 @@ export default async function ItemPage({ params }: PageProps<'/schedule/[id]'>) 
           </div>
           <div className="space-y-2">
             {item.notes_all && <div><div className="text-xs font-medium text-text-3">Notes</div><p className="whitespace-pre-wrap">{item.notes_all}</p></div>}
-            {mode === 'builder' && item.notes_internal && <div><div className="text-xs font-medium text-text-3">Internal notes</div><p className="whitespace-pre-wrap">{item.notes_internal}</p></div>}
-            {(mode === 'builder' || mode === 'sub') && item.notes_sub && <div><div className="text-xs font-medium text-text-3">Notes for subs</div><p className="whitespace-pre-wrap">{item.notes_sub}</p></div>}
-            {(mode === 'builder' || mode === 'client') && item.notes_client && <div><div className="text-xs font-medium text-text-3">Notes for client</div><p className="whitespace-pre-wrap">{item.notes_client}</p></div>}
+            {mode === 'builder' && notes.notes_internal && <div><div className="text-xs font-medium text-text-3">Internal notes</div><p className="whitespace-pre-wrap">{notes.notes_internal}</p></div>}
+            {(mode === 'builder' || mode === 'sub') && notes.notes_sub && <div><div className="text-xs font-medium text-text-3">Notes for subs</div><p className="whitespace-pre-wrap">{notes.notes_sub}</p></div>}
+            {(mode === 'builder' || mode === 'client') && notes.notes_client && <div><div className="text-xs font-medium text-text-3">Notes for client</div><p className="whitespace-pre-wrap">{notes.notes_client}</p></div>}
           </div>
         </div>
       </Card>
