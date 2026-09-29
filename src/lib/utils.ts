@@ -47,3 +47,8 @@ export function formatDate(d: string | null | undefined) {
 export function isoDaysFromNow(n: number) {
   return new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10)
 }
+
+/** Today's date (YYYY-MM-DD) in a time zone (defaults to Alberta). */
+export function todayIn(tz = 'America/Edmonton') {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+}

@@ -1,3 +1,4 @@
+import { todayIn } from '@/lib/utils'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -70,7 +71,7 @@ export default async function RfisPage({ searchParams }: PageProps<'/rfis'>) {
     { type: 'files', name: 'files', label: 'Files' },
   ]
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayIn()
   const columns: Column<Row>[] = [
     { key: 'number', label: '#', className: 'w-12 text-text-3', render: (r) => r.number },
     { key: 'title', label: 'Title', render: (r) => <Link href={`/rfis/${r.id}`} className="font-medium text-brand hover:underline">{r.title}</Link> },
