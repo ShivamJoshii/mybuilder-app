@@ -242,6 +242,12 @@ isOneToOne: true
 isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_clients_profile_fk"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
                   ]
                 },"job_group_members": {
@@ -305,6 +311,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "jobs"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_managers_profile_fk"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
                   ]
                 },"job_members": {
@@ -323,6 +335,12 @@ isOneToOne: false
       columns: ["job_id"]
 isOneToOne: false
       referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_members_profile_fk"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -405,6 +423,12 @@ isOneToOne: false
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "org_members_profile_fk"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "org_members_role_id_fkey"
@@ -531,6 +555,12 @@ isOneToOne: false
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "saved_views_profile_fk"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
