@@ -34,3 +34,43 @@ test('builder signs up, creates a company and a job', async ({ page }) => {
   await page.getByRole('button', { name: 'Create job' }).click()
   await expect(page.getByText('Use a Canadian postal code')).toBeVisible()
 })
+
+test('filters, saved views and comments on the jobs list', async ({ page }) => {
+  const { signUp: su, createBuilder: cb, uid: u } = await import('./helpers')
+  const id = u()
+  await su(page, { first: 'Vic', last: 'Views', email: `vic.${id}@alpha.test` })
+  await cb(page, `Views Co ${id}`)
+  for (const [t, st] of [['Aspen', 'open'], ['Birch', 'presale'], ['Cedar', 'closed']] as const) {
+    await page.goto('/jobs/new')
+    await page.getByLabel('Job name').fill(t)
+    await page.getByLabel('Status').selectOption(st)
+    await page.getByRole('button', { name: 'Create job' }).click()
+    await expect(page.getByRole('heading', { name: t })).toBeVisible()
+  }
+  // Comment on a job
+  await page.getByLabel('Write a comment').fill('Framing inspection booked for Tuesday')
+  await page.getByLabel('Share with subs').check()
+  await page.getByRole('button', { name: 'Post comment' }).click()
+  await expect(page.locator('li', { hasText: 'Framing inspection booked for Tuesday' })).toBeVisible()
+
+  await page.goto('/jobs')
+  await page.getByRole('button', { name: 'Filter', exact: true }).click()
+  await page.getByRole('dialog').getByLabel('Presale').check()
+  await page.getByRole('button', { name: 'Apply filter' }).click()
+  await expect(page.getByRole('link', { name: 'Birch' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Aspen' })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Views', exact: true }).click()
+  await page.getByRole('menuitem', { name: /Save current filters/ }).click()
+  await page.getByLabel('View name').fill('Presale only')
+  await page.getByRole('button', { name: 'Save view' }).click()
+  await expect(page.getByRole('button', { name: 'Presale only' })).toBeVisible()
+
+  await page.goto('/comments?tab=comments')
+  await page.getByRole('button', { name: /All active jobs|All matching jobs/ }).click()
+  await expect(page.getByText('Framing inspection booked for Tuesday')).toBeVisible()
+  await page.screenshot({ path: 'test-results/20-comments.png', fullPage: true })
+
+  await page.goto('/search?q=framing')
+  await expect(page.getByText('Framing inspection booked for Tuesday')).toBeVisible()
+})

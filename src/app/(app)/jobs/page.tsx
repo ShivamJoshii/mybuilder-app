@@ -5,6 +5,9 @@ import { getAppContext, can } from '@/lib/context'
 import { fetchJobs, queryJobs, fetchInternalUsers, type JobRow } from '@/lib/jobs'
 import { PageHeader } from '@/components/shell/page-header'
 import { FilterDrawer, type FilterDef } from '@/components/kit/filter-drawer'
+import { SavedViews } from '@/components/kit/saved-views'
+import { fetchViews } from '@/lib/views'
+import { redirect } from 'next/navigation'
 import { DataTable, type Column } from '@/components/kit/data-table'
 import { Button } from '@/components/ui/button'
 import { JobStatusBadge } from '@/components/ui/badge'
@@ -18,6 +21,10 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
   const ctx = await getAppContext()
   const isBuilder = ctx.workspace.mode === 'builder'
   const isSub = ctx.workspace.mode === 'sub'
+  const views = await fetchViews(ctx, 'jobs')
+  // Open the user's default view when they land on the bare list
+  const def = views.find((v) => v.is_default)
+  if (def && Object.keys(sp).length === 0 && def.query) redirect(`/jobs?${def.query}`)
   const all = await fetchJobs(ctx)
   const result = queryJobs(all, sp)
   const view = sp.view === 'map' ? 'map' : 'list'
@@ -67,6 +74,7 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
       <PageHeader
         title="Jobs"
         actions={<>
+          <SavedViews module="jobs" views={views} canShare={isBuilder} />
           <FilterDrawer filters={filters} />
           {isBuilder && can(ctx, 'jobs', 'add') && (
             <Button asChild variant="primary"><Link href="/jobs/new"><Plus />New job</Link></Button>

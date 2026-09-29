@@ -202,8 +202,12 @@ export function JobSidebar({
       {/* Job list */}
       <div className={cn('flex-1 overflow-y-auto py-1', pending && 'opacity-70')}>
         <button
-          onClick={() => save({ allJobs: true, jobIds: [] })}
-          className={cn('flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] hover:bg-surface-2', sel.allJobs && 'bg-brand-soft font-medium text-brand')}
+          onClick={() => {
+            // Everything when unfiltered; otherwise exactly the jobs shown (e.g. active only)
+            const everything = statuses.length === STATUSES.length && !query
+            save({ allJobs: everything, jobIds: everything ? [] : visible.map((j) => j.id) })
+          }}
+          className={cn('flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] hover:bg-surface-2', (sel.allJobs || (visible.length > 0 && visible.every((j) => selectedIds.has(j.id)) && sel.jobIds.length === visible.length)) && 'bg-brand-soft font-medium text-brand')}
         >
           <MoreHorizontal className="size-4" />
           {allLabel}
