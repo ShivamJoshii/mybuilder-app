@@ -13,6 +13,7 @@ import { formatCAD, formatDate } from '@/lib/utils'
 import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient, setJobMember, deleteJob } from '../actions'
 import { AddClientForm } from './client-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
+import { CommentThread } from '@/components/kit/comments'
 
 export const metadata: Metadata = { title: 'Job' }
 
@@ -71,6 +72,11 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
   }
 
   const canEdit = isBuilder && can(ctx, 'jobs', 'edit')
+  let subCanShare = false
+  if (ctx.workspace.mode === 'sub') {
+    const { data: mine } = await supabase.from('job_subs').select('can_share_with_client').eq('job_id', id).eq('sub_org_id', ctx.workspace.subOrgId).maybeSingle()
+    subCanShare = Boolean(mine?.can_share_with_client)
+  }
   return (
     <div className="mx-auto max-w-6xl p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -119,6 +125,8 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
               )}
             </div>
           </Card>
+
+          <CommentThread jobId={id} recordType="job" recordId={id} mode={ctx.workspace.mode} path={`/jobs/${id}`} canShareWithClient={subCanShare} />
 
           {isBuilder && (
             <Card>

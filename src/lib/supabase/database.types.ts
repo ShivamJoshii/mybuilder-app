@@ -94,6 +94,43 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"comments": {
+                  Row: {
+                    "author_id": string,"author_type": string,"body": string,"created_at": string,"deleted_at": string | null,"edited_at": string | null,"id": string,"job_id": string,"org_id": string,"parent_id": string | null,"record_id": string,"record_type": string,"visible_to_clients": boolean,"visible_to_subs": boolean
+                  }
+                  Insert: {
+                    "author_id": string,"author_type": string,"body": string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string,"job_id": string,"org_id": string,"parent_id"?: string | null,"record_id": string,"record_type": string,"visible_to_clients"?: boolean,"visible_to_subs"?: boolean
+                  }
+                  Update: {
+                    "author_id"?: string,"author_type"?: string,"body"?: string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string,"job_id"?: string,"org_id"?: string,"parent_id"?: string | null,"record_id"?: string,"record_type"?: string,"visible_to_clients"?: boolean,"visible_to_subs"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "comments_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "comments_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "comments_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "comments_parent_id_fkey"
+      columns: ["parent_id"]
+isOneToOne: false
+      referencedRelation: "comments"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"cost_categories": {
                   Row: {
                     "id": string,"name": string,"org_id": string,"sort": number
@@ -635,6 +672,9 @@ isOneToOne: false
           Functions: {
             "accept_invite":
 { Args: { "p_token": string }; Returns: string
+                           },
+"add_comment":
+{ Args: { "p_body": string,"p_job": string,"p_parent"?: string,"p_record_id": string,"p_record_type": string,"p_visible_to_clients"?: boolean,"p_visible_to_subs"?: boolean }; Returns: string
                            },
 "add_sub_vendor":
 { Args: { "p_builder": string,"p_company_name": string,"p_contact_first"?: string,"p_contact_last"?: string,"p_email": string,"p_phone"?: string,"p_trade"?: string }; Returns: string
