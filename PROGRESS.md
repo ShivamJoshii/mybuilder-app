@@ -49,6 +49,7 @@ Last updated: 2026-09-29 (overnight build)
 | Reminders (pg_cron every 15 min): to-do reminders + 7am digest, schedule reminders to assignees, bid deadlines, selection deadlines to clients, expiring WCB/insurance to both sides — each sent once | Built, tested (DB) |
 | Notification email worker (`/api/cron/deliver`): claims queued emails, sends via Postmark, retries up to 5 times; text/push marked skipped until configured | Built, tested against a stub |
 | Company time zones end to end (entry, display, reminders, time clock, payroll export) | Built, browser-tested |
+| Import from spreadsheets (Settings → Import data): jobs, leads, subs/vendors, cost codes; understands Buildertrend export headers, previews, reports skipped rows with reasons | Built, browser-tested |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
@@ -123,8 +124,8 @@ Last updated: 2026-09-29 (overnight build)
 | Suite | Count | Command |
 | --- | --- | --- |
 | Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance, job templates, reminders | 364 | `pnpm db:test` |
-| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing | 21 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance, job templates, time zones | 24 flows (run against a production build) | `pnpm test:e2e` |
+| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing, CSV import parsing | 23 | `pnpm test` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance, job templates, time zones, CSV import | 25 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)
