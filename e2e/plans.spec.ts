@@ -78,7 +78,7 @@ test('plans: split a set, read sheet numbers, mark up, new version, compare; spe
   await page.getByLabel('Specification').fill('All interior walls:\n\n- Benjamin Moore Regal Select, eggshell\n- Two coats over primer')
   await page.getByLabel('Share with the client').check()
   await page.getByRole('button', { name: 'Create specification' }).click()
-  await expect(page).toHaveURL(/\/plans\/specs\//)
+  await expect(page).toHaveURL(/\/plans\/specs\/[0-9a-f-]{36}/)
   await page.goto('/plans?tab=specs')
   await expect(page.getByRole('link', { name: 'Interior paint' })).toBeVisible()
 })

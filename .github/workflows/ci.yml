@@ -15,6 +15,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm test
       - name: Start local Supabase
         run: pnpm db:start
       - name: Database security tests
@@ -25,4 +26,6 @@ jobs:
           cp .env.example .env.local
           sed -i "s|sb_publishable_...|$(pnpm exec supabase status -o json | jq -r .PUBLISHABLE_KEY)|" .env.local
           sed -i "s|sb_secret_...|$(pnpm exec supabase status -o json | jq -r .SECRET_KEY)|" .env.local
+          sed -i "s|^STORAGE_ACCESS_KEY_ID=.*|STORAGE_ACCESS_KEY_ID=$(pnpm exec supabase status -o json | jq -r .S3_PROTOCOL_ACCESS_KEY_ID)|" .env.local
+          sed -i "s|^STORAGE_SECRET_ACCESS_KEY=.*|STORAGE_SECRET_ACCESS_KEY=$(pnpm exec supabase status -o json | jq -r .S3_PROTOCOL_ACCESS_KEY_SECRET)|" .env.local
           pnpm test:e2e

@@ -2384,6 +2384,11 @@ isOneToOne: false
 "award_bid":
 { Args: { "p_request": string }; Returns: string
                            },
+"bid_job_info":
+{ Args: { "p_package": string }; Returns: {
+              "builder_name": string,"city": string,"job_title": string,"province": string,"street": string
+            }[]
+                           },
 "bill_holdback":
 { Args: { "p_bill": string }; Returns: number
                            },
@@ -2424,6 +2429,9 @@ isOneToOne: false
                            },
 "convert_lead_to_job":
 { Args: { "p_amount"?: number,"p_contract"?: Database["public"]['Enums']["contract_type"],"p_lead": string,"p_title": string }; Returns: string
+                           },
+"create_bill":
+{ Args: { "p_bill": Json,"p_items": Json }; Returns: string
                            },
 "create_builder_org":
 { Args: { "p_name": string,"p_province"?: string }; Returns: string
@@ -2478,6 +2486,11 @@ isOneToOne: false
 "mark_notifications_read":
 { Args: { "p_ids"?: (string)[] }; Returns: undefined
                            },
+"my_bid_requests":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "builder_name": string,"due_at": string,"job_city": string,"job_title": string,"package_id": string,"package_status": Database["public"]['Enums']["bid_package_status"],"request_id": string,"status": Database["public"]['Enums']["bid_request_status"],"title": string,"total": number
+            }[]
+                           },
 "my_context":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -2490,6 +2503,11 @@ isOneToOne: false
 "po_holdback":
 { Args: { "p_po": string }; Returns: {
               "balance": number,"released": number,"withheld": number
+            }[]
+                           },
+"po_line_billing":
+{ Args: { "p_po": string }; Returns: {
+              "billed": number,"line_total": number,"po_item_id": string
             }[]
                            },
 "po_total":
@@ -2521,11 +2539,17 @@ isOneToOne: false
 "respond_schedule_item":
 { Args: { "p_confirm": boolean,"p_item": string }; Returns: undefined
                            },
+"save_bid_items":
+{ Args: { "p_items": Json,"p_package": string }; Returns: undefined
+                           },
 "save_change_order":
 { Args: { "p_co": string,"p_items": Json,"p_settings": Json }; Returns: undefined
                            },
 "save_estimate":
 { Args: { "p_estimate": string,"p_groups": Json,"p_items": Json,"p_settings": Json }; Returns: undefined
+                           },
+"save_po_items":
+{ Args: { "p_items": Json,"p_po": string }; Returns: undefined
                            },
 "selection_choices_public":
 { Args: { "p_sel": string }; Returns: {

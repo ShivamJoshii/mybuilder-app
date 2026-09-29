@@ -10,10 +10,10 @@ import { cn } from '@/lib/utils'
 
 /** Approve / decline with a typed or drawn signature. */
 export function DecisionForm({
-  action, needSignature, defaultName, onBehalf,
+  action, needSignature, defaultName, onBehalf, approveLabel = 'Approve', agreeText = 'I approve the scope and pricing shown above.', party = 'client',
 }: {
   action: (s: ActionState, fd: FormData) => Promise<ActionState>
-  needSignature: boolean; defaultName: string; onBehalf: boolean
+  needSignature: boolean; defaultName: string; onBehalf: boolean; approveLabel?: string; agreeText?: string; party?: string
 }) {
   const [state, formAction, pending] = useActionState(action, {})
   const [mode, setMode] = useState<'type' | 'draw'>('type')
@@ -45,7 +45,7 @@ export function DecisionForm({
   return (
     <form action={formAction} className="space-y-3">
       {state.error && <Alert>{state.error}</Alert>}
-      {onBehalf && <Alert tone="info">You are recording the client&apos;s decision on their behalf. This is noted on the signature.</Alert>}
+      {onBehalf && <Alert tone="info">You are recording the {party}&apos;s decision on their behalf. This is noted on the signature.</Alert>}
       <label className="block text-[13px] font-medium text-text-2">Full name
         <Input name="signer_name" className="mt-1" required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} />
       </label>
@@ -72,10 +72,10 @@ export function DecisionForm({
       <input type="hidden" name="signature" value={signature} />
       <Textarea name="comment" aria-label="Comment" placeholder="Comment (optional)" maxLength={4000} rows={2} />
       <label className="flex items-start gap-2 text-[13px] text-text-2">
-        <Checkbox name="agree" className="mt-0.5" /> I agree that my electronic signature is the legal equivalent of my handwritten signature and I approve the scope and pricing shown above.
+        <Checkbox name="agree" className="mt-0.5" /> I agree that my electronic signature is the legal equivalent of my handwritten signature and {agreeText}
       </label>
       <div className="flex gap-2">
-        <Button type="submit" name="decision" value="approved" variant="primary" disabled={pending}><CheckCircle2 />Approve{needSignature ? ' and sign' : ''}</Button>
+        <Button type="submit" name="decision" value="approved" variant="primary" disabled={pending}><CheckCircle2 />{approveLabel}{needSignature ? ' and sign' : ''}</Button>
         <Button type="submit" name="decision" value="declined" disabled={pending}><XCircle />Decline</Button>
       </div>
     </form>

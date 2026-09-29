@@ -288,6 +288,8 @@ begin
   end if;
   perform set_config('app.po_status', 'off', true);
   if p.sub_org_id is not null then
+    -- a sub with work on the job is on the job (schedule, files, RFIs)
+    insert into public.job_subs (job_id, sub_org_id) values (p.job_id, p.sub_org_id) on conflict do nothing;
     perform private.notify((select coalesce(array_agg(user_id), '{}') from public.org_members where org_id = p.sub_org_id and status = 'active'),
       p.org_id, p.job_id, 'po.released', 'Purchase order #' || p.number || ': ' || p.title, 'Review and accept the work.', '/purchase-orders/' || p.id);
   end if;

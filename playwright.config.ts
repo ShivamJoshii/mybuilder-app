@@ -20,10 +20,11 @@ export default defineConfig({
       launchOptions: process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {},
     },
   }],
+  // Production build: faster and steadier than `next dev` (no on-demand compiles mid-test).
   webServer: process.env.E2E_BASE_URL ? undefined : {
-    command: 'pnpm dev --hostname 127.0.0.1 --port 3000',
+    command: 'pnpm build && pnpm start --hostname 127.0.0.1 --port 3000',
     url: 'http://127.0.0.1:3000/login',
     reuseExistingServer: true,
-    timeout: 120_000,
+    timeout: 600_000,
   },
 })

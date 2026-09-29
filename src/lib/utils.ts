@@ -52,3 +52,25 @@ export function isoDaysFromNow(n: number) {
 export function todayIn(tz = 'America/Edmonton') {
   return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
 }
+
+/** "YYYY-MM-DDTHH:mm" wall time in a zone → UTC ISO string (handles DST). */
+export function zonedToUtc(local: string, tz = 'America/Edmonton') {
+  const guess = new Date(`${local}:00Z`)
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    .formatToParts(guess).map((p) => [p.type, p.value]))
+  const shown = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute)
+  return new Date(guess.getTime() - (shown - guess.getTime())).toISOString()
+}
+
+/** UTC ISO → "YYYY-MM-DDTHH:mm" wall time in a zone (for datetime-local inputs). */
+export function utcToZonedInput(iso: string | null | undefined, tz = 'America/Edmonton') {
+  if (!iso) return ''
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    .formatToParts(new Date(iso)).map((x) => [x.type, x.value]))
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`
+}
+
+export function formatDateTime(iso: string | null | undefined, tz = 'America/Edmonton') {
+  if (!iso) return ''
+  return new Intl.DateTimeFormat('en-CA', { timeZone: tz, month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
+}

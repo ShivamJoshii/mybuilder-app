@@ -56,3 +56,21 @@ export const CO_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand
   declined: { label: 'Declined', tone: 'danger' },
 }
 export type SnapshotLine = { title: string; description: string | null; quantity: number; unit: string; price: number; taxable: boolean }
+
+export const BID_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
+  draft: { label: 'Draft', tone: 'neutral' }, open: { label: 'Open for bids', tone: 'brand' }, closed: { label: 'Closed', tone: 'neutral' }, awarded: { label: 'Awarded', tone: 'success' },
+}
+export const BID_REQUEST_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
+  invited: { label: 'Invited', tone: 'warning' }, submitted: { label: 'Submitted', tone: 'brand' }, declined: { label: 'Declined', tone: 'danger' },
+  awarded: { label: 'Awarded', tone: 'success' }, not_awarded: { label: 'Not awarded', tone: 'neutral' },
+}
+export const PO_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
+  draft: { label: 'Draft', tone: 'neutral' }, released: { label: 'Awaiting acceptance', tone: 'warning' }, accepted: { label: 'Accepted', tone: 'success' },
+  declined: { label: 'Declined', tone: 'danger' }, void: { label: 'Void', tone: 'neutral' },
+}
+export const WORK_STATUS: Record<string, string> = { not_started: 'Not started', in_progress: 'In progress', complete: 'Complete' }
+export const BILL_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
+  draft: { label: 'Draft', tone: 'neutral' }, submitted: { label: 'Needs approval', tone: 'warning' }, approved: { label: 'Approved', tone: 'brand' },
+  paid: { label: 'Paid', tone: 'success' }, rejected: { label: 'Rejected', tone: 'danger' },
+}
+export const PAYMENT_METHODS: Record<string, string> = { eft: 'EFT / direct deposit', cheque: 'Cheque', credit_card: 'Credit card', cash: 'Cash', other: 'Other' }

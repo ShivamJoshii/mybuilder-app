@@ -27,7 +27,11 @@ Last updated: 2026-09-29 (overnight build)
 | Selections + allowances (choices with client price / builder cost, deadlines tied to schedule items, client picks, approval locks, overage/credit → draft change order, subs see without prices) | Built, browser-tested |
 | Plans: upload a plan set PDF → one sheet per page with sheet numbers read from title blocks; viewer (zoom/pan), markups (pen, rectangle, revision cloud, arrow, text; private/team/shared), versions with overlay compare (red removed / blue added), sharing + notifications | Built, browser-tested |
 | Specifications (divisions, plain-text body with bullets, sharing, print) | Built, browser-tested |
-| Bids/POs/bills, budget screens, invoices, warranty, messages | Next, per build order |
+| Bids: packages with lines, invite linked subs (presale jobs too), subs price each line or decline, side-by-side compare, award → draft PO | Built, browser-tested |
+| Purchase orders: lines by cost code, send to sub, sub accepts with signature, work status, holdback %, lien waiver flag | Built, browser-tested |
+| Bills: sub-submitted or builder-entered, can't over-bill a PO line, GST, holdback withheld, approve/reject, lien waiver gate, record payment, holdback release | Built, browser-tested |
+| Budget: original + change orders = revised, vs committed (POs) and actual (bills), remaining, projected profit | Built, browser-tested |
+| Client invoices, reports, warranty, messages (email), chat, time clock, accounting sync | Next, per build order |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -66,15 +70,18 @@ Last updated: 2026-09-29 (overnight build)
   through purchase orders.
 - Plans: our own viewer on pdf.js (legacy build for browser support); markups are vectors
   in PDF page units stored per version, so they survive zoom and never bleed into a new version.
+- Holdback defaults to 10% per PO (editable); release creates a draft bill that requires a lien waiver.
+- Releasing a PO to a sub adds them to the job (schedule, files, RFIs).
+- Bid documents: bidders not yet on the job can't open job attachments yet — to do with plan-sharing to bidders.
 - Invited clients get a copyable invite link on the job page until email sending is on.
 
 ## Tests
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs | 202 | `pnpm db:test` |
-| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math | 12 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans | 13 flows | `pnpm test:e2e` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget | 222 | `pnpm db:test` |
+| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones | 14 | `pnpm test` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget | 14 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)
