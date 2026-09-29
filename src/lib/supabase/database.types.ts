@@ -626,6 +626,124 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"todo_assignees": {
+                  Row: {
+                    "id": string,"sub_org_id": string | null,"todo_id": string,"user_id": string | null
+                  }
+                  Insert: {
+                    "id"?: string,"sub_org_id"?: string | null,"todo_id": string,"user_id"?: string | null
+                  }
+                  Update: {
+                    "id"?: string,"sub_org_id"?: string | null,"todo_id"?: string,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "todo_assignees_sub_org_id_fkey"
+      columns: ["sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todo_assignees_todo_id_fkey"
+      columns: ["todo_id"]
+isOneToOne: false
+      referencedRelation: "todos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todo_assignees_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"todo_checklist": {
+                  Row: {
+                    "body": string,"done_at": string | null,"done_by": string | null,"id": string,"sort": number,"todo_id": string
+                  }
+                  Insert: {
+                    "body": string,"done_at"?: string | null,"done_by"?: string | null,"id"?: string,"sort"?: number,"todo_id": string
+                  }
+                  Update: {
+                    "body"?: string,"done_at"?: string | null,"done_by"?: string | null,"id"?: string,"sort"?: number,"todo_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "todo_checklist_done_by_fkey"
+      columns: ["done_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todo_checklist_todo_id_fkey"
+      columns: ["todo_id"]
+isOneToOne: false
+      referencedRelation: "todos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"todo_watchers": {
+                  Row: {
+                    "todo_id": string,"user_id": string
+                  }
+                  Insert: {
+                    "todo_id": string,"user_id": string
+                  }
+                  Update: {
+                    "todo_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "todo_watchers_todo_id_fkey"
+      columns: ["todo_id"]
+isOneToOne: false
+      referencedRelation: "todos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todo_watchers_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"todos": {
+                  Row: {
+                    "completed_at": string | null,"completed_by": string | null,"created_at": string,"created_by": string,"deleted_at": string | null,"due_at": string | null,"has_due_time": boolean,"id": string,"job_id": string,"notes": string | null,"org_id": string,"priority": Database["public"]['Enums']["todo_priority"],"reminder_minutes": number | null,"tag_ids": (string)[],"title": string,"updated_at": string
+                  }
+                  Insert: {
+                    "completed_at"?: string | null,"completed_by"?: string | null,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"due_at"?: string | null,"has_due_time"?: boolean,"id"?: string,"job_id": string,"notes"?: string | null,"org_id": string,"priority"?: Database["public"]['Enums']["todo_priority"],"reminder_minutes"?: number | null,"tag_ids"?: (string)[],"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "completed_at"?: string | null,"completed_by"?: string | null,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"due_at"?: string | null,"has_due_time"?: boolean,"id"?: string,"job_id"?: string,"notes"?: string | null,"org_id"?: string,"priority"?: Database["public"]['Enums']["todo_priority"],"reminder_minutes"?: number | null,"tag_ids"?: (string)[],"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "todos_completed_by_fkey"
+      columns: ["completed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todos_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todos_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "todos_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_job_selection": {
                   Row: {
                     "all_jobs": boolean,"job_ids": (string)[],"org_id": string,"updated_at": string,"user_id": string
@@ -708,15 +826,21 @@ isOneToOne: false
 "set_active_org":
 { Args: { "p_org": string }; Returns: undefined
                            },
+"set_checklist_item":
+{ Args: { "p_done": boolean,"p_item": string }; Returns: undefined
+                           },
 "set_job_selection":
 { Args: { "p_all": boolean,"p_job_ids": (string)[],"p_org": string }; Returns: undefined
+                           },
+"set_todo_complete":
+{ Args: { "p_done": boolean,"p_todo": string }; Returns: undefined
                            },
 "update_my_sub_profile":
 { Args: { "p_link": string,"p_profile": Json }; Returns: undefined
                            }
           }
           Enums: {
-            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own"
+            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","todo_priority": "low"|"medium"|"high"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -832,7 +956,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"]
+            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"todo_priority": ["low", "medium", "high"]
           }
         }
 } as const
