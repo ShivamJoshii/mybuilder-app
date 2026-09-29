@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-09-29 (overnight build)
+Last updated: 2026-09-29 06:30 MDT (end of overnight build). Latest commit is in the bundle.
 
 ## Status at a glance
 
@@ -72,7 +72,7 @@ Step-by-step go-live guide: `docs/DEPLOY.md` (Supabase in Canada, R2, Vercel, Po
 1. **Supabase project.** Creating `mybuilder` in the myBuilder org fails: both
    `shivamjoshi.close@gmail.com` and `ShivamJoshii` already have 2 active free projects
    (the limit counts every org where you're an admin). Pause/delete one project per login,
-   or upgrade the org. Then I run the migrations against it (`supabase db push`).
+   or upgrade the org. Then I run the migrations against it (`supabase db push`). Re-tried at 6:20 MDT: still blocked by the same limit.
 2. **GitHub.** This workspace's git proxy only allows repos attached to the session, so
    the push to `ShivamJoshii/mybuilder-app` was refused (the token itself is fine).
    Add the repo as a session source, or connect a folder on your Mac. A git bundle of
