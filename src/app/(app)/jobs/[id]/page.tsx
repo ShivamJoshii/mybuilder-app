@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge, JobStatusBadge } from '@/components/ui/badge'
 import { Select } from '@/components/ui/input'
 import { formatCAD, formatDate } from '@/lib/utils'
+import { CopyButton } from '@/components/kit/copy-button'
 import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient, setJobMember, deleteJob } from '../actions'
 import { AddClientForm } from './client-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
@@ -47,6 +48,8 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
   let subs: { sub_org_id: string; company_name: string; trade: string | null; flags: string[] }[] = []
   let linkable: { sub_org_id: string; company_name: string; trade: string | null }[] = []
   let clients: { id: string; name: string; email: string | null; phone: string | null; invited_at: string | null; user_id: string | null }[] = []
+  let clientInvite = new Map<string, string>()
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   let team: { user_id: string; name: string; role_name: string; all_jobs: boolean; on_job: boolean }[] = []
   if (isBuilder) {
     const [{ data: js }, { data: links }, { data: jc }, users, { data: jm }] = await Promise.all([
@@ -56,6 +59,10 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
       fetchInternalUsers(job.org_id),
       supabase.from('job_members').select('user_id').eq('job_id', id),
     ])
+    const { data: cinv } = jc?.length
+      ? await supabase.from('invites').select('job_client_id,token').eq('kind', 'client').is('accepted_at', null).in('job_client_id', jc.map((c) => c.id))
+      : { data: [] }
+    clientInvite = new Map((cinv ?? []).map((i) => [i.job_client_id!, i.token]))
     const linkMap = new Map((links ?? []).map((l) => [l.sub_org_id, l]))
     subs = (js ?? []).map((s) => ({
       sub_org_id: s.sub_org_id,
@@ -183,7 +190,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
                       <div className="font-medium">{c.name}</div>
                       <div className="text-xs text-text-3">{[c.email, c.phone].filter(Boolean).join(' · ')}</div>
                     </div>
-                    {c.user_id ? <Badge tone="success">Active</Badge> : c.invited_at ? <Badge tone="warning">Invited</Badge> : c.email && can(ctx, 'clients', 'add') ? (
+                    {c.user_id ? <Badge tone="success">Active</Badge> : c.invited_at ? <span className="flex items-center gap-2"><Badge tone="warning">Invited</Badge>{clientInvite.get(c.id) && <CopyButton value={`${site}/invite/${clientInvite.get(c.id)}`} label="Invite link" />}</span> : c.email && can(ctx, 'clients', 'add') ? (
                       <form action={inviteJobClient.bind(null, id, c.id)}><Button type="submit" size="sm">Invite</Button></form>
                     ) : <Badge>Not invited</Badge>}
                     {can(ctx, 'clients', 'delete') && (

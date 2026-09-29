@@ -19,7 +19,11 @@ Last updated: 2026-09-29 (overnight build)
 | Notifications engine (37 event types, per-user email/text/push matrix, in-app bell, delivery outbox) | Built; email/SMS sending waits for Postmark/Twilio |
 | Schedule (calendar, list, Gantt with dependencies + critical path + baseline, online/offline, confirmations, shift log, workday exceptions) | Built, browser-tested |
 | Sales/CRM (leads, pipeline board, activities, convert to job, website lead forms) | Built, browser-tested |
-| Files, messages, chat, estimating, change orders, selections, bids/POs/bills, budget, invoices, warranty | Next, per build order |
+| Files: documents, photos, videos (folders, versions, sharing, share links, attachments on logs/RFIs/to-dos) | Built, browser-tested (local S3 stands in for R2) |
+| Estimating: worksheet (groups, optional groups, cost codes, markup %/$, provincial tax presets, catalog), price-only view for sales roles | Built, browser-tested |
+| Proposals: frozen snapshot on release, client e-signature (typed or drawn, IP + user agent logged), builder can record on behalf, print | Built, browser-tested |
+| Send to budget (locks estimate, writes original budget, sets contract price), unlock | Built, browser-tested |
+| Change orders, selections, bids/POs/bills, budget screens, invoices, warranty, messages | Next, per build order |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -49,14 +53,20 @@ Last updated: 2026-09-29 (overnight build)
 - Starter cost codes (29 codes in 6 categories) seeded for every new builder.
 - Postal codes are validated as Canadian and stored as `A1A 1A1`.
 - Map tab lists addresses until Google Maps is connected.
+- Tax defaults by province: HST where it applies (ON 13, NS 14, NB/NL/PE 15), QC 14.975
+  (GST+QST), GST 5% elsewhere. PST in BC/MB/SK is treated as part of material cost.
+  Editable per estimate.
+- E-signatures are captured in-house (no DocuSign); we store name, signature image or
+  typed name, timestamp, IP and browser, plus the frozen proposal they signed.
+- Invited clients get a copyable invite link on the job page until email sending is on.
 
 ## Tests
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads | 128 | `pnpm db:test` |
-| Unit (Vitest): workday calendar, dependency cascade, loops, critical path | 9 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads | 9 flows | `pnpm test:e2e` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals | 160 | `pnpm db:test` |
+| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math | 12 | `pnpm test` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget | 10 flows | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

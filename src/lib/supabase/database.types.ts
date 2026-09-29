@@ -63,6 +63,37 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"budget_lines": {
+                  Row: {
+                    "cost_code_id": string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at": string,"id": string,"job_id": string,"org_id": string,"original_cost": number,"original_price": number,"source": string
+                  }
+                  Insert: {
+                    "cost_code_id"?: string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at"?: string,"id"?: string,"job_id": string,"org_id": string,"original_cost"?: number,"original_price"?: number,"source"?: string
+                  }
+                  Update: {
+                    "cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"id"?: string,"job_id"?: string,"org_id"?: string,"original_cost"?: number,"original_price"?: number,"source"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "budget_lines_cost_code_id_fkey"
+      columns: ["cost_code_id"]
+isOneToOne: false
+      referencedRelation: "cost_codes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "budget_lines_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "budget_lines_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"builder_sub_links": {
                   Row: {
                     "builder_org_id": string,"business_phone": string | null,"cell_phone": string | null,"city": string | null,"company_name": string,"created_at": string,"custom": NonNullable<Json>,"fax": string | null,"id": string,"postal_code": string | null,"primary_contact_first": string | null,"primary_contact_last": string | null,"primary_email": string | null,"province": string | null,"sms_opt_in": boolean,"status": Database["public"]['Enums']["link_status"],"street": string | null,"sub_org_id": string,"trade": string | null,"updated_at": string
@@ -194,6 +225,31 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"cost_items": {
+                  Row: {
+                    "cost_code_id": string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at": string,"description": string | null,"id": string,"is_active": boolean,"markup_type": Database["public"]['Enums']["markup_type"],"markup_value": number,"org_id": string,"taxable": boolean,"title": string,"unit": string,"unit_cost": number
+                  }
+                  Insert: {
+                    "cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"description"?: string | null,"id"?: string,"is_active"?: boolean,"markup_type"?: Database["public"]['Enums']["markup_type"],"markup_value"?: number,"org_id": string,"taxable"?: boolean,"title": string,"unit"?: string,"unit_cost"?: number
+                  }
+                  Update: {
+                    "cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"description"?: string | null,"id"?: string,"is_active"?: boolean,"markup_type"?: Database["public"]['Enums']["markup_type"],"markup_value"?: number,"org_id"?: string,"taxable"?: boolean,"title"?: string,"unit"?: string,"unit_cost"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "cost_items_cost_code_id_fkey"
+      columns: ["cost_code_id"]
+isOneToOne: false
+      referencedRelation: "cost_codes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "cost_items_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"custom_field_defs": {
                   Row: {
                     "created_at": string,"data_type": Database["public"]['Enums']["field_type"],"id": string,"is_active": boolean,"is_filterable": boolean,"is_required": boolean,"key": string,"label": string,"module": string,"options": NonNullable<Json>,"org_id": string,"sort": number,"tooltip": string | null,"visible_to_clients": boolean,"visible_to_subs": boolean
@@ -244,6 +300,81 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "daily_logs_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"estimate_groups": {
+                  Row: {
+                    "estimate_id": string,"id": string,"is_optional": boolean,"name": string,"option_status": Database["public"]['Enums']["option_status"],"sort": number
+                  }
+                  Insert: {
+                    "estimate_id": string,"id"?: string,"is_optional"?: boolean,"name": string,"option_status"?: Database["public"]['Enums']["option_status"],"sort"?: number
+                  }
+                  Update: {
+                    "estimate_id"?: string,"id"?: string,"is_optional"?: boolean,"name"?: string,"option_status"?: Database["public"]['Enums']["option_status"],"sort"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "estimate_groups_estimate_id_fkey"
+      columns: ["estimate_id"]
+isOneToOne: false
+      referencedRelation: "estimates"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"estimate_items": {
+                  Row: {
+                    "cost_code_id": string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at": string,"description": string | null,"estimate_id": string,"group_id": string | null,"id": string,"internal_notes": string | null,"marked_as": Database["public"]['Enums']["marked_as"],"markup_type": Database["public"]['Enums']["markup_type"],"markup_value": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string,"unit_cost": number,"item_cost": number | null,"item_price": number | null
+                  }
+                  Insert: {
+                    "cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"description"?: string | null,"estimate_id": string,"group_id"?: string | null,"id"?: string,"internal_notes"?: string | null,"marked_as"?: Database["public"]['Enums']["marked_as"],"markup_type"?: Database["public"]['Enums']["markup_type"],"markup_value"?: number,"quantity"?: number,"sort"?: number,"taxable"?: boolean,"title": string,"unit"?: string,"unit_cost"?: number
+                  }
+                  Update: {
+                    "cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"description"?: string | null,"estimate_id"?: string,"group_id"?: string | null,"id"?: string,"internal_notes"?: string | null,"marked_as"?: Database["public"]['Enums']["marked_as"],"markup_type"?: Database["public"]['Enums']["markup_type"],"markup_value"?: number,"quantity"?: number,"sort"?: number,"taxable"?: boolean,"title"?: string,"unit"?: string,"unit_cost"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "estimate_items_cost_code_id_fkey"
+      columns: ["cost_code_id"]
+isOneToOne: false
+      referencedRelation: "cost_codes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "estimate_items_estimate_id_fkey"
+      columns: ["estimate_id"]
+isOneToOne: false
+      referencedRelation: "estimates"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "estimate_items_group_id_fkey"
+      columns: ["group_id"]
+isOneToOne: false
+      referencedRelation: "estimate_groups"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"estimates": {
+                  Row: {
+                    "created_at": string,"default_markup_pct": number,"id": string,"job_id": string,"locked_at": string | null,"org_id": string,"sent_to_budget_at": string | null,"tax_label": string,"tax_rate": number,"updated_at": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"default_markup_pct"?: number,"id"?: string,"job_id": string,"locked_at"?: string | null,"org_id": string,"sent_to_budget_at"?: string | null,"tax_label"?: string,"tax_rate"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"default_markup_pct"?: number,"id"?: string,"job_id"?: string,"locked_at"?: string | null,"org_id"?: string,"sent_to_budget_at"?: string | null,"tax_label"?: string,"tax_rate"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "estimates_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: true
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "estimates_org_id_fkey"
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
@@ -987,6 +1118,68 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"proposal_signatures": {
+                  Row: {
+                    "comment": string | null,"decision": string,"id": string,"ip": string | null,"on_behalf": boolean,"proposal_id": string,"signature": string | null,"signed_at": string,"signer_name": string,"signer_user_id": string | null,"user_agent": string | null
+                  }
+                  Insert: {
+                    "comment"?: string | null,"decision": string,"id"?: string,"ip"?: string | null,"on_behalf"?: boolean,"proposal_id": string,"signature"?: string | null,"signed_at"?: string,"signer_name": string,"signer_user_id"?: string | null,"user_agent"?: string | null
+                  }
+                  Update: {
+                    "comment"?: string | null,"decision"?: string,"id"?: string,"ip"?: string | null,"on_behalf"?: boolean,"proposal_id"?: string,"signature"?: string | null,"signed_at"?: string,"signer_name"?: string,"signer_user_id"?: string | null,"user_agent"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposal_signatures_proposal_id_fkey"
+      columns: ["proposal_id"]
+isOneToOne: false
+      referencedRelation: "proposals"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposal_signatures_signer_user_id_fkey"
+      columns: ["signer_user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proposals": {
+                  Row: {
+                    "approval_deadline": string | null,"closing": string | null,"collect_signature": boolean,"created_at": string,"created_by": string,"decided_at": string | null,"estimate_id": string,"id": string,"intro": string | null,"job_id": string,"org_id": string,"released_at": string | null,"show_line_items": boolean,"show_quantities": boolean,"snapshot": Json | null,"status": Database["public"]['Enums']["proposal_status"],"subtotal": number | null,"tax": number | null,"tax_label": string | null,"title": string,"total": number | null
+                  }
+                  Insert: {
+                    "approval_deadline"?: string | null,"closing"?: string | null,"collect_signature"?: boolean,"created_at"?: string,"created_by"?: string,"decided_at"?: string | null,"estimate_id": string,"id"?: string,"intro"?: string | null,"job_id": string,"org_id": string,"released_at"?: string | null,"show_line_items"?: boolean,"show_quantities"?: boolean,"snapshot"?: Json | null,"status"?: Database["public"]['Enums']["proposal_status"],"subtotal"?: number | null,"tax"?: number | null,"tax_label"?: string | null,"title": string,"total"?: number | null
+                  }
+                  Update: {
+                    "approval_deadline"?: string | null,"closing"?: string | null,"collect_signature"?: boolean,"created_at"?: string,"created_by"?: string,"decided_at"?: string | null,"estimate_id"?: string,"id"?: string,"intro"?: string | null,"job_id"?: string,"org_id"?: string,"released_at"?: string | null,"show_line_items"?: boolean,"show_quantities"?: boolean,"snapshot"?: Json | null,"status"?: Database["public"]['Enums']["proposal_status"],"subtotal"?: number | null,"tax"?: number | null,"tax_label"?: string | null,"title"?: string,"total"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposals_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_estimate_id_fkey"
+      columns: ["estimate_id"]
+isOneToOne: false
+      referencedRelation: "estimates"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"record_attachments": {
                   Row: {
                     "created_at": string,"created_by": string,"file_id": string,"record_id": string,"record_type": string
@@ -1627,6 +1820,14 @@ isOneToOne: false
 "create_sub_org":
 { Args: { "p_name": string }; Returns: string
                            },
+"decide_proposal":
+{ Args: { "p_comment"?: string,"p_decision": string,"p_ip"?: string,"p_proposal": string,"p_signature": string,"p_signer_name": string,"p_ua"?: string }; Returns: undefined
+                           },
+"estimate_price_lines":
+{ Args: { "p_estimate": string }; Returns: {
+              "description": string,"group_id": string,"id": string,"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
+            }[]
+                           },
 "invite_internal_user":
 { Args: { "p_email": string,"p_org": string,"p_role": string }; Returns: string
                            },
@@ -1637,6 +1838,12 @@ isOneToOne: false
 { Args: { "p_token": string }; Returns: {
               "accepted": boolean,"email": string,"expired": boolean,"kind": Database["public"]['Enums']["invite_kind"],"org_name": string
             }[]
+                           },
+"item_cost":
+{ Args: { "i": Database["public"]['Tables']["estimate_items"]['Row'] }; Returns: number
+                           },
+"item_price":
+{ Args: { "i": Database["public"]['Tables']["estimate_items"]['Row'] }; Returns: number
                            },
 "lead_form_info":
 { Args: { "p_token": string }; Returns: {
@@ -1652,6 +1859,9 @@ isOneToOne: false
 "my_permissions":
 { Args: { "p_org": string }; Returns: Json
                            },
+"release_proposal":
+{ Args: { "p_proposal": string }; Returns: undefined
+                           },
 "resolve_share_link":
 { Args: { "p_token": string }; Returns: {
               "mime": string,"name": string,"size_bytes": number,"storage_key": string
@@ -1659,6 +1869,12 @@ isOneToOne: false
                            },
 "respond_schedule_item":
 { Args: { "p_confirm": boolean,"p_item": string }; Returns: undefined
+                           },
+"save_estimate":
+{ Args: { "p_estimate": string,"p_groups": Json,"p_items": Json,"p_settings": Json }; Returns: undefined
+                           },
+"send_estimate_to_budget":
+{ Args: { "p_estimate": string }; Returns: undefined
                            },
 "set_active_org":
 { Args: { "p_org": string }; Returns: undefined
@@ -1678,12 +1894,15 @@ isOneToOne: false
 "submit_lead_form":
 { Args: { "p_payload": Json,"p_token": string }; Returns: boolean
                            },
+"unlock_estimate":
+{ Args: { "p_estimate": string }; Returns: undefined
+                           },
 "update_my_sub_profile":
 { Args: { "p_link": string,"p_profile": Json }; Returns: undefined
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1799,7 +2018,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const

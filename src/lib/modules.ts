@@ -28,7 +28,7 @@ export const MODULES: ModuleDef[] = [
     emptyTitle: 'Track every lead in one pipeline', emptyBody: 'Capture leads from your website, log calls and meetings, and convert sold leads into jobs.' },
   { slug: 'lead-activities', label: 'Lead activities', module: 'leads', icon: ListChecks, modes: ['builder'], jobScoped: false, buildStep: 6,
     emptyTitle: 'Never miss a follow-up', emptyBody: 'Calls, meetings and follow-ups for every lead, on a calendar.' },
-  { slug: 'proposals', label: 'Proposals', module: 'proposals', icon: FileSignature, modes: ['builder'], jobScoped: false, buildStep: 7,
+  { slug: 'proposals', label: 'Proposals', module: 'proposals', icon: FileSignature, modes: ['builder', 'client'], jobScoped: false, buildStep: 7,
     emptyTitle: 'Send proposals clients can sign', emptyBody: 'Build proposals from your estimate and collect e-signatures.' },
 
   { slug: 'schedule', label: 'Schedule', module: 'schedule', icon: CalendarDays, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 5,
@@ -103,7 +103,7 @@ export function navFor(mode: Mode): NavGroup[] {
     { label: 'Project Management', items: items(['schedule', 'daily-logs', 'todos', 'change-orders', 'selections', 'warranty', 'plans', 'submittals', 'time-clock'], mode) },
     { label: 'Files', items: items(['documents', 'photos', 'videos'], mode) },
     { label: 'Messaging', items: items(['comments', 'messages', 'rfis'], mode) },
-    { label: 'Financial', items: items(['estimates', 'bids', 'purchase-orders', 'bills', 'budget', 'invoices', 'reports'], mode) },
+    { label: 'Financial', items: items(['estimates', ...(mode === 'client' ? ['proposals'] : []), 'bids', 'purchase-orders', 'bills', 'budget', 'invoices', 'reports'], mode) },
   )
   return groups.filter((g) => g.items.length > 0)
 }
