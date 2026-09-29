@@ -85,6 +85,8 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
 
   const canEdit = isBuilder && can(ctx, 'jobs', 'edit')
   const portal = canEdit ? await portalSettings(id, job.org_id) : {}
+  // clients see the PM's contact details only if the builder allows it
+  const showPm = ctx.workspace.mode !== 'client' || (await supabase.rpc('client_can', { p_job: id, p_key: 'pm_contact' })).data !== false
   let subCanShare = false
   if (ctx.workspace.mode === 'sub') {
     const { data: mine } = await supabase.from('job_subs').select('can_share_with_client').eq('job_id', id).eq('sub_org_id', ctx.workspace.subOrgId).maybeSingle()
@@ -248,7 +250,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
               <Row label="Square feet">{job.square_feet?.toLocaleString('en-CA')}</Row>
             </dl>
           </Card>
-          {!isBuilder && managers.length > 0 && (
+          {!isBuilder && managers.length > 0 && showPm && (
             <Card>
               <CardHeader title="Builder contact" />
               <ul className="divide-y divide-border">

@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(13);
+select plan(15);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -65,6 +65,18 @@ select is((select start_date::text from public.schedule_items where id = pg_temp
 select pg_temp.login('client');
 select is((select count(*)::int from public.schedule_items), 1, 'client sees only items shown to the client');
 select is((select string_agg(distinct audience, ',') from public.schedule_item_notes), 'client', 'client reads only client notes');
+reset role;
+select pg_temp.login('owner');
+insert into public.job_client_permissions (job_id, settings) values (pg_temp.id('job'), '{"schedule": "none"}');
+reset role;
+select pg_temp.login('client');
+select is((select count(*)::int from public.schedule_items), 0, 'portal setting "hidden" hides the schedule from clients');
+reset role;
+select pg_temp.login('owner');
+update public.job_client_permissions set settings = '{"schedule": "all", "schedule_days_ahead": 3650}' where job_id = pg_temp.id('job');
+reset role;
+select pg_temp.login('client');
+select is((select count(*)::int from public.schedule_items), 2, 'portal setting "all" shows every item');
 reset role;
 
 select pg_temp.login('owner');

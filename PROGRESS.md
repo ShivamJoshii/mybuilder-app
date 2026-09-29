@@ -56,7 +56,7 @@ Last updated: 2026-09-29 (overnight build)
 | Estimate a lead before it's sold: the lead gets a Presale job for its estimate and proposal; converting reuses it | Built, browser-tested |
 | Accessibility: automated WCAG 2 AA scan (axe) of 24 main pages with no serious violations; muted text darkened to meet contrast | Built, browser-tested |
 | Getting-started checklist for new builder companies (logo/GST, team, subs, first job, client, schedule, import) | Built, browser-tested |
-| Client portal money: per-job portal settings; clients can see the contract/payments summary, open-book budget vs actual, and the POs and bills behind it — only what the builder turns on (these settings existed but weren't wired before) | Built, browser-tested |
+| Client portal money: per-job portal settings; clients can see the contract/payments summary, open-book budget vs actual, and the POs and bills behind it — only what the builder turns on (these settings existed but weren't wired before); schedule visibility (hidden / marked items / all, days ahead) and PM contact now honoured too | Built, browser-tested |
 | Installable web app (manifest + icons) for phones and tablets | Built |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Second audit of tonight's features (8 findings): attachments tied to the record's job, sub certificates need builder verification, template copies respect module permissions, documents frozen while out for signature, signing evidence recorded server-side, signer IPs private, certificate documents scoped, templates don't send reminders | Fixed, regression tests added |
@@ -134,7 +134,7 @@ Step-by-step go-live guide: `docs/DEPLOY.md` (Supabase in Canada, R2, Vercel, Po
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance, job templates, reminders, audit, e-signatures, client financials | 397 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance, job templates, reminders, audit, e-signatures, client financials | 399 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing, CSV import parsing | 23 | `pnpm test` |
 | Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance, job templates, time zones, CSV import, audit log, e-signatures, accessibility, client money | 29 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |

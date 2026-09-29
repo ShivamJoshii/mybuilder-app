@@ -7,7 +7,7 @@ export function PortalSettingsFields({ s, idPrefix = '' }: { s: Record<string, u
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Schedule" htmlFor={`${idPrefix}schedule`}>
           <Select id={`${idPrefix}schedule`} name="schedule" defaultValue={String(s.schedule ?? 'phases')}>
-            <option value="none">Hidden</option><option value="phases">Phases only</option><option value="all">All schedule items</option>
+            <option value="none">Hidden</option><option value="phases">Items marked for the client</option><option value="all">All schedule items</option>
           </Select>
         </Field>
         <Field label="Show schedule this many days ahead" htmlFor={`${idPrefix}schedule_days_ahead`}>
