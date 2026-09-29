@@ -175,7 +175,7 @@ export default async function SchedulePage({ searchParams }: PageProps<'/schedul
         {mode === 'builder' && single && (
           <div className={cn('flex flex-wrap items-center gap-3 rounded-lg border px-4 py-2.5 text-[13px]', isOnline ? 'border-success/30 bg-success-soft' : 'border-warning/30 bg-warning-soft')}>
             {isOnline ? <Radio className="size-4 text-success" /> : <CloudOff className="size-4 text-warning" />}
-            <span className="flex-1">
+            <span className="min-w-[14rem] flex-1">
               {isOnline ? <><strong>Online.</strong> Subs and clients see what you share; assignees get notified and date changes are logged.</>
                 : <><strong>Offline.</strong> Build the schedule privately. Nobody is notified until you go online.</>}
             </span>
