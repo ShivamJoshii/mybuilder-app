@@ -1,0 +1,28 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - name: Start local Supabase
+        run: pnpm db:start
+      - name: Database security tests
+        run: pnpm db:test
+      - name: Browser tests
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          cp .env.example .env.local
+          sed -i "s|sb_publishable_...|$(pnpm exec supabase status -o json | jq -r .PUBLISHABLE_KEY)|" .env.local
+          sed -i "s|sb_secret_...|$(pnpm exec supabase status -o json | jq -r .SECRET_KEY)|" .env.local
+          pnpm test:e2e

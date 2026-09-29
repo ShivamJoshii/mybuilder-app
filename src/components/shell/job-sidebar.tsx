@@ -1,6 +1,6 @@
 'use client'
 import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useMemo, useOptimistic, useState, useSyncExternalStore, useTransition } from 'react'
 import { ArrowDownUp, Check, ChevronDown, ChevronsLeft, ChevronsRight, Filter, MoreHorizontal, Search } from 'lucide-react'
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '@/components/ui/dropdown'
 import { MODULE_BY_SLUG } from '@/lib/modules'
@@ -25,6 +25,21 @@ const STATUSES = ['presale', 'open', 'warranty', 'closed'] as const
 const DEFAULT_STATUSES = ['presale', 'open', 'warranty']
 const JOB_PAGES = new Set(['/summary', '/jobs'])
 
+// Sidebar collapsed state lives in localStorage (per browser convenience)
+const KEY = 'mb.sidebar.collapsed'
+function readCollapsed() {
+  try { return localStorage.getItem(KEY) === '1' } catch { return false }
+}
+function writeCollapsed(v: boolean) {
+  try { localStorage.setItem(KEY, v ? '1' : '0') } catch {}
+  window.dispatchEvent(new Event('mb-sidebar'))
+}
+function subscribeCollapsed(cb: () => void) {
+  window.addEventListener('mb-sidebar', cb)
+  window.addEventListener('storage', cb)
+  return () => { window.removeEventListener('mb-sidebar', cb); window.removeEventListener('storage', cb) }
+}
+
 function isJobScoped(pathname: string) {
   const first = '/' + (pathname.split('/')[1] ?? '')
   if (JOB_PAGES.has(first)) return true
@@ -41,23 +56,13 @@ export function JobSidebar({
   showBuilderNames: boolean
 }) {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
+  const collapsed = useSyncExternalStore(subscribeCollapsed, readCollapsed, () => false)
   const [query, setQuery] = useState('')
   const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES)
   const [sort, setSort] = useState<SortKey>('az')
-  const [sel, setSel] = useState(selection)
+  const [sel, setOptimisticSel] = useOptimistic(selection)
   const [pending, startTransition] = useTransition()
-
-  useEffect(() => setSel(selection), [selection])
-  useEffect(() => {
-    try { setCollapsed(localStorage.getItem('mb.sidebar.collapsed') === '1') } catch {}
-  }, [])
-  const toggleCollapsed = () => {
-    setCollapsed((c) => {
-      try { localStorage.setItem('mb.sidebar.collapsed', c ? '0' : '1') } catch {}
-      return !c
-    })
-  }
+  const toggleCollapsed = () => writeCollapsed(!collapsed)
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -83,8 +88,10 @@ export function JobSidebar({
     : `All matching jobs (${visible.length})`
 
   function save(next: { allJobs: boolean; jobIds: string[] }) {
-    setSel(next)
-    startTransition(() => setJobSelection(next.allJobs, next.jobIds))
+    startTransition(async () => {
+      setOptimisticSel(next)
+      await setJobSelection(next.allJobs, next.jobIds)
+    })
   }
   function onRowClick(e: React.MouseEvent, id: string) {
     if (e.metaKey || e.ctrlKey) {
