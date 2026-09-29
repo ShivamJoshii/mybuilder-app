@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD, formatDate } from '@/lib/utils'
 import { CO_STATUS } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Change orders' }
 
@@ -25,8 +26,8 @@ export default async function ChangeOrdersPage({ searchParams }: PageProps<'/cha
   const supabase = await createClient()
   let rows: { id: string; number: number; title: string; status: string; total: number | null; job_id: string; requested_by_client: boolean; approval_deadline: string | null; released_at: string | null }[] = []
   if (picked.length) {
-    let q = supabase.from('change_orders').select('id,number,title,status,total,job_id,requested_by_client,approval_deadline,released_at')
-      .in('job_id', picked.map((j) => j.id)).order('created_at', { ascending: false })
+    let q = forJobs(supabase.from('change_orders').select('id,number,title,status,total,job_id,requested_by_client,approval_deadline,released_at')
+      , ctx, picked.map((j) => j.id)).order('created_at', { ascending: false })
     if (status) q = q.eq('status', status as 'draft')
     rows = (await q).data ?? []
   }

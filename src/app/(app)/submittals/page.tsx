@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatDate, todayIn } from '@/lib/utils'
 import { SUBMITTAL_KINDS, SUBMITTAL_STATUS } from '@/lib/submittal'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Submittals' }
 
@@ -25,7 +26,7 @@ export default async function SubmittalsPage({ searchParams }: PageProps<'/submi
   const supabase = await createClient()
   let q = supabase.from('submittals').select('id,number,title,spec_section,kind,status,revision,due_date,required_on_site,job_id,reviewer_user_id,sub:organizations!submittals_submitter_sub_org_id_fkey(name),jobs(title)')
     .is('deleted_at', null).order('number')
-  if (internal) q = q.in('job_id', picked.map((j) => j.id))
+  if (internal) q = forJobs(q, ctx, picked.map((j) => j.id))
   const { data } = internal && !picked.length ? { data: [] } : await q
   const today = todayIn(ctx.tz)
   const rows = (data ?? []).filter((s) => !ball || SUBMITTAL_STATUS[s.status].ball === ball || (ball === 'me' && s.reviewer_user_id === ctx.userId && s.status === 'submitted'))

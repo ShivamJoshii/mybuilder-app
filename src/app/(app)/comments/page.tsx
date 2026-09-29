@@ -14,6 +14,7 @@ import { timeAgo } from '@/components/kit/comments'
 import { resolveDateRange } from '@/lib/date-range'
 import { RECORD_TYPES, recordHref, recordLabel } from '@/lib/records'
 import { cn, initials } from '@/lib/utils'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Comments' }
 
@@ -36,9 +37,9 @@ export default async function CommentsPage({ searchParams }: PageProps<'/comment
   }[] = []
   if (jobIds.length) {
     const supabase = await createClient()
-    let q = supabase.from('comments')
+    let q = forJobs(supabase.from('comments')
       .select('id,body,job_id,record_type,record_id,author_type,created_at,profiles(first_name,last_name,email)')
-      .in('job_id', jobIds).order('created_at', { ascending: false }).limit(500)
+      , ctx, jobIds).order('created_at', { ascending: false }).limit(500)
     const kw = one(sp.q)?.trim()
     if (kw) q = q.ilike('body', `%${kw.replace(/[%_]/g, '')}%`)
     const types = arr(sp.type); if (types.length) q = q.in('record_type', types)

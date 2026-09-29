@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD, formatDateTime } from '@/lib/utils'
 import { BID_REQUEST_STATUS, BID_STATUS } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Bids' }
 
@@ -54,8 +55,8 @@ export default async function BidsPage() {
   }
 
   const picked = selectedJobs(ctx)
-  const { data: pkgs } = picked.length ? await supabase.from('bid_packages').select('id,number,title,status,due_at,job_id,bid_requests(status,total)')
-    .in('job_id', picked.map((j) => j.id)).is('deleted_at', null).order('created_at', { ascending: false }) : { data: [] }
+  const { data: pkgs } = picked.length ? await forJobs(supabase.from('bid_packages').select('id,number,title,status,due_at,job_id,bid_requests(status,total)')
+    , ctx, picked.map((j) => j.id)).is('deleted_at', null).order('created_at', { ascending: false }) : { data: [] }
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
   const canAdd = can(ctx, 'bids', 'add')
   return (

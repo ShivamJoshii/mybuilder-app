@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD } from '@/lib/utils'
 import { PO_STATUS, WORK_STATUS } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Purchase orders' }
 
@@ -23,7 +24,7 @@ export default async function PurchaseOrdersPage() {
   const picked = mode === 'builder' ? selectedJobs(ctx) : []
   let q = supabase.from('purchase_orders').select('id,number,title,status,work_status,job_id,vendor_name,sub:organizations!purchase_orders_sub_org_id_fkey(name),jobs(title),po_items(quantity,unit_cost),bills(status,deleted_at,is_holdback_release,bill_items(amount))')
     .is('deleted_at', null).order('created_at', { ascending: false })
-  if (mode === 'builder') q = q.in('job_id', picked.map((j) => j.id))
+  if (mode === 'builder') q = forJobs(q, ctx, picked.map((j) => j.id))
   const { data: pos } = mode === 'builder' && !picked.length ? { data: [] } : await q
   const canAdd = mode === 'builder' && can(ctx, 'purchase_orders', 'add')
   const rows = (pos ?? []).map((p) => {

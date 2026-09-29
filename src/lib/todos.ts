@@ -1,6 +1,8 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 import type { QRow } from '@/components/kit/query-builder'
+import { forJobs, inChunks } from '@/lib/job-filter'
+import { getAppContext } from '@/lib/context'
 
 export type TodoRow = {
   id: string
@@ -23,15 +25,16 @@ type Profile = { first_name: string; last_name: string; email: string } | null
 const nm = (p: Profile) => (p ? `${p.first_name} ${p.last_name}`.trim() || p.email : '')
 
 export async function fetchTodos(jobIds: string[]): Promise<TodoRow[]> {
+  const ctx = await getAppContext()
   if (jobIds.length === 0) return []
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data } = await forJobs(supabase
     .from('todos')
     .select(`id,job_id,title,notes,priority,due_at,has_due_time,completed_at,created_at,updated_at,created_by,
              creator:profiles!todos_created_by_fkey(first_name,last_name,email),
              todo_assignees(user_id,sub_org_id,profiles(first_name,last_name,email),organizations(name)),
              todo_checklist(done_at)`)
-    .in('job_id', jobIds)
+    , ctx, jobIds)
     .is('deleted_at', null)
     .order('due_at', { ascending: true, nullsFirst: false })
     .limit(1000)
@@ -85,8 +88,8 @@ export async function fetchAssignable(orgId: string, jobIds: string[]) {
   const supabase = await createClient()
   const [{ data: members }, { data: subs }, { data: clients }, { data: links }] = await Promise.all([
     supabase.from('org_members').select('user_id,profiles(first_name,last_name,email)').eq('org_id', orgId).eq('status', 'active'),
-    supabase.from('job_subs').select('job_id,sub_org_id').in('job_id', jobIds),
-    supabase.from('job_clients').select('job_id,user_id,first_name,last_name').in('job_id', jobIds).not('user_id', 'is', null),
+    inChunks(jobIds, (c) => supabase.from('job_subs').select('job_id,sub_org_id').in('job_id', c)),
+    inChunks(jobIds, (c) => supabase.from('job_clients').select('job_id,user_id,first_name,last_name').in('job_id', c).not('user_id', 'is', null)),
     supabase.from('builder_sub_links').select('sub_org_id,company_name').eq('builder_org_id', orgId),
   ])
   const company = new Map((links ?? []).map((l) => [l.sub_org_id, l.company_name]))

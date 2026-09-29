@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatDateTime } from '@/lib/utils'
 import { SIG_STATUS } from '@/lib/signature-status'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Signatures' }
 
@@ -18,7 +19,7 @@ export default async function SignaturesPage() {
   const picked = builder ? selectedJobs(ctx) : ctx.jobs
   const supabase = await createClient()
   const { data: reqs } = picked.length
-    ? await supabase.from('signature_requests').select('id,title,job_id,status,sent_at,created_at,signature_request_signers(status)').in('job_id', picked.map((j) => j.id)).order('created_at', { ascending: false }).limit(300)
+    ? await forJobs(supabase.from('signature_requests').select('id,title,job_id,status,sent_at,created_at,signature_request_signers(status)'), ctx, picked.map((j) => j.id)).order('created_at', { ascending: false }).limit(300)
     : { data: [] }
   const job = new Map(ctx.jobs.map((j) => [j.id, j.title]))
   return (

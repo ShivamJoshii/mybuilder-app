@@ -17,6 +17,7 @@ import { cn, formatDate, formatDateTime } from '@/lib/utils'
 import { createFolder } from './actions'
 import { FileActions } from './file-actions'
 import { FolderSharing } from './folder-sharing'
+import { forJobs } from '@/lib/job-filter'
 
 type Kind = 'documents' | 'photos' | 'videos'
 const TITLE: Record<Kind, string> = { documents: 'Documents', photos: 'Photos', videos: 'Videos' }
@@ -82,8 +83,8 @@ export async function FilesPage({ kind, sp }: { kind: Kind; sp: Sp }) {
   // Trash view
   if (trash) {
     const jobIds = job ? [job.id] : picked.map((j) => j.id)
-    const { data: gone } = await supabase.from('files').select('id,name,size_bytes,deleted_at,version,share_subs,share_clients')
-      .eq('kind', kind).not('deleted_at', 'is', null).in('job_id', jobIds.length ? jobIds : ['00000000-0000-0000-0000-000000000000']).order('deleted_at', { ascending: false })
+    const { data: gone } = await forJobs(supabase.from('files').select('id,name,size_bytes,deleted_at,version,share_subs,share_clients')
+      .eq('kind', kind).not('deleted_at', 'is', null), ctx, jobIds.length ? jobIds : ['00000000-0000-0000-0000-000000000000']).order('deleted_at', { ascending: false })
     return (
       <>{header}<div className="p-5"><Card>
         {(gone ?? []).length === 0 ? <EmptyState icon={Trash2} title="Trash is empty" body="Deleted files can be restored from here." /> : (

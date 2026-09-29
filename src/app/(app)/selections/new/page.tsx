@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/shell/page-header'
 import { Card } from '@/components/ui/card'
 import { SelectionForm } from '../selection-form'
 import { createSelection } from '../actions'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'New selection' }
 
@@ -13,7 +14,7 @@ export default async function NewSelectionPage() {
   const picked = selectedJobs(ctx)
   const supabase = await createClient()
   const { data: items } = ctx.jobs.length
-    ? await supabase.from('schedule_items').select('id,job_id,title,start_date').in('job_id', ctx.jobs.map((j) => j.id)).is('deleted_at', null).order('start_date')
+    ? await forJobs(supabase.from('schedule_items').select('id,job_id,title,start_date'), ctx, ctx.jobs.map((j) => j.id)).is('deleted_at', null).order('start_date')
     : { data: [] }
   return (
     <>

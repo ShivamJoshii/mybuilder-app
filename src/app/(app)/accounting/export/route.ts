@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getAppContext, can } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { toCsv } from '@/lib/csv'
+import { inChunks } from '@/lib/job-filter'
 
 const DEFAULT_ACCOUNTS: Record<string, string> = { labor: 'Job Labour', material: 'Job Materials', subcontractor: 'Subcontractors', equipment: 'Equipment Rental', other: 'Job Expenses', none: 'Job Expenses' }
 const isDate = (s: string | null) => (s && /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null)
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
     const { data } = await supabase.from('client_invoices').select('id,number,title,invoice_date,due_date,tax_rate,tax_label,holdback_pct,job_id,client_invoice_lines(title,amount,taxable)')
       .eq('org_id', org).in('status', ['released', 'paid']).is('deleted_at', null).gte('invoice_date', from).lte('invoice_date', to).order('invoice_date')
     const jobIds = [...new Set((data ?? []).map((i) => i.job_id))]
-    const { data: clients } = jobIds.length ? await supabase.from('job_clients').select('job_id,first_name,last_name').in('job_id', jobIds) : { data: [] }
+    const { data: clients } = await inChunks(jobIds, (c) => supabase.from('job_clients').select('job_id,first_name,last_name').in('job_id', c))
     const customer = (job: string) => (clients ?? []).filter((c) => c.job_id === job).map((c) => `${c.first_name} ${c.last_name}`.trim()).join(' & ') || jobName.get(job) || 'Client'
     rows = [['InvoiceNo', 'Customer', 'InvoiceDate', 'DueDate', 'Memo', 'Item(Product/Service)', 'ItemDescription', 'ItemQuantity', 'ItemRate', 'ItemAmount', 'ItemTaxCode', 'ItemTaxAmount', 'Job']]
     for (const i of data ?? []) {

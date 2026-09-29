@@ -1,17 +1,20 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 import { formatDate } from '@/lib/utils'
+import { forJobs } from '@/lib/job-filter'
+import { getAppContext } from '@/lib/context'
 
 export type LinkTarget = { type: string; id: string; job_id: string; label: string }
 
 /** Records on these jobs that can be linked as related items (visible to the caller). */
 export async function linkableRecords(jobIds: string[]): Promise<LinkTarget[]> {
+  const ctx = await getAppContext()
   if (jobIds.length === 0) return []
   const supabase = await createClient()
   const [{ data: todos }, { data: logs }, { data: rfis }] = await Promise.all([
-    supabase.from('todos').select('id,job_id,title').in('job_id', jobIds).is('deleted_at', null).limit(300),
-    supabase.from('daily_logs').select('id,job_id,log_date,title').in('job_id', jobIds).is('deleted_at', null).order('log_date', { ascending: false }).limit(300),
-    supabase.from('rfis').select('id,job_id,number,title').in('job_id', jobIds).is('deleted_at', null).limit(300),
+    forJobs(supabase.from('todos').select('id,job_id,title'), ctx, jobIds).is('deleted_at', null).limit(300),
+    forJobs(supabase.from('daily_logs').select('id,job_id,log_date,title'), ctx, jobIds).is('deleted_at', null).order('log_date', { ascending: false }).limit(300),
+    forJobs(supabase.from('rfis').select('id,job_id,number,title'), ctx, jobIds).is('deleted_at', null).limit(300),
   ])
   return [
     ...(todos ?? []).map((t) => ({ type: 'todo', id: t.id, job_id: t.job_id, label: t.title })),

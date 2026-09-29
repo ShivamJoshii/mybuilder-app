@@ -11,3 +11,7 @@ psql "$DB_URL" -f supabase/perf/seed.sql
 Reference (local, after 20260929004400_rls_performance): 40k to-dos for the owner ≈ 60 ms (was 34 s);
 the PM's 4k to-dos ≈ 10 ms (was 4.3 s); 1,000 to-dos with embeds through the API ≈ 0.25 s.
 Run `pnpm exec supabase db reset` afterwards.
+
+Page timings with that seed (production build, local): every list page under 1 s for the owner with all 200
+jobs selected and for the PM. Large selections filter by company instead of sending 200+ job ids in the URL
+(`src/lib/job-filter.ts`), which otherwise fails with HTTP 414 past ~500 jobs.

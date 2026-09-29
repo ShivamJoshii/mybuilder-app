@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD, formatDate, todayIn } from '@/lib/utils'
 import { SELECTION_STATUS } from '@/lib/selection'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Selections' }
 
@@ -31,8 +32,8 @@ export default async function SelectionsPage({ searchParams }: PageProps<'/selec
     const { data } = await supabase.rpc('sub_selections', { p_jobs: picked.map((j) => j.id) })
     rows = (data ?? []).filter((r) => !status || r.status === status).map((r) => ({ ...r, allowance: null }))
   } else if (picked.length) {
-    let q = supabase.from('selections').select('id,title,job_id,category,location,status,deadline,allowance,selected_choice_id')
-      .in('job_id', picked.map((j) => j.id)).is('deleted_at', null).order('deadline', { ascending: true, nullsFirst: false }).order('title')
+    let q = forJobs(supabase.from('selections').select('id,title,job_id,category,location,status,deadline,allowance,selected_choice_id')
+      , ctx, picked.map((j) => j.id)).is('deleted_at', null).order('deadline', { ascending: true, nullsFirst: false }).order('title')
     if (status) q = q.eq('status', status as 'draft')
     rows = (await q).data ?? []
   }

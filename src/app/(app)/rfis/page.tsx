@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatDate } from '@/lib/utils'
 import { RFI_STATUS } from '@/lib/rfi'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'RFIs' }
 
@@ -38,13 +39,13 @@ export default async function RfisPage({ searchParams }: PageProps<'/rfis'>) {
   const supabase = await createClient()
   let rows: Row[] = []
   if (picked.length) {
-    const { data } = await supabase.from('rfis')
+    const { data } = await forJobs(supabase.from('rfis')
       .select(`id,number,title,status,due_date,job_id,created_by,assignee_user_id,assignee_sub_org_id,author_sub_org_id,
                assignee:profiles!rfis_assignee_user_id_fkey(first_name,last_name),
                assignee_org:organizations!rfis_assignee_sub_org_id_fkey(name),
                creator:profiles!rfis_created_by_fkey(first_name,last_name),
                rfi_responses(id)`)
-      .in('job_id', picked.map((j) => j.id)).is('deleted_at', null).order('created_at', { ascending: false })
+      , ctx, picked.map((j) => j.id)).is('deleted_at', null).order('created_at', { ascending: false })
     rows = (data ?? []) as unknown as Row[]
   }
   const { data: rel } = rows.length ? await supabase.from('related_items').select('from_id,to_type').eq('from_type', 'rfi').in('from_id', rows.map((r) => r.id)) : { data: [] }

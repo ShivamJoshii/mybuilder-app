@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD, formatDate, todayIn } from '@/lib/utils'
 import { INVOICE_STATUS } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Invoices' }
 
@@ -21,8 +22,8 @@ export default async function InvoicesPage() {
   if (mode === 'builder' && !can(ctx, 'invoices')) redirect('/summary?denied=invoices')
   const picked = mode === 'client' ? ctx.jobs : selectedJobs(ctx)
   const supabase = await createClient()
-  const { data: invs } = picked.length ? await supabase.from('client_invoices').select('id,number,title,status,invoice_date,due_date,job_id')
-    .in('job_id', picked.map((j) => j.id)).is('deleted_at', null).order('invoice_date', { ascending: false }).order('number', { ascending: false }) : { data: [] }
+  const { data: invs } = picked.length ? await forJobs(supabase.from('client_invoices').select('id,number,title,status,invoice_date,due_date,job_id')
+    , ctx, picked.map((j) => j.id)).is('deleted_at', null).order('invoice_date', { ascending: false }).order('number', { ascending: false }) : { data: [] }
   const totals = await Promise.all((invs ?? []).map(async (i) => [i.id, (await supabase.rpc('invoice_totals', { p: i.id })).data?.[0]] as const))
   const T = new Map(totals)
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))

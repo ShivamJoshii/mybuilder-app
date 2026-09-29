@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatDate } from '@/lib/utils'
 import { CLAIM_STATUS, PRIORITY } from '@/lib/warranty'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Warranty' }
 
@@ -24,7 +25,7 @@ export default async function WarrantyPage({ searchParams }: PageProps<'/warrant
   const picked = mode === 'builder' ? selectedJobs(ctx) : []
   let q = supabase.from('warranty_claims').select('id,number,title,status,priority,category,created_at,submitted_by_client,job_id,assignee:profiles!warranty_claims_assignee_user_id_fkey(first_name,last_name),assignee_org:organizations!warranty_claims_assignee_sub_org_id_fkey(name),jobs(title),warranty_appointments(starts_at,status)')
     .is('deleted_at', null).order('created_at', { ascending: false })
-  if (mode === 'builder') q = q.in('job_id', picked.map((j) => j.id))
+  if (mode === 'builder') q = forJobs(q, ctx, picked.map((j) => j.id))
   if (status) q = q.eq('status', status as 'open')
   const { data: claims } = mode === 'builder' && !picked.length ? { data: [] } : await q
   const canAdd = mode === 'builder' ? can(ctx, 'warranties', 'add') : mode === 'client'

@@ -1,6 +1,8 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 import type { Calendar, Exception } from './calendar'
+import { forJobs } from '@/lib/job-filter'
+import { getAppContext } from '@/lib/context'
 
 export type SchedItem = {
   id: string
@@ -29,16 +31,17 @@ export type SchedLink = { predecessor_id: string; successor_id: string; type: 'F
 type P = { first_name: string; last_name: string; email: string } | null
 
 export async function fetchSchedule(jobIds: string[]) {
+  const ctx = await getAppContext()
   if (jobIds.length === 0) return { items: [] as SchedItem[], links: [] as SchedLink[], online: new Map<string, boolean>(), phases: [] as { id: string; job_id: string; name: string; color: string }[] }
   const supabase = await createClient()
   const [{ data: items }, { data: settings }, { data: phases }] = await Promise.all([
-    supabase.from('schedule_items')
+    forJobs(supabase.from('schedule_items')
       .select(`id,job_id,phase_id,title,color,start_date,duration,end_date,is_hourly,start_time,end_time,progress,completed_at,
                show_on_gantt,show_subs,show_client,notes_all,reminder_days,
                schedule_assignees(id,user_id,sub_org_id,status,profiles!schedule_assignees_user_id_fkey(first_name,last_name,email),organizations(name))`)
-      .in('job_id', jobIds).is('deleted_at', null).order('start_date').order('title'),
-    supabase.from('job_schedule_settings').select('job_id,is_online').in('job_id', jobIds),
-    supabase.from('schedule_phases').select('id,job_id,name,color').in('job_id', jobIds).order('sort'),
+      , ctx, jobIds).is('deleted_at', null).order('start_date').order('title'),
+    forJobs(supabase.from('job_schedule_settings').select('job_id,is_online'), ctx, jobIds),
+    forJobs(supabase.from('schedule_phases').select('id,job_id,name,color'), ctx, jobIds).order('sort'),
   ])
   const ids = (items ?? []).map((i) => i.id)
   const { data: links } = ids.length

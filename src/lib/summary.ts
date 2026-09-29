@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { can, hasAction, type AppContext } from '@/lib/context'
 import { formatCAD, formatDate, todayIn } from '@/lib/utils'
 import { addDays as isoAddDays } from '@/lib/overtime'
+import { forJobs } from '@/lib/job-filter'
 
 export type WidgetItem = { id: string; label: string; sub?: string; href: string; flag?: 'overdue' | 'today' | 'soon' }
 export type Widget = { key: string; title: string; href: string; items: WidgetItem[]; total: number; empty: string }
@@ -27,16 +28,16 @@ export async function summaryWidgets(ctx: AppContext, jobIds: string[]): Promise
   const see = (m: string) => builder && can(ctx, m)
 
   const q = {
-    todos: mode !== 'client' ? supabase.from('todos').select('id,title,due_at,job_id,todo_assignees(user_id,sub_org_id)').in('job_id', jobIds).is('completed_at', null).is('deleted_at', null).order('due_at', { nullsFirst: false }).limit(200) : null,
-    schedule: supabase.from('schedule_items').select('id,title,start_date,end_date,job_id,completed_at,schedule_assignees(user_id,sub_org_id,status)').in('job_id', jobIds).is('deleted_at', null).is('completed_at', null).lte('start_date', mode === 'client' ? fortnight : week).gte('end_date', today).order('start_date').limit(200),
-    rfis: mode !== 'client' ? supabase.from('rfis').select('id,number,title,status,due_date,job_id,assignee_user_id,assignee_sub_org_id,created_by').in('job_id', jobIds).in('status', ['sent', 'reopened']).is('deleted_at', null).order('due_date').limit(100) : null,
-    cos: mode !== 'sub' ? supabase.from('change_orders').select('id,number,title,status,requested_by_client,approval_deadline,job_id').in('job_id', jobIds).in('status', mode === 'client' ? ['pending'] : ['pending', 'draft']).limit(100) : null,
-    selections: mode === 'sub' ? null : supabase.from('selections').select('id,title,status,deadline,job_id').in('job_id', jobIds).in('status', mode === 'client' ? ['pending'] : ['pending', 'selected']).is('deleted_at', null).order('deadline', { nullsFirst: false }).limit(100),
-    proposals: mode === 'client' ? supabase.from('proposals').select('id,title,approval_deadline,job_id').in('job_id', jobIds).eq('status', 'released').limit(50) : null,
-    invoices: mode !== 'sub' && (mode === 'client' || see('invoices')) ? supabase.from('client_invoices').select('id,number,title,due_date,job_id').in('job_id', jobIds).eq('status', 'released').is('deleted_at', null).order('due_date').limit(100) : null,
-    bills: builder && can(ctx, 'bills', 'cost') && hasAction(ctx, 'bills.approve') ? supabase.from('bills').select('id,number,invoice_ref,title,job_id,vendor_name,sub:organizations!bills_sub_org_id_fkey(name)').in('job_id', jobIds).eq('status', 'submitted').is('deleted_at', null).limit(100) : null,
+    todos: mode !== 'client' ? forJobs(supabase.from('todos').select('id,title,due_at,job_id,todo_assignees(user_id,sub_org_id)'), ctx, jobIds).is('completed_at', null).is('deleted_at', null).order('due_at', { nullsFirst: false }).limit(200) : null,
+    schedule: forJobs(supabase.from('schedule_items').select('id,title,start_date,end_date,job_id,completed_at,schedule_assignees(user_id,sub_org_id,status)'), ctx, jobIds).is('deleted_at', null).is('completed_at', null).lte('start_date', mode === 'client' ? fortnight : week).gte('end_date', today).order('start_date').limit(200),
+    rfis: mode !== 'client' ? forJobs(supabase.from('rfis').select('id,number,title,status,due_date,job_id,assignee_user_id,assignee_sub_org_id,created_by'), ctx, jobIds).in('status', ['sent', 'reopened']).is('deleted_at', null).order('due_date').limit(100) : null,
+    cos: mode !== 'sub' ? forJobs(supabase.from('change_orders').select('id,number,title,status,requested_by_client,approval_deadline,job_id'), ctx, jobIds).in('status', mode === 'client' ? ['pending'] : ['pending', 'draft']).limit(100) : null,
+    selections: mode === 'sub' ? null : forJobs(supabase.from('selections').select('id,title,status,deadline,job_id'), ctx, jobIds).in('status', mode === 'client' ? ['pending'] : ['pending', 'selected']).is('deleted_at', null).order('deadline', { nullsFirst: false }).limit(100),
+    proposals: mode === 'client' ? forJobs(supabase.from('proposals').select('id,title,approval_deadline,job_id'), ctx, jobIds).eq('status', 'released').limit(50) : null,
+    invoices: mode !== 'sub' && (mode === 'client' || see('invoices')) ? forJobs(supabase.from('client_invoices').select('id,number,title,due_date,job_id'), ctx, jobIds).eq('status', 'released').is('deleted_at', null).order('due_date').limit(100) : null,
+    bills: builder && can(ctx, 'bills', 'cost') && hasAction(ctx, 'bills.approve') ? forJobs(supabase.from('bills').select('id,number,invoice_ref,title,job_id,vendor_name,sub:organizations!bills_sub_org_id_fkey(name)'), ctx, jobIds).eq('status', 'submitted').is('deleted_at', null).limit(100) : null,
     pos: mode === 'sub' ? supabase.from('purchase_orders').select('id,number,title,job_id').eq('status', 'released').is('deleted_at', null).limit(50) : null,
-    warranty: supabase.from('warranty_claims').select('id,number,title,status,priority,job_id').in('job_id', jobIds).in('status', ['open', 'scheduled']).is('deleted_at', null).limit(100),
+    warranty: forJobs(supabase.from('warranty_claims').select('id,number,title,status,priority,job_id'), ctx, jobIds).in('status', ['open', 'scheduled']).is('deleted_at', null).limit(100),
     bids: mode === 'sub' ? supabase.rpc('my_bid_requests') : null,
   }
   const [todos, schedule, rfis, cos, selections, proposals, invoices, bills, pos, warranty, bids] = await Promise.all([

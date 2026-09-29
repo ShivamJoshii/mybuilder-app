@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatDate } from '@/lib/utils'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Plans and specs' }
 
@@ -25,8 +26,8 @@ export default async function PlansPage({ searchParams }: PageProps<'/plans'>) {
   const ids = picked.map((j) => j.id)
   const supabase = await createClient()
   const [{ data: sheets }, { data: specs }] = ids.length ? await Promise.all([
-    supabase.from('plan_sheets').select('id,job_id,number,title,discipline,current_version,share_subs,share_clients,created_at').in('job_id', ids).is('deleted_at', null),
-    supabase.from('spec_documents').select('id,job_id,division,title,share_subs,share_clients,updated_at').in('job_id', ids).is('deleted_at', null).order('division').order('title'),
+    forJobs(supabase.from('plan_sheets').select('id,job_id,number,title,discipline,current_version,share_subs,share_clients,created_at'), ctx, ids).is('deleted_at', null),
+    forJobs(supabase.from('spec_documents').select('id,job_id,division,title,share_subs,share_clients,updated_at'), ctx, ids).is('deleted_at', null).order('division').order('title'),
   ]) : [{ data: [] }, { data: [] }]
   const canAdd = mode === 'builder' && can(ctx, 'specs', 'add')
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))

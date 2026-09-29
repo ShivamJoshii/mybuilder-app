@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PrintButton } from '@/components/kit/print-button'
 import { formatDate } from '@/lib/utils'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Daily logs' }
 
@@ -38,9 +39,9 @@ export default async function DailyLogsPage({ searchParams }: PageProps<'/daily-
     profiles: { first_name: string; last_name: string; email: string } | null
   }[] = []
   if (picked.length) {
-    let q = supabase.from('daily_logs')
+    let q = forJobs(supabase.from('daily_logs')
       .select('id,job_id,log_date,title,notes,status,tag_ids,weather,include_weather,author_type,share_subs,share_clients,created_by,profiles!daily_logs_created_by_fkey(first_name,last_name,email)')
-      .in('job_id', picked.map((j) => j.id)).order('log_date', { ascending: false }).order('created_at', { ascending: false }).limit(300)
+      , ctx, picked.map((j) => j.id)).order('log_date', { ascending: false }).order('created_at', { ascending: false }).limit(300)
     if (range.from) q = q.gte('log_date', range.from)
     if (range.to) q = q.lte('log_date', range.to)
     const kw = one(sp.q)?.trim()

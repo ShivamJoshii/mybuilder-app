@@ -8,6 +8,7 @@ import { Card, CardHeader } from '@/components/ui/card'
 import { JobStatusBadge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { recordHref, recordLabel } from '@/lib/records'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Search' }
 
@@ -25,8 +26,8 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
     const like = `%${q.replace(/[%_\\,()"]/g, '')}%`
     const ids = ctx.jobs.map((j) => j.id)
     const [c, ...rest] = await Promise.all([
-      supabase.from('comments').select('id,body,job_id,record_type,record_id').in('job_id', ids).ilike('body', like).limit(20),
-      ...SOURCES.map((src) => supabase.from(src.table as 'todos').select(src.select).in('job_id', ids).or(src.cols.map((col) => `${col}.ilike."${like}"`).join(','))
+      forJobs(supabase.from('comments').select('id,body,job_id,record_type,record_id'), ctx, ids).ilike('body', like).limit(20),
+      ...SOURCES.map((src) => forJobs(supabase.from(src.table as 'todos').select(src.select), ctx, ids).or(src.cols.map((col) => `${col}.ilike."${like}"`).join(','))
         .limit(10).then((r) => ((r.data ?? []) as unknown as Record<string, unknown>[]).filter((row) => !row.deleted_at).map((row) => ({
           type: src.label, id: String(row.id), job_id: String(row.job_id), title: src.title(row), href: src.href(row),
         })))),

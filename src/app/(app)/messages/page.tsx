@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { CopyButton } from '@/components/kit/copy-button'
 import { jobAddress } from '@/lib/email'
 import { formatDateTime } from '@/lib/utils'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Messages' }
 
@@ -22,8 +23,8 @@ export default async function MessagesPage() {
   const ids = picked.map((j) => j.id)
   const supabase = await createClient()
   const [{ data: threads }, { data: boxes }] = ids.length ? await Promise.all([
-    supabase.from('email_threads').select('id,job_id,subject,last_at,email_messages(direction,from_name,from_email,status,created_at)').in('job_id', ids).order('last_at', { ascending: false }).limit(200),
-    supabase.from('job_mailboxes').select('job_id,token').in('job_id', ids),
+    forJobs(supabase.from('email_threads').select('id,job_id,subject,last_at,email_messages(direction,from_name,from_email,status,created_at)'), ctx, ids).order('last_at', { ascending: false }).limit(200),
+    forJobs(supabase.from('job_mailboxes').select('job_id,token'), ctx, ids),
   ]) : [{ data: [] }, { data: [] }]
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
   const canAdd = can(ctx, 'messages', 'add')

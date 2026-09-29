@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD, formatDate, todayIn } from '@/lib/utils'
 import { BILL_STATUS } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Bills' }
 
@@ -25,7 +26,7 @@ export default async function BillsPage({ searchParams }: PageProps<'/bills'>) {
   const picked = mode === 'builder' ? selectedJobs(ctx) : []
   let q = supabase.from('bills').select('id,number,invoice_ref,title,status,invoice_date,due_date,tax_amount,holdback_pct,paid_amount,job_id,vendor_name,is_holdback_release,sub:organizations!bills_sub_org_id_fkey(name),jobs(title),bill_items(amount)')
     .is('deleted_at', null).order('invoice_date', { ascending: false })
-  if (mode === 'builder') q = q.in('job_id', picked.map((j) => j.id))
+  if (mode === 'builder') q = forJobs(q, ctx, picked.map((j) => j.id))
   if (status) q = q.eq('status', status as 'draft')
   const { data: bills } = mode === 'builder' && !picked.length ? { data: [] } : await q
   const today = todayIn(ctx.tz)

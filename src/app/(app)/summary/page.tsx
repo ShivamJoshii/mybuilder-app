@@ -12,6 +12,7 @@ import { Alert } from '@/components/ui/alert'
 import { cn, formatDate } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import { jobMoney, summaryWidgets, type Widget } from '@/lib/summary'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Summary' }
 
@@ -25,7 +26,7 @@ export default async function SummaryPage({ searchParams }: PageProps<'/summary'
 
   const widgets = await summaryWidgets(ctx, picked.map((j) => j.id))
   const supabase = await createClient()
-  const { data: logs } = picked.length ? await supabase.from('daily_logs').select('id,title,notes,log_date,job_id').in('job_id', picked.map((j) => j.id)).eq('status', 'published').order('log_date', { ascending: false }).limit(5) : { data: [] }
+  const { data: logs } = picked.length ? await forJobs(supabase.from('daily_logs').select('id,title,notes,log_date,job_id'), ctx, picked.map((j) => j.id)).eq('status', 'published').order('log_date', { ascending: false }).limit(5) : { data: [] }
   const money = mode === 'builder' && picked.length === 1 && can(ctx, 'budget') && can(ctx, 'budget', 'cost') ? await jobMoney(picked[0].id) : null
   const shortcuts = navFor(mode)
     .filter((g) => g.label !== 'Jobs')

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD, formatDate } from '@/lib/utils'
 import { PROPOSAL_STATUS } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Proposals' }
 
@@ -21,8 +22,8 @@ export default async function ProposalsPage({ searchParams }: PageProps<'/propos
   if (mode === 'builder' && !can(ctx, 'proposals') && !can(ctx, 'estimates')) redirect('/summary?denied=proposals')
   const status = typeof sp.status === 'string' ? sp.status : ''
   const supabase = await createClient()
-  let q = supabase.from('proposals').select('id,title,status,total,job_id,released_at,decided_at,approval_deadline,created_at')
-    .in('job_id', ctx.jobs.map((j) => j.id)).order('created_at', { ascending: false })
+  let q = forJobs(supabase.from('proposals').select('id,title,status,total,job_id,released_at,decided_at,approval_deadline,created_at')
+    , ctx, ctx.jobs.map((j) => j.id)).order('created_at', { ascending: false })
   if (status && status in PROPOSAL_STATUS) q = q.eq('status', status as 'draft')
   const { data: rows } = await q
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))

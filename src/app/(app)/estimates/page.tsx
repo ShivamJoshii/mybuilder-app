@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { formatCAD } from '@/lib/utils'
 import { itemCost, itemPrice, type EstItem } from '@/lib/estimate'
+import { forJobs } from '@/lib/job-filter'
 
 export const metadata: Metadata = { title: 'Estimates' }
 
@@ -20,7 +21,7 @@ export default async function EstimatesPage() {
   const supabase = await createClient()
   const seeCost = can(ctx, 'estimates', 'cost')
   const ids = picked.map((j) => j.id)
-  const { data: ests } = ids.length ? await supabase.from('estimates').select('id,job_id,locked_at,sent_to_budget_at').in('job_id', ids) : { data: [] }
+  const { data: ests } = ids.length ? await forJobs(supabase.from('estimates').select('id,job_id,locked_at,sent_to_budget_at'), ctx, ids) : { data: [] }
   const { data: items } = seeCost && ests?.length
     ? await supabase.from('estimate_items').select('estimate_id,quantity,unit_cost,markup_type,markup_value').in('estimate_id', ests.map((e) => e.id))
     : { data: [] }
