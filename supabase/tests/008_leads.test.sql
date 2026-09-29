@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(12);
+select plan(15);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -66,6 +66,15 @@ select is((select count(*)::int from public.job_clients where job_id = pg_temp.i
 reset role;
 select pg_temp.login('crew');
 select is((select count(*)::int from public.leads), 0, 'field crew sees no leads');
+reset role;
+
+-- Estimating a lead before it is sold, then converting it, keeps one job
+select pg_temp.login('owner');
+insert into ids select 'lead2', id from public.leads where title = 'Rep lead';
+insert into ids select 'pjob', public.start_lead_job(pg_temp.id('lead2'));
+select is((select status::text from public.jobs where id = pg_temp.id('pjob')), 'presale', 'estimating a lead opens a Presale job');
+select is(public.start_lead_job(pg_temp.id('lead2')), pg_temp.id('pjob'), 'asking again returns the same job');
+select is(public.convert_lead_to_job(pg_temp.id('lead2'), 'Rep lead home', 'fixed_price', 500000), pg_temp.id('pjob'), 'converting reuses the estimated job');
 reset role;
 
 select * from finish();

@@ -149,3 +149,13 @@ export async function completeActivity(id: string, leadId: string, done: boolean
   await supabase.from('lead_activities').update({ completed_at: done ? new Date().toISOString() : null }).eq('id', id)
   revalidatePath(`/leads/${leadId}`); revalidatePath('/lead-activities')
 }
+
+/** Estimate a lead before it's sold: opens (or reuses) its Presale job and goes to the estimate. */
+export async function estimateLead(id: string) {
+  await requireBuilder('leads', 'edit')
+  const supabase = await createClient()
+  const { data: jobId, error } = await supabase.rpc('start_lead_job', { p_lead: z.string().uuid().parse(id) })
+  if (error || !jobId) throw new Error(error?.message ?? 'Could not start the estimate')
+  revalidatePath('/', 'layout')
+  redirect(`/estimates/${jobId}`)
+}

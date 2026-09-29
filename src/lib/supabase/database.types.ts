@@ -1561,13 +1561,13 @@ isOneToOne: false
                   ]
                 },"leads": {
                   Row: {
-                    "confidence": number | null,"contact_email": string | null,"contact_first": string,"contact_last": string,"contact_phone": string | null,"converted_job_id": string | null,"created_at": string,"created_by": string | null,"custom": NonNullable<Json>,"deleted_at": string | null,"est_revenue_max": number | null,"est_revenue_min": number | null,"id": string,"lost_at": string | null,"lost_notes": string | null,"lost_reason_id": string | null,"notes": string | null,"org_id": string,"project_type_ids": (string)[],"projected_sale_date": string | null,"site_city": string | null,"site_postal": string | null,"site_province": string | null,"site_street": string | null,"sold_amount": number | null,"sold_at": string | null,"source_ids": (string)[],"status_changed_at": string,"status_id": string,"tag_ids": (string)[],"title": string,"updated_at": string
+                    "confidence": number | null,"contact_email": string | null,"contact_first": string,"contact_last": string,"contact_phone": string | null,"converted_job_id": string | null,"created_at": string,"created_by": string | null,"custom": NonNullable<Json>,"deleted_at": string | null,"est_revenue_max": number | null,"est_revenue_min": number | null,"id": string,"job_id": string | null,"lost_at": string | null,"lost_notes": string | null,"lost_reason_id": string | null,"notes": string | null,"org_id": string,"project_type_ids": (string)[],"projected_sale_date": string | null,"site_city": string | null,"site_postal": string | null,"site_province": string | null,"site_street": string | null,"sold_amount": number | null,"sold_at": string | null,"source_ids": (string)[],"status_changed_at": string,"status_id": string,"tag_ids": (string)[],"title": string,"updated_at": string
                   }
                   Insert: {
-                    "confidence"?: number | null,"contact_email"?: string | null,"contact_first"?: string,"contact_last"?: string,"contact_phone"?: string | null,"converted_job_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"est_revenue_max"?: number | null,"est_revenue_min"?: number | null,"id"?: string,"lost_at"?: string | null,"lost_notes"?: string | null,"lost_reason_id"?: string | null,"notes"?: string | null,"org_id": string,"project_type_ids"?: (string)[],"projected_sale_date"?: string | null,"site_city"?: string | null,"site_postal"?: string | null,"site_province"?: string | null,"site_street"?: string | null,"sold_amount"?: number | null,"sold_at"?: string | null,"source_ids"?: (string)[],"status_changed_at"?: string,"status_id": string,"tag_ids"?: (string)[],"title": string,"updated_at"?: string
+                    "confidence"?: number | null,"contact_email"?: string | null,"contact_first"?: string,"contact_last"?: string,"contact_phone"?: string | null,"converted_job_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"est_revenue_max"?: number | null,"est_revenue_min"?: number | null,"id"?: string,"job_id"?: string | null,"lost_at"?: string | null,"lost_notes"?: string | null,"lost_reason_id"?: string | null,"notes"?: string | null,"org_id": string,"project_type_ids"?: (string)[],"projected_sale_date"?: string | null,"site_city"?: string | null,"site_postal"?: string | null,"site_province"?: string | null,"site_street"?: string | null,"sold_amount"?: number | null,"sold_at"?: string | null,"source_ids"?: (string)[],"status_changed_at"?: string,"status_id": string,"tag_ids"?: (string)[],"title": string,"updated_at"?: string
                   }
                   Update: {
-                    "confidence"?: number | null,"contact_email"?: string | null,"contact_first"?: string,"contact_last"?: string,"contact_phone"?: string | null,"converted_job_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"est_revenue_max"?: number | null,"est_revenue_min"?: number | null,"id"?: string,"lost_at"?: string | null,"lost_notes"?: string | null,"lost_reason_id"?: string | null,"notes"?: string | null,"org_id"?: string,"project_type_ids"?: (string)[],"projected_sale_date"?: string | null,"site_city"?: string | null,"site_postal"?: string | null,"site_province"?: string | null,"site_street"?: string | null,"sold_amount"?: number | null,"sold_at"?: string | null,"source_ids"?: (string)[],"status_changed_at"?: string,"status_id"?: string,"tag_ids"?: (string)[],"title"?: string,"updated_at"?: string
+                    "confidence"?: number | null,"contact_email"?: string | null,"contact_first"?: string,"contact_last"?: string,"contact_phone"?: string | null,"converted_job_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"custom"?: NonNullable<Json>,"deleted_at"?: string | null,"est_revenue_max"?: number | null,"est_revenue_min"?: number | null,"id"?: string,"job_id"?: string | null,"lost_at"?: string | null,"lost_notes"?: string | null,"lost_reason_id"?: string | null,"notes"?: string | null,"org_id"?: string,"project_type_ids"?: (string)[],"projected_sale_date"?: string | null,"site_city"?: string | null,"site_postal"?: string | null,"site_province"?: string | null,"site_street"?: string | null,"sold_amount"?: number | null,"sold_at"?: string | null,"source_ids"?: (string)[],"status_changed_at"?: string,"status_id"?: string,"tag_ids"?: (string)[],"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -1581,6 +1581,12 @@ isOneToOne: false
       columns: ["created_by"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "leads_lost_reason_id_fkey"
@@ -3424,6 +3430,9 @@ isOneToOne: false
                            },
 "start_conversation":
 { Args: { "p_body"?: string,"p_job": string,"p_org": string,"p_title"?: string,"p_users": (string)[] }; Returns: string
+                           },
+"start_lead_job":
+{ Args: { "p_lead": string }; Returns: string
                            },
 "sub_compliance":
 { Args: { "p_builder": string,"p_sub": string }; Returns: {

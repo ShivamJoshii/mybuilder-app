@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Hammer, Pencil, Trash2, XCircle } from 'lucide-react'
+import { ArrowLeft, Calculator, Hammer, Pencil, Trash2, XCircle } from 'lucide-react'
 import { requireBuilder, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { fetchLookups, ageDays, revenue, ACTIVITY_TYPES } from '@/lib/leads'
@@ -14,7 +14,7 @@ import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { formatDate, todayIn } from '@/lib/utils'
 import { StatusSelect } from '../status-select'
-import { addActivity, completeActivity, convertLead, deleteLead, markLost } from '../actions'
+import { addActivity, completeActivity, convertLead, deleteLead, estimateLead, markLost } from '../actions'
 import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'Lead' }
@@ -58,6 +58,9 @@ export default async function LeadPage({ params }: PageProps<'/leads/[id]'>) {
             </Dialog>
           )}
           {canEdit && <Button asChild><Link href={`/leads/${id}/edit`}><Pencil />Edit</Link></Button>}
+          {!lead.converted_job_id && (lead.job_id
+            ? <Button asChild><Link href={`/estimates/${lead.job_id}`}><Calculator />Open estimate</Link></Button>
+            : canEdit && can(ctx, 'jobs', 'add') && can(ctx, 'estimates', 'add') && <form action={estimateLead.bind(null, id)}><Button type="submit"><Calculator />Estimate</Button></form>)}
           {canConvert && (
             <Dialog>
               <DialogTrigger asChild><Button variant="primary"><Hammer />Convert to job</Button></DialogTrigger>

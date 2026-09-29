@@ -40,11 +40,19 @@ test('web form lead flows into the pipeline and converts to a job', async ({ pag
   await page.getByRole('button', { name: 'Save activity' }).click()
   await expect(page.getByText('Activity scheduled.')).toBeVisible()
 
+  // Estimate before the sale: a Presale job holds the estimate, and converting reuses it
+  const leadUrl = page.url()
+  await page.getByRole('button', { name: 'Estimate', exact: true }).click()
+  await expect(page).toHaveURL(/\/estimates\/[0-9a-f-]{36}/)
+  const estJob = page.url().split('/estimates/')[1]
+  await page.goto(leadUrl)
+  await expect(page.getByRole('link', { name: 'Open estimate' })).toBeVisible()
   await page.getByRole('button', { name: 'Convert to job' }).click()
   await page.getByLabel('Job name').fill(`Dhillon Residence ${id}`)
   await page.getByLabel('Contract price (CAD)').fill('725000')
   await page.getByRole('button', { name: 'Create job' }).click()
   await expect(page.getByRole('heading', { name: `Dhillon Residence ${id}` })).toBeVisible()
+  expect(page.url()).toContain(`/jobs/${estJob}`)
   await expect(page.getByText('Presale')).toBeVisible()
   await expect(page.locator('li', { hasText: 'Gurpreet Dhillon' })).toBeVisible()
   await expect(page.getByText('$725,000.00')).toBeVisible()
