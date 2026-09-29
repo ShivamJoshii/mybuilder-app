@@ -55,6 +55,8 @@ test('contract from estimate → progress draw invoice → payment → WIP and r
   await expect(page.getByTestId('invoice-balance')).toHaveText('$0.00')
   await expect(page.getByText('Paid', { exact: true }).first()).toBeVisible()
 
+  await page.goto(`/search?q=${encodeURIComponent('Draw 1')}`)
+  await expect(page.getByRole('link', { name: '#1 Draw 1 — foundation' })).toBeVisible()
   await page.goto('/reports')
   const row = page.getByRole('row', { name: new RegExp(`Larch ${id}`) })
   await expect(row).toContainText('$100,000.00')
