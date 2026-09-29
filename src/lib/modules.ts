@@ -116,4 +116,5 @@ export const SETTINGS_NAV: { label: string; href: string; module?: string; actio
   { label: 'Cost codes', href: '/settings/cost-codes', module: 'cost_codes', icon: ListChecks },
   { label: 'Custom fields', href: '/settings/custom-fields', action: 'settings.manage', icon: ClipboardList },
   { label: 'Sales', href: '/settings/sales', action: 'settings.manage', icon: Target },
+  { label: 'Accounting', href: '/settings/accounting', module: 'accounting', icon: Receipt },
 ]

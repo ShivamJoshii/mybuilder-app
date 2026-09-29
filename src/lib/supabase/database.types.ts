@@ -5,7 +5,26 @@ export type Database = {
   
   "public": {
           Tables: {
-            "app_actions": {
+            "accounting_settings": {
+                  Row: {
+                    "accounts": NonNullable<Json>,"code_accounts": NonNullable<Json>,"income_item": string,"org_id": string,"system": string,"updated_at": string
+                  }
+                  Insert: {
+                    "accounts"?: NonNullable<Json>,"code_accounts"?: NonNullable<Json>,"income_item"?: string,"org_id": string,"system"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "accounts"?: NonNullable<Json>,"code_accounts"?: NonNullable<Json>,"income_item"?: string,"org_id"?: string,"system"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "accounting_settings_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"app_actions": {
                   Row: {
                     "key": string,"label": string,"module": string
                   }

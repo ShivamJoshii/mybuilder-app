@@ -365,3 +365,19 @@ export async function removeLogo() {
   await supabase.from('organizations').update({ logo_url: null }).eq('id', ctx.workspace.orgId)
   revalidatePath('/', 'layout')
 }
+
+export async function saveAccounting(_: ActionState, fd: FormData): Promise<ActionState> {
+  const ctx = await getAppContext()
+  if (ctx.workspace.mode !== 'builder') return { error: 'Not allowed' }
+  const types = ['labor', 'material', 'subcontractor', 'equipment', 'other', 'none']
+  const accounts = Object.fromEntries(types.map((t) => [t, String(fd.get(`acct:${t}`) ?? '').trim().slice(0, 100)]).filter(([, v]) => v))
+  const code_accounts: Record<string, string> = {}
+  for (const [k, v] of fd.entries()) if (k.startsWith('code:') && String(v).trim()) code_accounts[z.string().uuid().parse(k.slice(5))] = String(v).trim().slice(0, 100)
+  const system = z.enum(['qbo', 'xero', 'sage', 'other']).catch('qbo').parse(fd.get('system'))
+  const income_item = String(fd.get('income_item') ?? '').trim().slice(0, 100) || 'Construction services'
+  const supabase = await createClient()
+  const { error } = await supabase.from('accounting_settings').upsert({ org_id: ctx.workspace.orgId, system, income_item, accounts, code_accounts })
+  if (error) return { error: 'You don’t have permission to change accounting settings.' }
+  revalidatePath('/settings/accounting')
+  return { ok: 'Accounting settings saved.' }
+}

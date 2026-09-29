@@ -41,7 +41,8 @@ Last updated: 2026-09-29 (overnight build)
 | Summary dashboard: role-specific “needs attention” widgets, money snapshot, latest logs | Built |
 | Global search across all modules | Built, browser-tested |
 | Company logo + GST/HST (and QST) numbers on proposals, change orders, POs and invoices; invoices show “Bill to” | Built, browser-tested |
-| Accounting sync (QuickBooks Online / Xero), mobile polish | Next |
+| Accounting: cost type / cost code → account mapping; QuickBooks-shaped CSV exports for bills and invoices; payments register | Built, browser-tested |
+| Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -58,6 +59,9 @@ Last updated: 2026-09-29 (overnight build)
 3. **Email (Postmark).** Set POSTMARK_SERVER_TOKEN, a verified sender (EMAIL_FROM), an inbound
    domain (MX for in.mybuilder.ca → Postmark) and INBOUND_WEBHOOK_SECRET. Until then invites show a
    copyable link and job email stays queued.
+4. **Storage (Cloudflare R2).** Create a bucket + API token and set STORAGE_* (endpoint, keys, bucket).
+   Locally Supabase Storage stands in.
+5. **QuickBooks Online sync (later).** Needs an Intuit developer app (client ID/secret). CSV exports work today.
 
 ## Decisions I made on my own
 

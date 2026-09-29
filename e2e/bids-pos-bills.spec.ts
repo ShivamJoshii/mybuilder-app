@@ -111,4 +111,15 @@ test('bid → award → PO accepted by sub → sub bills → builder pays; budge
   await expect(page.getByTestId('budget-committed')).toHaveText('$8,000.00')
   await expect(page.getByTestId('budget-actual')).toHaveText('$2,500.00')
   await page.screenshot({ path: 'test-results/95-budget.png', fullPage: true })
+
+  // Accounting export for QuickBooks
+  await page.goto('/settings/accounting')
+  await expect(page.getByRole('heading', { name: 'Chart of accounts mapping' })).toBeVisible()
+  const bills = await (await page.request.get('/accounting/export?kind=bills')).text()
+  expect(bills).toContain('FC-1001')
+  expect(bills).toContain('Subcontractors')
+  expect(bills).toContain('2500.00')
+  const pays = await (await page.request.get('/accounting/export?kind=payments')).text()
+  expect(pays).toContain('Bill payment')
+  expect(pays).toContain('-2375.00')
 })
