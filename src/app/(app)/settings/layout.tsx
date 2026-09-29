@@ -8,7 +8,10 @@ export default async function SettingsLayout({ children }: LayoutProps<'/setting
   const items = ctx.workspace.mode === 'builder'
     ? SETTINGS_NAV.filter((s) => (s.module ? can(ctx, s.module) : true) && (s.action ? hasAction(ctx, s.action) : true))
         .map(({ label, href }) => ({ label, href }))
-    : ctx.orgs.some((o) => o.kind === 'sub' && o.is_admin) ? [{ label: 'Company profile', href: '/settings/sub-profile' }] : []
+    : [
+        ...(ctx.orgs.some((o) => o.kind === 'sub' && o.is_admin) ? [{ label: 'Company profile', href: '/settings/sub-profile' }] : []),
+        ...(ctx.orgs.some((o) => o.kind === 'sub') ? [{ label: 'Compliance documents', href: '/settings/compliance' }] : []),
+      ]
   items.push({ label: 'My profile', href: '/settings/profile' }, { label: 'Notifications', href: '/settings/notifications' })
   return (
     <div className="flex min-h-full flex-col md:flex-row">

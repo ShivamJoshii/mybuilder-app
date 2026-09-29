@@ -15,6 +15,7 @@ import { Attachments } from '@/components/kit/attachments'
 import { formatCAD, formatDate, formatDateTime, todayIn } from '@/lib/utils'
 import { BILL_STATUS, PAYMENT_METHODS } from '@/lib/estimate'
 import { billStatus, deleteBill, payBill } from '../actions'
+import { ComplianceBanner } from '@/components/kit/compliance-banner'
 
 export const metadata: Metadata = { title: 'Bill' }
 
@@ -48,6 +49,7 @@ export default async function BillPage({ params }: PageProps<'/bills/[id]'>) {
           {canEdit && b.status === 'draft' && <form action={deleteBill.bind(null, id)}><ConfirmSubmit variant="ghost" title="Delete this bill?" body="The draft bill moves to the trash."><Trash2 />Delete</ConfirmSubmit></form>}
         </div>
       </div>
+      {builder && b.status !== 'paid' && <ComplianceBanner builderId={b.org_id} subId={b.sub_org_id} />}
       <Card className="p-5">
         <div className="text-[13px] text-text-3">{job?.title} · Bill #{b.number}{po ? <> · <Link href={`/purchase-orders/${po.id}`} className="text-brand hover:underline">PO #{po.number} {po.title}</Link></> : null}</div>
         <h1 className="text-xl font-semibold">{b.invoice_ref ? `Invoice ${b.invoice_ref}` : b.title}</h1>

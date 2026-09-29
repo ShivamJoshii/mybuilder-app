@@ -40,12 +40,16 @@ export function ChatRoom({ conversationId, me, initial }: { conversationId: stri
       sb.realtime.setAuth(data.session.access_token)
       ch = sb.channel(`chat:${conversationId}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversationId}` }, () => { void pollRef.current() })
-        .subscribe((status) => setLive(status === 'SUBSCRIBED'))
+        // "live" only once Realtime confirms the database subscription (the channel can join earlier)
+        .on('system', {}, (p: { extension?: string; status?: string }) => {
+          if (p.extension === 'postgres_changes') { setLive(p.status === 'ok'); void pollRef.current() }
+        })
+        .subscribe((status) => { if (status !== 'SUBSCRIBED') setLive(false) })
     })
     return () => { gone = true; if (ch) void sb.removeChannel(ch) }
   }, [conversationId])
   useEffect(() => {
-    const t = setInterval(poll, live ? 30000 : 3000)
+    const t = setInterval(poll, live ? 15000 : 3000)
     return () => clearInterval(t)
   }, [poll, live])
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [msgs.length])

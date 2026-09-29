@@ -1,9 +1,13 @@
 import type { Metadata } from 'next'
 import { HardHat, Plus } from 'lucide-react'
-import { requireBuilder, can } from '@/lib/context'
+import Link from 'next/link'
+import { requireBuilder, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/shell/page-header'
-import { Card } from '@/components/ui/card'
+import { Card, CardHeader } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { CERT_KINDS, COMPLIANCE_STATUS, REQUIRABLE } from '@/lib/compliance'
+import { saveComplianceRules } from '../compliance-actions'
 import { Field, Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +29,11 @@ export default async function SubsPage() {
       : Promise.resolve({ data: [] as { id: string; email: string; token: string; sub_org_id: string | null }[] }),
     supabase.from('job_subs').select('sub_org_id, jobs!inner(org_id)').eq('jobs.org_id', ctx.workspace.orgId),
   ])
+  const [compliance, { data: org }] = await Promise.all([
+    Promise.all((links ?? []).map((l) => supabase.rpc('sub_compliance', { p_builder: ctx.workspace.orgId, p_sub: l.sub_org_id }).then((r) => [l.sub_org_id, r.data?.[0]] as const))),
+    supabase.from('organizations').select('compliance_required,compliance_blocks_payment').eq('id', ctx.workspace.orgId).single(),
+  ])
+  const comp = new Map(compliance)
   const inviteBySub = new Map((invites ?? []).map((i) => [i.sub_org_id, i]))
   const jobCount = new Map<string, number>()
   for (const j of jobSubs ?? []) jobCount.set(j.sub_org_id, (jobCount.get(j.sub_org_id) ?? 0) + 1)
@@ -49,7 +58,7 @@ export default async function SubsPage() {
           </DialogContent>
         </Dialog>
       )} />
-      <div className="p-5">
+      <div className="space-y-5 p-5">
         <Card>
           {(links ?? []).length === 0 ? (
             <EmptyState icon={HardHat} title="Add your trades and suppliers" body="Subs you add can be put on jobs, get bid requests and POs, and see only the jobs they work on." />
@@ -57,14 +66,14 @@ export default async function SubsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead className="bg-surface-2 text-left text-xs font-semibold text-text-2">
-                  <tr><th className="px-3 py-2">Company</th><th className="px-3 py-2">Trade</th><th className="px-3 py-2">Contact</th><th className="px-3 py-2">Jobs</th><th className="px-3 py-2">Portal</th><th className="px-3 py-2">Status</th><th className="px-3 py-2" /></tr>
+                  <tr><th className="px-3 py-2">Company</th><th className="px-3 py-2">Trade</th><th className="px-3 py-2">Contact</th><th className="px-3 py-2">Jobs</th><th className="px-3 py-2">Portal</th><th className="px-3 py-2">Compliance</th><th className="px-3 py-2">Status</th><th className="px-3 py-2" /></tr>
                 </thead>
                 <tbody>
                   {(links ?? []).map((l) => {
                     const inv = inviteBySub.get(l.sub_org_id)
                     return (
                       <tr key={l.id} className="border-t border-border">
-                        <td className="px-3 py-2 font-medium">{l.company_name}</td>
+                        <td className="px-3 py-2 font-medium"><Link href={`/settings/subs/${l.id}`} className="text-brand hover:underline">{l.company_name}</Link></td>
                         <td className="px-3 py-2">{l.trade}</td>
                         <td className="px-3 py-2">
                           <div>{[l.primary_contact_first, l.primary_contact_last].filter(Boolean).join(' ')}</div>
@@ -72,6 +81,8 @@ export default async function SubsPage() {
                         </td>
                         <td className="px-3 py-2">{jobCount.get(l.sub_org_id) ?? 0}</td>
                         <td className="px-3 py-2">{inv ? <span className="flex items-center gap-2"><Badge tone="warning">Invited</Badge><CopyButton value={`${site}/invite/${inv.token}`} label="Invite link" /></span> : <Badge tone="success">Joined</Badge>}</td>
+                        <td className="px-3 py-2">{(() => { const c = comp.get(l.sub_org_id); const st = COMPLIANCE_STATUS[c?.status ?? 'ok']
+                          return <span title={c?.detail || undefined}><Badge tone={st.tone}>{st.label}</Badge></span> })()}</td>
                         <td className="px-3 py-2">{l.status === 'pending'
                           ? <span title="This company already uses MyBuilder. Their admin must accept your invite before they can see your jobs."><Badge tone="warning">Awaiting their OK</Badge></span>
                           : <Badge tone={l.status === 'active' ? 'success' : 'neutral'}>{l.status}</Badge>}</td>
@@ -106,6 +117,20 @@ export default async function SubsPage() {
             </div>
           )}
         </Card>
+        {hasAction(ctx, 'settings.manage') && (
+          <Card>
+            <CardHeader title="Compliance rules" description="What every sub must keep on file with you. Subs add certificates from their portal; you can add them too." />
+            <ActionForm action={saveComplianceRules} resetOnSuccess={false} className="space-y-3 p-4 text-[13px]">
+              <div className="grid gap-2 sm:grid-cols-3">
+                {REQUIRABLE.map((k) => (
+                  <label key={k} className="flex items-center gap-2"><Checkbox name="required" value={k} defaultChecked={org?.compliance_required.includes(k)} />{CERT_KINDS[k]}</label>
+                ))}
+              </div>
+              <label className="flex items-center gap-2"><Checkbox name="block" defaultChecked={org?.compliance_blocks_payment} />Block payments to subs with missing or expired documents</label>
+              <Button type="submit">Save rules</Button>
+            </ActionForm>
+          </Card>
+        )}
       </div>
     </>
   )

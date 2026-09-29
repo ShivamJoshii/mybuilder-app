@@ -34,7 +34,7 @@ Last updated: 2026-09-29 (overnight build)
 | Client invoices: draws by % of contract, fixed amounts, approved change orders; GST/HST; owner holdback; send to client; record payments; void | Built, browser-tested |
 | Reports: work in progress (earned vs billed, over/under billing), receivables aging, payables aging | Built, browser-tested |
 | Warranty: client requests (portal setting), assignment to team or sub, service visits the sub confirms/completes, internal notes kept private, client rating | Built, browser-tested |
-| Chat: 1:1 and group conversations with team, job subs and job clients (membership checked server-side), unread counts, live updates (3s polling; Supabase Realtime later) | Built, browser-tested (two browsers) |
+| Chat: 1:1 and group conversations with team, job subs and job clients (membership checked server-side), unread counts, live updates (Supabase Realtime) | Built, browser-tested (two browsers) |
 | Messages: job email with a per-job address; send from the job (Reply-To = job address), inbound webhook threads replies (In-Reply-To, then subject), notifications | Built, browser-tested; sending waits for Postmark keys (stays “Queued”) |
 | Time clock: clock in/out by job + cost code with GPS, manual shifts, provincial overtime (AB 8/44 default), approve/reject, labour rates (admin-only), labour cost into budget and WIP, payroll CSV export | Built, browser-tested |
 | Submittals: request from sub, numbered revisions with attachments, reviewer decisions (approved / as noted / revise / rejected), ball-in-court | Built, browser-tested |
@@ -45,6 +45,7 @@ Last updated: 2026-09-29 (overnight build)
 | Bid documents: pick plan sheets for a bid package; invited bidders open those sheets and the package attachments before they're on the job | Built, browser-tested |
 | Custom fields on jobs, leads, daily logs, to-dos, RFIs and warranty claims: typed values, per-field visibility to subs / clients | Built, browser-tested |
 | Chat is live over Supabase Realtime (members only, via RLS); polling kicks in if the socket drops | Built, browser-tested |
+| Sub compliance: WCB clearance / liability / auto / licence / COR certificates per builder with documents and expiry; subs file their own; required set + optional payment block; warnings on POs and bills | Built, browser-tested |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
@@ -116,9 +117,9 @@ Last updated: 2026-09-29 (overnight build)
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields | 331 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance | 342 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing | 21 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields | 21 flows (run against a production build) | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance | 22 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

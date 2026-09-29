@@ -1741,13 +1741,13 @@ isOneToOne: false
                   ]
                 },"organizations": {
                   Row: {
-                    "city": string | null,"country": string,"created_at": string,"created_by": string | null,"email": string | null,"gst_number": string | null,"id": string,"kind": Database["public"]['Enums']["org_kind"],"legal_name": string | null,"logo_url": string | null,"name": string,"phone": string | null,"postal_code": string | null,"province": string | null,"qst_number": string | null,"street": string | null,"timezone": string,"updated_at": string,"website": string | null
+                    "city": string | null,"compliance_blocks_payment": boolean,"compliance_required": (string)[],"country": string,"created_at": string,"created_by": string | null,"email": string | null,"gst_number": string | null,"id": string,"kind": Database["public"]['Enums']["org_kind"],"legal_name": string | null,"logo_url": string | null,"name": string,"phone": string | null,"postal_code": string | null,"province": string | null,"qst_number": string | null,"street": string | null,"timezone": string,"updated_at": string,"website": string | null
                   }
                   Insert: {
-                    "city"?: string | null,"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gst_number"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name": string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"qst_number"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
+                    "city"?: string | null,"compliance_blocks_payment"?: boolean,"compliance_required"?: (string)[],"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gst_number"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name": string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"qst_number"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
                   }
                   Update: {
-                    "city"?: string | null,"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gst_number"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name"?: string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"qst_number"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
+                    "city"?: string | null,"compliance_blocks_payment"?: boolean,"compliance_required"?: (string)[],"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gst_number"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name"?: string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"qst_number"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
                   }
                   Relationships: [
                     
@@ -2554,6 +2554,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"sub_certificates": {
+                  Row: {
+                    "builder_org_id": string,"coverage": number | null,"created_at": string,"created_by": string | null,"effective_on": string | null,"expires_on": string | null,"file_id": string | null,"id": string,"kind": string,"label": string | null,"notes": string | null,"number": string | null,"provider": string | null,"sub_org_id": string,"updated_at": string
+                  }
+                  Insert: {
+                    "builder_org_id": string,"coverage"?: number | null,"created_at"?: string,"created_by"?: string | null,"effective_on"?: string | null,"expires_on"?: string | null,"file_id"?: string | null,"id"?: string,"kind": string,"label"?: string | null,"notes"?: string | null,"number"?: string | null,"provider"?: string | null,"sub_org_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "builder_org_id"?: string,"coverage"?: number | null,"created_at"?: string,"created_by"?: string | null,"effective_on"?: string | null,"expires_on"?: string | null,"file_id"?: string | null,"id"?: string,"kind"?: string,"label"?: string | null,"notes"?: string | null,"number"?: string | null,"provider"?: string | null,"sub_org_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "sub_certificates_builder_org_id_fkey"
+      columns: ["builder_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "sub_certificates_file_id_fkey"
+      columns: ["file_id"]
+isOneToOne: false
+      referencedRelation: "files"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "sub_certificates_sub_org_id_fkey"
+      columns: ["sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"submittal_revisions": {
                   Row: {
                     "decided_at": string | null,"decided_by": string | null,"decision": string | null,"decision_notes": string | null,"id": string,"notes": string | null,"revision": number,"submittal_id": string,"submitted_at": string,"submitted_by": string | null
@@ -3071,6 +3102,9 @@ isOneToOne: false
               "description": string,"id": string,"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
             }[]
                            },
+"compliance_folder":
+{ Args: { "p_org": string }; Returns: string
+                           },
 "convert_lead_to_job":
 { Args: { "p_amount"?: number,"p_contract"?: Database["public"]['Enums']["contract_type"],"p_lead": string,"p_title": string }; Returns: string
                            },
@@ -3281,6 +3315,11 @@ isOneToOne: false
                            },
 "start_conversation":
 { Args: { "p_body"?: string,"p_job": string,"p_org": string,"p_title"?: string,"p_users": (string)[] }; Returns: string
+                           },
+"sub_compliance":
+{ Args: { "p_builder": string,"p_sub": string }; Returns: {
+              "detail": string,"status": string
+            }[]
                            },
 "sub_selections":
 { Args: { "p_id"?: string,"p_jobs": (string)[] }; Returns: {

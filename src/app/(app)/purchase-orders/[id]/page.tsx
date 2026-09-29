@@ -20,6 +20,7 @@ import { formatCAD, formatDate, fullName } from '@/lib/utils'
 import { BILL_STATUS, PO_STATUS, WORK_STATUS } from '@/lib/estimate'
 import { PoForm } from '../po-form'
 import { decidePo, releaseHoldback, releasePo, savePoLines, setWorkStatus, updatePo } from '../actions'
+import { ComplianceBanner } from '@/components/kit/compliance-banner'
 
 export const metadata: Metadata = { title: 'Purchase order' }
 
@@ -63,6 +64,7 @@ export default async function PoPage({ params }: PageProps<'/purchase-orders/[id
           )}
         </div>
       </div>
+      {builder && <ComplianceBanner builderId={po.org_id} subId={po.sub_org_id} />}
 
       {draft && canEdit ? (
         <>
