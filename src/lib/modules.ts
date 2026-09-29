@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { FileUp,
+import { FileUp, History,
   BarChart3, Calculator, CalendarDays, CheckSquare, ClipboardList, DollarSign, FileCheck2, FileQuestion,
   FileSignature, FileText, FolderOpen, Gavel, Hammer, Image as ImageIcon, Inbox, LayoutDashboard, ListChecks,
   MessageCircle, MessageSquare, NotebookPen, Receipt, ScrollText, ShieldCheck, ShoppingCart, Target, Timer,
@@ -118,4 +118,5 @@ export const SETTINGS_NAV: { label: string; href: string; module?: string; actio
   { label: 'Sales', href: '/settings/sales', action: 'settings.manage', icon: Target },
   { label: 'Accounting', href: '/settings/accounting', module: 'accounting', icon: Receipt },
   { label: 'Import data', href: '/settings/import', module: 'jobs', icon: FileUp },
+  { label: 'Audit log', href: '/settings/audit', action: 'audit.view', icon: History },
 ]
