@@ -59,8 +59,9 @@ export async function signDocument(id: string, _: ActionState, fd: FormData): Pr
   const ctx = await getAppContext()
   const d = await parseDecision(fd)
   if ('error' in d) return { error: d.error }
-  const supabase = await createClient()
-  const { data: status, error } = await supabase.rpc('sign_document', { ...d.args, p_req: uuid.parse(id), p_decision: d.decision === 'approved' ? 'signed' : 'declined' })
+  // The server records who signed and from where (signers can't supply their own IP/browser)
+  const admin = createAdminClient()
+  const { data: status, error } = await admin.rpc('sign_document', { ...d.args, p_req: uuid.parse(id), p_user: ctx.userId, p_decision: d.decision === 'approved' ? 'signed' : 'declined' })
   if (error) return { error: error.message }
   if (status === 'completed') await makeSignedCopy(id, ctx.tz)
   revalidatePath(`/signatures/${id}`); revalidatePath('/signatures')
@@ -74,15 +75,22 @@ async function makeSignedCopy(id: string, tz: string) {
   const f = r?.files as { id: string; org_id: string; job_id: string; folder_id: string; name: string; storage_key: string; share_subs: boolean; share_clients: boolean } | null
   if (!r || !f || r.status !== 'completed' || r.signed_file_id) return
   const original = await getObjectBytes(f.storage_key)
-  if (!original || sha256(original) !== r.file_sha256) { console.error('signed copy: document changed since it was sent', id); return }
+  if (!original || sha256(original) !== r.file_sha256) {
+    await admin.rpc('signed_copy_failed', { p_req: id, p_reason: 'The document changed after it was sent, so no signed copy was made.' }); return
+  }
   const { data: signers } = await admin.from('signature_request_signers').select('*').eq('request_id', id).order('sort')
-  const bytes = await stampCertificate(original, { title: r.title, company: (r.organizations as { name: string } | null)?.name ?? '', sentAt: r.sent_at!, completedAt: r.completed_at!, hash: r.file_sha256!, tz }, signers ?? [])
+  let bytes: Uint8Array
+  try {
+    bytes = await stampCertificate(original, { title: r.title, company: (r.organizations as { name: string } | null)?.name ?? '', sentAt: r.sent_at!, completedAt: r.completed_at!, hash: r.file_sha256!, tz }, signers ?? [])
+  } catch (e) {
+    await admin.rpc('signed_copy_failed', { p_req: id, p_reason: `The signed copy could not be made (${e instanceof Error ? e.message : 'PDF error'}).` }); return
+  }
   const newId = randomUUID()
   const name = f.name.replace(/\.pdf$/i, '') + ' (signed).pdf'
   const key = storageKey(f.org_id, f.job_id, newId, 1, name)
   await putObject(key, bytes, 'application/pdf')
   const { error } = await admin.from('files').insert({ id: newId, org_id: f.org_id, folder_id: f.folder_id, kind: 'documents', name, mime: 'application/pdf',
     size_bytes: bytes.length, storage_key: key, status: 'ready', share_subs: f.share_subs, share_clients: f.share_clients, uploaded_by: r.created_by ?? undefined })
-  if (error) { console.error('signed copy: could not save', error.message); return }
+  if (error) { await admin.rpc('signed_copy_failed', { p_req: id, p_reason: 'The signed copy could not be saved.' }); return }
   await admin.rpc('attach_signed_copy', { p_req: id, p_file: newId })
 }

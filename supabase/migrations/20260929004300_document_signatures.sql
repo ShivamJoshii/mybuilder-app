@@ -22,6 +22,7 @@ create table public.signature_requests (
   in_order        boolean not null default false,
   status          public.sigreq_status not null default 'draft',
   signed_file_id  uuid references public.files (id) on delete set null,
+  signed_copy_error text,
   created_by      uuid references auth.users (id) on delete set null default auth.uid(),
   created_at      timestamptz not null default now(),
   sent_at         timestamptz,
@@ -65,6 +66,12 @@ returns boolean language sql stable security definer set search_path = '' as $$
       or (p_sub is not null and exists (select 1 from public.org_members m where m.org_id = p_sub and m.user_id = auth.uid() and m.status = 'active'));
 $$;
 
+create or replace function private.is_signer_user(p_uid uuid, p_user uuid, p_sub uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select (p_user is not null and p_user = p_uid)
+      or (p_sub is not null and exists (select 1 from public.org_members m where m.org_id = p_sub and m.user_id = p_uid and m.status = 'active'));
+$$;
+
 create or replace function private.can_see_sigreq(p uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.signature_requests r where r.id = p and (
@@ -85,7 +92,19 @@ create policy signers_select on public.signature_request_signers for select to a
 create policy signers_write on public.signature_request_signers for all to authenticated
   using ((private.sigreq_row(request_id)).status = 'draft' and private.can_module((private.sigreq_row(request_id)).job_id, 'files', 'edit'))
   with check ((private.sigreq_row(request_id)).status = 'draft' and private.can_module((private.sigreq_row(request_id)).job_id, 'files', 'edit'));
-grant select, insert, update, delete on public.signature_request_signers to authenticated;
+grant insert, update, delete on public.signature_request_signers to authenticated;
+-- IP and browser are evidence for the sender, not for other signers
+revoke select on public.signature_request_signers from authenticated, anon;
+grant select (id, request_id, sort, user_id, sub_org_id, label, status, signer_name, signed_by, signature, comment, decided_at)
+  on public.signature_request_signers to authenticated;
+
+create or replace function public.signature_evidence(p_req uuid)
+returns table (signer_id uuid, ip text, user_agent text)
+language sql stable security definer set search_path = '' as $$
+  select s.id, s.ip, s.user_agent from public.signature_request_signers s join public.signature_requests r on r.id = s.request_id
+  where s.request_id = p_req and private.can_module(r.job_id, 'files', 'view');
+$$;
+grant execute on function public.signature_evidence(uuid) to authenticated;
 
 create or replace function private.sigreq_fill()
 returns trigger language plpgsql security definer set search_path = '' as $$
@@ -94,10 +113,10 @@ begin
   if tg_op = 'UPDATE' then
     new.org_id := old.org_id; new.job_id := old.job_id; new.created_by := old.created_by; new.created_at := old.created_at;
     if current_setting('app.sigreq', true) is distinct from 'on' then
-      new.status := old.status; new.sent_at := old.sent_at; new.completed_at := old.completed_at; new.signed_file_id := old.signed_file_id; new.file_sha256 := old.file_sha256;
+      new.status := old.status; new.sent_at := old.sent_at; new.completed_at := old.completed_at; new.signed_file_id := old.signed_file_id; new.file_sha256 := old.file_sha256; new.signed_copy_error := old.signed_copy_error;
     end if;
   else
-    new.created_by := auth.uid(); new.status := 'draft'; new.sent_at := null; new.completed_at := null; new.signed_file_id := null; new.file_sha256 := null;
+    new.created_by := auth.uid(); new.status := 'draft'; new.sent_at := null; new.completed_at := null; new.signed_file_id := null; new.file_sha256 := null; new.signed_copy_error := null;
   end if;
   select * into f from public.files where id = new.file_id;
   if f.id is null or f.job_id is distinct from new.job_id or f.deleted_at is not null then raise exception 'Pick a file on this job' using errcode = '23514'; end if;
@@ -183,19 +202,23 @@ begin
   end loop;
 end $$;
 
-create or replace function public.sign_document(p_req uuid, p_decision text, p_signer_name text, p_signature text, p_comment text default null, p_ip text default null, p_ua text default null)
+-- Called by the server only (service role) with the verified user, IP and browser; signers can't forge the evidence
+create or replace function public.sign_document(p_req uuid, p_user uuid, p_decision text, p_signer_name text, p_signature text, p_comment text default null, p_ip text default null, p_ua text default null)
 returns text language plpgsql security definer set search_path = '' as $$
 declare r public.signature_requests; s public.signature_request_signers; v_left int;
 begin
   select * into r from public.signature_requests where id = p_req for update;
   if r.id is null or r.status <> 'sent' then raise exception 'This document is not open for signing' using errcode = '22023'; end if;
   if p_decision not in ('signed', 'declined') then raise exception 'Bad decision' using errcode = '22023'; end if;
-  select t.* into s from private.sig_turn(p_req) t where private.is_signer(t.user_id, t.sub_org_id) order by t.sort limit 1;
+  if length(trim(coalesce(p_signer_name, ''))) not between 1 and 120 then raise exception 'Enter your full name' using errcode = '23514'; end if;
+  if p_decision = 'signed' and coalesce(p_signature, '') !~ '^(typed:.{1,120}|data:image/png;base64,[A-Za-z0-9+/]+=*)$' then
+    raise exception 'A signature is required' using errcode = '23514';
+  end if;
+  select t.* into s from private.sig_turn(p_req) t where private.is_signer_user(p_user, t.user_id, t.sub_org_id) order by t.sort limit 1;
   if s.id is null then raise exception 'It is not your turn to sign this document' using errcode = '42501'; end if;
-  if p_decision = 'signed' and coalesce(trim(p_signature), '') = '' then raise exception 'A signature is required' using errcode = '23514'; end if;
   perform set_config('app.sigreq', 'on', true);
-  update public.signature_request_signers set status = p_decision, signer_name = trim(p_signer_name), signed_by = auth.uid(),
-    signature = case when p_decision = 'signed' then p_signature end, comment = p_comment, ip = p_ip, user_agent = p_ua, decided_at = now()
+  update public.signature_request_signers set status = p_decision, signer_name = trim(p_signer_name), signed_by = p_user,
+    signature = case when p_decision = 'signed' then p_signature end, comment = left(p_comment, 4000), ip = left(p_ip, 100), user_agent = left(p_ua, 400), decided_at = now()
   where id = s.id;
   if p_decision = 'declined' then
     update public.signature_requests set status = 'declined' where id = p_req;
@@ -214,6 +237,8 @@ begin
   perform set_config('app.sigreq', 'off', true);
   return (select status::text from public.signature_requests where id = p_req);
 end $$;
+revoke execute on function public.sign_document(uuid, uuid, text, text, text, text, text, text) from public, anon, authenticated;
+grant execute on function public.sign_document(uuid, uuid, text, text, text, text, text, text) to service_role;
 
 create or replace function public.void_signature_request(p_req uuid)
 returns void language plpgsql security definer set search_path = '' as $$
@@ -235,6 +260,15 @@ begin
   update public.signature_requests set signed_file_id = p_file where id = p_req and status = 'completed' and signed_file_id is null;
   perform set_config('app.sigreq', 'off', true);
 end $$;
+create or replace function public.signed_copy_failed(p_req uuid, p_reason text)
+returns void language plpgsql security definer set search_path = '' as $$
+begin
+  perform set_config('app.sigreq', 'on', true);
+  update public.signature_requests set signed_copy_error = left(p_reason, 500) where id = p_req;
+  perform set_config('app.sigreq', 'off', true);
+end $$;
+revoke execute on function public.signed_copy_failed(uuid, text) from public, anon, authenticated;
+grant execute on function public.signed_copy_failed(uuid, text) to service_role;
 revoke execute on function public.attach_signed_copy(uuid, uuid) from public, anon, authenticated;
 grant execute on function public.attach_signed_copy(uuid, uuid) to service_role;
 
@@ -263,6 +297,10 @@ begin
     new.share_clients := new.share_clients or f.share_clients;
   else
     new.id := old.id;
+    if (new.version is distinct from old.version or new.storage_key is distinct from old.storage_key or new.folder_id is distinct from old.folder_id or new.deleted_at is distinct from old.deleted_at)
+       and exists (select 1 from public.signature_requests r where r.file_id = old.id and r.status = 'sent') then
+      raise exception 'This document is out for signature. Void the request before changing it.' using errcode = '55000';
+    end if;
     new.uploaded_by := old.uploaded_by; new.uploader_type := old.uploader_type; new.uploader_org := old.uploader_org;
     if new.version < old.version then new.version := old.version; end if;
     new.storage_key := case when new.version > old.version then new.storage_key else old.storage_key end;
@@ -284,3 +322,8 @@ returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from private.sig_turn(p_req) t where private.is_signer(t.user_id, t.sub_org_id));
 $$;
 grant execute on function public.my_signature_turn(uuid) to authenticated;
+
+-- Server-only helpers stay server-only (the blanket grant above re-adds them)
+revoke execute on function private.run_reminders(timestamptz) from authenticated;
+revoke execute on function private.remind(uuid[], text, uuid, text, uuid, uuid, text, text, text) from authenticated;
+revoke execute on function private.notify(uuid[], uuid, uuid, text, text, text, text) from authenticated;

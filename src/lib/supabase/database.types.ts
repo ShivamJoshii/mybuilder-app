@@ -2563,13 +2563,13 @@ isOneToOne: false
                   ]
                 },"signature_requests": {
                   Row: {
-                    "completed_at": string | null,"created_at": string,"created_by": string | null,"file_id": string,"file_sha256": string | null,"file_version": number,"id": string,"in_order": boolean,"job_id": string,"message": string | null,"org_id": string,"sent_at": string | null,"signed_file_id": string | null,"status": Database["public"]['Enums']["sigreq_status"],"title": string
+                    "completed_at": string | null,"created_at": string,"created_by": string | null,"file_id": string,"file_sha256": string | null,"file_version": number,"id": string,"in_order": boolean,"job_id": string,"message": string | null,"org_id": string,"sent_at": string | null,"signed_copy_error": string | null,"signed_file_id": string | null,"status": Database["public"]['Enums']["sigreq_status"],"title": string
                   }
                   Insert: {
-                    "completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"file_id": string,"file_sha256"?: string | null,"file_version"?: number,"id"?: string,"in_order"?: boolean,"job_id": string,"message"?: string | null,"org_id": string,"sent_at"?: string | null,"signed_file_id"?: string | null,"status"?: Database["public"]['Enums']["sigreq_status"],"title": string
+                    "completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"file_id": string,"file_sha256"?: string | null,"file_version"?: number,"id"?: string,"in_order"?: boolean,"job_id": string,"message"?: string | null,"org_id": string,"sent_at"?: string | null,"signed_copy_error"?: string | null,"signed_file_id"?: string | null,"status"?: Database["public"]['Enums']["sigreq_status"],"title": string
                   }
                   Update: {
-                    "completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"file_id"?: string,"file_sha256"?: string | null,"file_version"?: number,"id"?: string,"in_order"?: boolean,"job_id"?: string,"message"?: string | null,"org_id"?: string,"sent_at"?: string | null,"signed_file_id"?: string | null,"status"?: Database["public"]['Enums']["sigreq_status"],"title"?: string
+                    "completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"file_id"?: string,"file_sha256"?: string | null,"file_version"?: number,"id"?: string,"in_order"?: boolean,"job_id"?: string,"message"?: string | null,"org_id"?: string,"sent_at"?: string | null,"signed_copy_error"?: string | null,"signed_file_id"?: string | null,"status"?: Database["public"]['Enums']["sigreq_status"],"title"?: string
                   }
                   Relationships: [
                     {
@@ -2631,13 +2631,13 @@ isOneToOne: false
                   ]
                 },"sub_certificates": {
                   Row: {
-                    "builder_org_id": string,"coverage": number | null,"created_at": string,"created_by": string | null,"effective_on": string | null,"expires_on": string | null,"file_id": string | null,"id": string,"kind": string,"label": string | null,"notes": string | null,"number": string | null,"provider": string | null,"sub_org_id": string,"updated_at": string
+                    "builder_org_id": string,"coverage": number | null,"created_at": string,"created_by": string | null,"effective_on": string | null,"expires_on": string | null,"file_id": string | null,"id": string,"kind": string,"label": string | null,"notes": string | null,"number": string | null,"provider": string | null,"sub_org_id": string,"updated_at": string,"verified_at": string | null,"verified_by": string | null
                   }
                   Insert: {
-                    "builder_org_id": string,"coverage"?: number | null,"created_at"?: string,"created_by"?: string | null,"effective_on"?: string | null,"expires_on"?: string | null,"file_id"?: string | null,"id"?: string,"kind": string,"label"?: string | null,"notes"?: string | null,"number"?: string | null,"provider"?: string | null,"sub_org_id": string,"updated_at"?: string
+                    "builder_org_id": string,"coverage"?: number | null,"created_at"?: string,"created_by"?: string | null,"effective_on"?: string | null,"expires_on"?: string | null,"file_id"?: string | null,"id"?: string,"kind": string,"label"?: string | null,"notes"?: string | null,"number"?: string | null,"provider"?: string | null,"sub_org_id": string,"updated_at"?: string,"verified_at"?: string | null,"verified_by"?: string | null
                   }
                   Update: {
-                    "builder_org_id"?: string,"coverage"?: number | null,"created_at"?: string,"created_by"?: string | null,"effective_on"?: string | null,"expires_on"?: string | null,"file_id"?: string | null,"id"?: string,"kind"?: string,"label"?: string | null,"notes"?: string | null,"number"?: string | null,"provider"?: string | null,"sub_org_id"?: string,"updated_at"?: string
+                    "builder_org_id"?: string,"coverage"?: number | null,"created_at"?: string,"created_by"?: string | null,"effective_on"?: string | null,"expires_on"?: string | null,"file_id"?: string | null,"id"?: string,"kind"?: string,"label"?: string | null,"notes"?: string | null,"number"?: string | null,"provider"?: string | null,"sub_org_id"?: string,"updated_at"?: string,"verified_at"?: string | null,"verified_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -3412,7 +3412,15 @@ isOneToOne: false
 { Args: { "s": Database["public"]['Tables']["time_shifts"]['Row'] }; Returns: number
                            },
 "sign_document":
-{ Args: { "p_comment"?: string,"p_decision": string,"p_ip"?: string,"p_req": string,"p_signature": string,"p_signer_name": string,"p_ua"?: string }; Returns: string
+{ Args: { "p_comment"?: string,"p_decision": string,"p_ip"?: string,"p_req": string,"p_signature": string,"p_signer_name": string,"p_ua"?: string,"p_user": string }; Returns: string
+                           },
+"signature_evidence":
+{ Args: { "p_req": string }; Returns: {
+              "ip": string,"signer_id": string,"user_agent": string
+            }[]
+                           },
+"signed_copy_failed":
+{ Args: { "p_reason": string,"p_req": string }; Returns: undefined
                            },
 "start_conversation":
 { Args: { "p_body"?: string,"p_job": string,"p_org": string,"p_title"?: string,"p_users": (string)[] }; Returns: string

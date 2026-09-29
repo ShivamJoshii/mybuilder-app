@@ -22,11 +22,13 @@ export default async function SignaturePage({ params }: PageProps<'/signatures/[
   const supabase = await createClient()
   const { data: r } = await supabase.from('signature_requests').select('*').eq('id', id).maybeSingle()
   if (!r) notFound()
-  const [{ data: signers }, { data: turn }] = await Promise.all([
-    supabase.from('signature_request_signers').select('*').eq('request_id', id).order('sort'),
-    supabase.rpc('my_signature_turn', { p_req: id }),
-  ])
   const builder = ctx.workspace.mode === 'builder'
+  const [{ data: signers }, { data: turn }, { data: evidence }] = await Promise.all([
+    supabase.from('signature_request_signers').select('id,sort,label,status,signer_name,signed_by,signature,comment,decided_at').eq('request_id', id).order('sort'),
+    supabase.rpc('my_signature_turn', { p_req: id }),
+    builder ? supabase.rpc('signature_evidence', { p_req: id }) : Promise.resolve({ data: [] as { signer_id: string; ip: string | null; user_agent: string | null }[] }),
+  ])
+  const ipOf = new Map((evidence ?? []).map((e) => [e.signer_id, e.ip]))
   const canEdit = builder && can(ctx, 'files', 'edit')
   const st = SIG_STATUS[r.status]
   const job = ctx.jobs.find((j) => j.id === r.job_id)
@@ -50,6 +52,7 @@ export default async function SignaturePage({ params }: PageProps<'/signatures/[
         {r.message && <p className="mt-3 whitespace-pre-wrap text-[14px]">{r.message}</p>}
       </Card>
       {mine && <Alert tone={mine.status === 'signed' ? 'success' : 'danger'}>You {mine.status === 'signed' ? 'signed' : 'declined'} this on {formatDateTime(mine.decided_at, ctx.tz)}.</Alert>}
+      {r.signed_copy_error && builder && <Alert>{r.signed_copy_error}</Alert>}
       {r.status === 'draft' && canEdit && <Alert tone="info">This is a draft. Check the document and signers, then send it.</Alert>}
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -64,7 +67,7 @@ export default async function SignaturePage({ params }: PageProps<'/signatures/[
                 <li key={s.id} className="px-4 py-2">
                   <div className="flex items-center gap-2"><span className="font-medium">{r.in_order ? `${s.sort}. ` : ''}{s.label}</span>
                     <Badge tone={s.status === 'signed' ? 'success' : s.status === 'declined' ? 'danger' : 'neutral'} className="ml-auto">{s.status === 'signed' ? 'Signed' : s.status === 'declined' ? 'Declined' : 'Waiting'}</Badge></div>
-                  {s.decided_at && <div className="text-xs text-text-3">{s.signer_name} · {formatDateTime(s.decided_at, ctx.tz)}{builder && s.ip ? ` · IP ${s.ip}` : ''}</div>}
+                  {s.decided_at && <div className="text-xs text-text-3">{s.signer_name} · {formatDateTime(s.decided_at, ctx.tz)}{ipOf.get(s.id) ? ` · IP ${ipOf.get(s.id)}` : ''}</div>}
                   {s.signature?.startsWith('typed:') && <div className="font-serif text-xl italic">{s.signature.slice(6)}</div>}
                   {s.signature?.startsWith('data:image/png;base64,') && (
                     // eslint-disable-next-line @next/next/no-img-element

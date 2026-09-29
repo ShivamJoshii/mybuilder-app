@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(11);
+select plan(13);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -39,8 +39,9 @@ select pg_temp.login('sub');
 insert into public.sub_certificates (builder_org_id, sub_org_id, kind, number, expires_on) values
   (pg_temp.id('org'), pg_temp.id('so'), 'wcb_clearance', 'WCB-123', current_date + 10),
   (pg_temp.id('org'), pg_temp.id('so'), 'liability_insurance', 'POL-9', current_date + 365);
-select is((select status from public.sub_compliance(pg_temp.id('org'), pg_temp.id('so'))), 'expiring', 'WCB due within 30 days shows as expiring');
-select ok((select detail from public.sub_compliance(pg_temp.id('org'), pg_temp.id('so'))) like 'WCB clearance expires%', 'the detail names the certificate');
+select is((select status from public.sub_compliance(pg_temp.id('org'), pg_temp.id('so'))), 'review', 'certificates a sub enters wait for the builder''s review');
+update public.sub_certificates set verified_at = now() where sub_org_id = pg_temp.id('so');
+select is((select count(*)::int from public.sub_certificates where verified_at is not null), 0, 'a sub cannot verify its own certificates');
 select is(public.compliance_folder(pg_temp.id('so')) is not null, true, 'subs get a compliance folder for documents');
 select throws_ok(format('select public.compliance_folder(%L)', pg_temp.id('org')), '42501', null, 'but not in the builder''s company');
 update public.organizations set compliance_blocks_payment = true where id = pg_temp.id('org');
@@ -54,6 +55,9 @@ reset role;
 -- Builder: expired WCB blocks payment once the rule is on
 select pg_temp.login('owner');
 select is((select count(*)::int from public.sub_certificates), 2, 'the builder sees the sub''s certificates');
+update public.sub_certificates set verified_at = now() where sub_org_id = pg_temp.id('so');
+select is((select status from public.sub_compliance(pg_temp.id('org'), pg_temp.id('so'))), 'expiring', 'once verified, a WCB due within 30 days shows as expiring');
+select ok((select detail from public.sub_compliance(pg_temp.id('org'), pg_temp.id('so'))) like 'WCB clearance expires%', 'the detail names the certificate');
 update public.sub_certificates set expires_on = current_date - 1 where kind = 'wcb_clearance';
 select is((select status from public.sub_compliance(pg_temp.id('org'), pg_temp.id('so'))), 'expired', 'an expired WCB clearance makes the sub non-compliant');
 update public.organizations set compliance_blocks_payment = true where id = pg_temp.id('org');

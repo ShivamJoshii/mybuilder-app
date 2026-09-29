@@ -11,11 +11,11 @@ import { ConfirmSubmit } from './confirm-submit'
 import { CertUpload } from './cert-upload'
 import { formatCAD, formatDate, todayIn } from '@/lib/utils'
 import { CERT_KINDS, COMPLIANCE_STATUS, certState, type CertKind } from '@/lib/compliance'
-import { addCertificate, deleteCertificate } from '@/app/(app)/settings/compliance-actions'
+import { addCertificate, deleteCertificate, verifyCertificate } from '@/app/(app)/settings/compliance-actions'
 
 /** Certificates a sub keeps on file with one builder, plus the overall compliance status. */
-export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, path, title, tz }: {
-  builderId: string; subId: string; uploaderOrgId: string; canEdit: boolean; path: string; title?: string; tz: string
+export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, path, title, tz, canVerify = false }: {
+  builderId: string; subId: string; uploaderOrgId: string; canEdit: boolean; path: string; title?: string; tz: string; canVerify?: boolean
 }) {
   const supabase = await createClient()
   const [{ data: certs }, { data: status }, folder] = await Promise.all([
@@ -47,7 +47,8 @@ export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, p
                 const file = c.files as { id: string; name: string } | null
                 return (
                   <tr key={c.id}>
-                    <td className="px-3 py-2 font-medium">{CERT_KINDS[c.kind as CertKind]}{c.label ? <div className="text-xs font-normal text-text-3">{c.label}</div> : null}</td>
+                    <td className="px-3 py-2 font-medium">{CERT_KINDS[c.kind as CertKind]}{c.label ? <div className="text-xs font-normal text-text-3">{c.label}</div> : null}
+                      <div className="mt-0.5">{c.verified_at ? <Badge tone="success">Verified</Badge> : <Badge tone="warning">Waiting for review</Badge>}</div></td>
                     <td className="px-3 py-2">{c.number}{c.provider ? <div className="text-xs text-text-3">{c.provider}</div> : null}</td>
                     <td className="px-3 py-2 tabular-nums">{c.coverage != null ? formatCAD(Number(c.coverage)) : ''}</td>
                     <td className="px-3 py-2">{c.expires_on ? <Badge tone={tone[s]}>{s === 'expired' ? 'Expired ' : ''}{formatDate(c.expires_on)}</Badge> : <span className="text-text-3">No expiry</span>}</td>
@@ -56,7 +57,8 @@ export async function Certificates({ builderId, subId, uploaderOrgId, canEdit, p
                         : canEdit && folder ? <CertUpload folderId={folder} certId={c.id} path={path} /> : <span className="text-text-3">—</span>}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      {canEdit && <form action={deleteCertificate.bind(null, c.id, path)}><ConfirmSubmit size="icon" variant="ghost" aria-label={`Delete ${CERT_KINDS[c.kind as CertKind]}`} title="Delete this certificate?" body="The record is removed; the document stays in the compliance folder."><Trash2 /></ConfirmSubmit></form>}
+                      {canVerify && !c.verified_at && <form action={verifyCertificate.bind(null, c.id, true, path)} className="mb-1"><Button type="submit" size="sm" aria-label={`Verify ${CERT_KINDS[c.kind as CertKind]}`}>Verify</Button></form>}
+                      {canEdit && (canVerify || !c.verified_at) && <form action={deleteCertificate.bind(null, c.id, path)}><ConfirmSubmit size="icon" variant="ghost" aria-label={`Delete ${CERT_KINDS[c.kind as CertKind]}`} title="Delete this certificate?" body="The record is removed; the document stays in the compliance folder."><Trash2 /></ConfirmSubmit></form>}
                     </td>
                   </tr>
                 )

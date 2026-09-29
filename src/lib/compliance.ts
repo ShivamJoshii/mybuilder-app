@@ -12,6 +12,7 @@ export const REQUIRABLE: CertKind[] = ['wcb_clearance', 'liability_insurance', '
 export const COMPLIANCE_STATUS: Record<string, { label: string; tone: 'success' | 'warning' | 'danger' | 'neutral' }> = {
   ok: { label: 'Compliant', tone: 'success' },
   expiring: { label: 'Expiring soon', tone: 'warning' },
+  review: { label: 'Needs review', tone: 'warning' },
   expired: { label: 'Expired', tone: 'danger' },
   missing: { label: 'Missing documents', tone: 'danger' },
 }

@@ -23,7 +23,7 @@ export async function parseDecision(fd: FormData) {
   return {
     args: {
       p_decision: d.decision, p_signer_name: d.signer_name, p_signature: d.signature, p_comment: d.comment || undefined,
-      p_ip: (h.get('x-forwarded-for') ?? '').split(',')[0].trim() || undefined, p_ua: h.get('user-agent')?.slice(0, 400) ?? undefined,
+      p_ip: h.get('x-real-ip') || (h.get('x-forwarded-for') ?? '').split(',').pop()?.trim() || undefined,   // the proxy's view, not what the browser claims p_ua: h.get('user-agent')?.slice(0, 400) ?? undefined,
     },
     decision: d.decision,
   } as const

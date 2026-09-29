@@ -46,13 +46,59 @@ alter policy sheets_select on public.plan_sheets using (
   private.plan_visible(job_id, share_subs, share_clients, deleted_at)
   or (deleted_at is null and private.bid_sheet_visible(id)));
 
--- ... and the files attached to it
+-- ... and the files attached to it (only the package's own job files count)
 create or replace function private.bid_file_visible(p_file uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.record_attachments ra
+                 join public.bid_packages p on p.id = ra.record_id
+                 join public.files f on f.id = ra.file_id and f.job_id = p.job_id
                  where ra.file_id = p_file and ra.record_type = 'bid_package'
                    and private.bid_sub_request(ra.record_id) is not null);
 $$;
+
+-- Job of an attachable record (null when unknown)
+create or replace function private.record_job(p_type text, p_id uuid)
+returns uuid language sql stable security definer set search_path = '' as $$
+  select case p_type
+    when 'job' then (select id from public.jobs where id = p_id)
+    when 'bid_package' then (select job_id from public.bid_packages where id = p_id)
+    when 'bill' then (select job_id from public.bills where id = p_id)
+    when 'daily_log' then (select job_id from public.daily_logs where id = p_id)
+    when 'purchase_order' then (select job_id from public.purchase_orders where id = p_id)
+    when 'rfi' then (select job_id from public.rfis where id = p_id)
+    when 'schedule_item' then (select job_id from public.schedule_items where id = p_id)
+    when 'selection' then (select job_id from public.selections where id = p_id)
+    when 'submittal_revision' then (select s.job_id from public.submittal_revisions r join public.submittals s on s.id = r.submittal_id where r.id = p_id)
+    when 'todo' then (select job_id from public.todos where id = p_id)
+    when 'warranty_claim' then (select job_id from public.warranty_claims where id = p_id)
+  end;
+$$;
+
+-- Invoker: the caller's RLS on the record's own table decides whether they can see it
+create or replace function private.record_visible(p_type text, p_id uuid)
+returns boolean language plpgsql stable security invoker set search_path = '' as $$
+begin
+  return case p_type
+    when 'job' then exists (select 1 from public.jobs where id = p_id)
+    when 'bid_package' then exists (select 1 from public.bid_packages where id = p_id)
+    when 'bill' then exists (select 1 from public.bills where id = p_id)
+    when 'daily_log' then exists (select 1 from public.daily_logs where id = p_id)
+    when 'purchase_order' then exists (select 1 from public.purchase_orders where id = p_id)
+    when 'rfi' then exists (select 1 from public.rfis where id = p_id)
+    when 'schedule_item' then exists (select 1 from public.schedule_items where id = p_id)
+    when 'selection' then exists (select 1 from public.selections where id = p_id)
+    when 'submittal_revision' then exists (select 1 from public.submittal_revisions where id = p_id)
+    when 'todo' then exists (select 1 from public.todos where id = p_id)
+    when 'warranty_claim' then exists (select 1 from public.warranty_claims where id = p_id)
+    else false end;
+end $$;
+
+-- Attaching: the caller sees the file and the record, both on the same job; bid packages need bid edit rights
+alter policy attach_insert on public.record_attachments with check (
+  created_by = (select auth.uid()) and private.can_see_file(file_id)
+  and private.record_visible(record_type, record_id)
+  and (select f.job_id from public.files f where f.id = file_id) = private.record_job(record_type, record_id)
+  and (record_type <> 'bid_package' or private.bid_internal(record_id, 'edit')));
 
 alter policy files_select on public.files using (
   private.file_visible(org_id, job_id, share_subs, share_clients, uploaded_by, uploader_org, deleted_at)

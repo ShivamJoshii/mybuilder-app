@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(8);
+select plan(9);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -59,6 +59,8 @@ select is((select count(*)::int from public.plan_sheet_versions), 1, 'and their 
 select is((select count(*)::int from public.files where id = pg_temp.id('f1')), 1, 'and the package attachments');
 select is((select count(*)::int from public.record_attachments where record_id = pg_temp.id('pkg')), 1, 'attachment links are visible');
 select is((select count(*)::int from public.jobs), 0, 'but not the job itself');
+select throws_ok(format($q$insert into public.record_attachments (file_id, record_type, record_id) values (%L, 'bid_package', %L)$q$, pg_temp.id('f1'), pg_temp.id('pkg')),
+  '42501', null, 'bidders cannot attach files to the package');
 reset role;
 select pg_temp.login('other');
 select is((select count(*)::int from public.plan_sheets) + (select count(*)::int from public.files), 0, 'a sub not invited to bid sees nothing');

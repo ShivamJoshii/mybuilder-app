@@ -42,9 +42,11 @@ export async function stampCertificate(original: Uint8Array, info: { title: stri
     text(`Signed by ${s.signer_name ?? ''}${s.email ? ` <${s.email}>` : ''}`, 9)
     if (s.signature?.startsWith('typed:')) { page.drawText(latin1(s.signature.slice(6)).slice(0, 60), { x: 60, y: y - 14, size: 24, font: italic }); y -= 40 }
     else if (s.signature?.startsWith('data:image/png;base64,')) {
-      const img = await pdf.embedPng(Buffer.from(s.signature.split(',')[1], 'base64'))
-      const h = 48, w = Math.min(240, (img.width / img.height) * h)
-      page.drawImage(img, { x: 60, y: y - h + 6, width: w, height: h }); y -= h + 6
+      try {
+        const img = await pdf.embedPng(Buffer.from(s.signature.split(',')[1], 'base64'))
+        const h = 48, w = Math.min(240, (img.width / img.height) * h)
+        page.drawImage(img, { x: 60, y: y - h + 6, width: w, height: h }); y -= h + 6
+      } catch { text('[drawn signature could not be rendered]', 9) }
     }
     text(`Signed ${fmt(s.decided_at)}${s.ip ? ` · IP ${s.ip}` : ''}`, 9)
     if (s.user_agent) text(s.user_agent, 7, font, rgb(0.4, 0.4, 0.45))

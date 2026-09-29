@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
-select plan(13);
+select plan(16);
 
 create temp table ids (k text primary key, v uuid) on commit drop;
 grant all on ids to authenticated;
@@ -54,16 +54,22 @@ reset role;
 select pg_temp.login('owner');
 select public.send_signature_request(pg_temp.id('req'), repeat('a', 64));
 select is((select status::text from public.signature_requests where id = pg_temp.id('req')), 'sent', 'request is sent');
+select throws_ok(format($q$update public.files set version = 2, storage_key = %L where id = %L$q$,
+  pg_temp.id('org') || '/' || pg_temp.id('job') || '/' || pg_temp.id('f') || '/v2/other.pdf', pg_temp.id('f')), '55000', null, 'the document is frozen while out for signature');
 reset role;
 select is((select count(*)::int from public.notifications where type = 'signature.requested' and user_id = pg_temp.id('client')), 1, 'the first signer is asked');
 select is((select count(*)::int from public.notifications where type = 'signature.requested' and user_id = pg_temp.id('sub')), 0, 'the second waits their turn');
 
-select pg_temp.login('sub');
-select throws_ok(format($q$select public.sign_document(%L, 'signed', 'S', 'typed:S')$q$, pg_temp.id('req')), '42501', null, 'signing in order is enforced');
+select throws_ok(format($q$select public.sign_document(%L, %L, 'signed', 'S', 'typed:S')$q$, pg_temp.id('req'), pg_temp.id('sub')), '42501', null, 'signing in order is enforced');
+select pg_temp.login('client');
+select throws_ok(format($q$select public.sign_document(%L, %L, 'signed', 'C', 'typed:C', null, '1.2.3.4', 'forged')$q$, pg_temp.id('req'), pg_temp.id('client')), '42501', null, 'signers cannot call the signing function directly');
 reset role;
 select pg_temp.login('client');
 select is((select count(*)::int from public.files where id = pg_temp.id('f')), 1, 'the signer can open the document');
-select is(public.sign_document(pg_temp.id('req'), 'signed', 'Cara Client', 'typed:Cara Client', null, '203.0.113.9', 'Test'), 'sent', 'the client signs');
+reset role;
+select is(public.sign_document(pg_temp.id('req'), pg_temp.id('client'), 'signed', 'Cara Client', 'typed:Cara Client', null, '203.0.113.9', 'Test'), 'sent', 'the client signs');
+select pg_temp.login('client');
+select throws_ok('select ip from public.signature_request_signers', '42501', null, 'signers cannot read each other''s IP addresses');
 update public.signature_request_signers set status = 'pending', signature = null where request_id = pg_temp.id('req');
 select is((select status from public.signature_request_signers where user_id = pg_temp.id('client')), 'signed', 'signatures cannot be undone');
 reset role;
@@ -72,8 +78,8 @@ select is((select count(*)::int from public.signature_requests) + (select count(
 reset role;
 select pg_temp.login('sub');
 select is((select count(*)::int from public.notifications where type = 'signature.requested'), 1, 'now the sub is asked');
-select is(public.sign_document(pg_temp.id('req'), 'signed', 'Sam Sub', 'typed:Sam Sub'), 'completed', 'last signature completes it');
 reset role;
+select is(public.sign_document(pg_temp.id('req'), pg_temp.id('sub'), 'signed', 'Sam Sub', 'typed:Sam Sub'), 'completed', 'last signature completes it');
 select is((select count(*)::int from public.notifications where type = 'signature.completed' and user_id = pg_temp.id('owner')), 1, 'the sender hears it is done');
 
 select * from finish();

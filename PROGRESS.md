@@ -54,6 +54,7 @@ Last updated: 2026-09-29 (overnight build)
 | Document e-signatures: send any job PDF to clients, subs or team (in order or together); typed/drawn signatures with IP + browser; document fingerprinted (SHA-256) at send; signed copy with a certificate page saved next to the original | Built, browser-tested |
 | Installable web app (manifest + icons) for phones and tablets | Built |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
+| Second audit of tonight's features (8 findings): attachments tied to the record's job, sub certificates need builder verification, template copies respect module permissions, documents frozen while out for signature, signing evidence recorded server-side, signer IPs private, certificate documents scoped, templates don't send reminders | Fixed, regression tests added |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
@@ -126,7 +127,7 @@ Last updated: 2026-09-29 (overnight build)
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance, job templates, reminders, audit, e-signatures | 382 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields, compliance, job templates, reminders, audit, e-signatures | 388 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing, CSV import parsing | 23 | `pnpm test` |
 | Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields, compliance, job templates, time zones, CSV import, audit log, e-signatures | 27 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |

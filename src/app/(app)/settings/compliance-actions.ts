@@ -41,6 +41,14 @@ export async function deleteCertificate(id: string, path: string) {
   revalidatePath(path)
 }
 
+/** Builder confirms the document matches (only verified certificates count toward compliance). */
+export async function verifyCertificate(id: string, verified: boolean, path: string) {
+  await getAppContext()
+  const supabase = await createClient()
+  await supabase.from('sub_certificates').update({ verified_at: verified ? new Date().toISOString() : null }).eq('id', uuid.parse(id))
+  revalidatePath(path)
+}
+
 export async function attachCertificateFile(id: string, fileIds: string[], path: string) {
   await getAppContext()
   const fileId = uuid.parse(fileIds[0])

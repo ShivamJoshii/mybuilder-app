@@ -64,6 +64,15 @@ begin
      or not private.can_module(p_from, 'jobs', 'view') or not private.can_module(p_to, 'jobs', 'edit') then
     raise exception 'Not allowed' using errcode = '42501';
   end if;
+  -- only the parts the caller may read on the source and create on the target
+  p_parts := array(select x from unnest(p_parts) x where case x
+    when 'schedule'   then private.can_module(p_from, 'schedule', 'view') and private.can_module(p_to, 'schedule', 'add')
+    when 'todos'      then private.can_module(p_from, 'todos', 'view') and private.can_module(p_to, 'todos', 'add')
+    when 'selections' then private.can_module(p_from, 'selections', 'view') and private.can_module(p_to, 'selections', 'add')
+    when 'specs'      then private.can_module(p_from, 'specs', 'view') and private.can_module(p_to, 'specs', 'add')
+    when 'estimate'   then private.can_module(p_from, 'estimates', 'view') and private.can_module(p_to, 'estimates', 'edit')
+    when 'folders'    then private.can_module(p_from, 'files', 'view') and private.can_module(p_to, 'files', 'add')
+    else false end);
   d := coalesce(p_start, private.job_anchor(p_from)) - private.job_anchor(p_from);
   perform set_config('app.quiet', 'on', true);
   create temp table if not exists _copy_map (old uuid primary key, new uuid not null) on commit drop;

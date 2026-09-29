@@ -49,7 +49,7 @@ declare r record; n int := 0; v_title text;
 begin
   -- 1. To-do reminders: N minutes before the due time
   for r in
-    select t.* from public.todos t
+    select t.* from public.todos t join public.jobs j on j.id = t.job_id and not j.is_template and j.deleted_at is null
     where t.completed_at is null and t.deleted_at is null and t.reminder_minutes is not null and t.due_at is not null
       and t.due_at - make_interval(mins => t.reminder_minutes) <= p_now and t.due_at > p_now - interval '1 day'
   loop
@@ -64,7 +64,8 @@ begin
     with mine as (
       select coalesce(a.user_id, m.user_id) as uid, t.id, t.org_id, (t.due_at at time zone private.org_tz(t.org_id))::date due_day,
              (p_now at time zone private.org_tz(t.org_id))::date today, extract(hour from p_now at time zone private.org_tz(t.org_id)) hr
-      from public.todos t join public.todo_assignees a on a.todo_id = t.id
+      from public.todos t join public.jobs j on j.id = t.job_id and not j.is_template and j.deleted_at is null
+      join public.todo_assignees a on a.todo_id = t.id
       left join public.org_members m on m.org_id = a.sub_org_id and m.status = 'active'
       where t.completed_at is null and t.deleted_at is null and t.due_at is not null
     )

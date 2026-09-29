@@ -18,6 +18,8 @@ create table public.sub_certificates (
   expires_on     date,
   file_id        uuid references public.files (id) on delete set null,
   notes          text check (length(notes) <= 2000),
+  verified_at    timestamptz,                       -- the builder checked the document; only verified certificates count
+  verified_by    uuid references auth.users (id) on delete set null,
   created_by     uuid references auth.users (id) on delete set null default auth.uid(),
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now(),
@@ -29,20 +31,32 @@ alter table public.sub_certificates enable row level security;
 
 create or replace function private.cert_fill()
 returns trigger language plpgsql security definer set search_path = '' as $$
+declare v_builder_side boolean := private.is_member(new.builder_org_id) and private.has_perm(new.builder_org_id, 'subs_vendors', 'edit');
 begin
   if tg_op = 'UPDATE' then
     new.builder_org_id := old.builder_org_id; new.sub_org_id := old.sub_org_id; new.created_by := old.created_by; new.created_at := old.created_at;
+    if not v_builder_side then
+      -- a sub may correct its own certificate, but that sends it back for review
+      new.verified_at := null; new.verified_by := null;
+    elsif new.verified_at is distinct from old.verified_at then
+      new.verified_by := case when new.verified_at is null then null else auth.uid() end;
+      new.verified_at := case when new.verified_at is null then null else now() end;
+    end if;
   else
     new.created_by := auth.uid();
+    -- certificates the builder enters are verified; a sub's wait for review
+    new.verified_at := case when v_builder_side then now() end;
+    new.verified_by := case when v_builder_side then auth.uid() end;
   end if;
   new.updated_at := now();
   if not exists (select 1 from public.builder_sub_links where builder_org_id = new.builder_org_id and sub_org_id = new.sub_org_id) then
     raise exception 'That company is not linked to this builder' using errcode = '23514';
   end if;
-  -- documents must live in either company's compliance folder
+  -- the document must be in the caller's own company's compliance folder, and visible to them
   if new.file_id is not null and new.file_id is distinct from (case when tg_op = 'UPDATE' then old.file_id end) and not exists (
        select 1 from public.files f join public.file_folders d on d.id = f.folder_id
-       where f.id = new.file_id and d.system_key = 'compliance' and d.org_id in (new.builder_org_id, new.sub_org_id)) then
+       where f.id = new.file_id and d.system_key = 'compliance' and d.org_id in (new.builder_org_id, new.sub_org_id)
+         and private.is_member(d.org_id) and private.can_see_file(f.id)) then
     raise exception 'Upload the certificate first' using errcode = '23514';
   end if;
   return new;
@@ -67,7 +81,9 @@ create policy certs_select on public.sub_certificates for select to authenticate
 create policy certs_insert on public.sub_certificates for insert to authenticated with check (private.cert_can_edit(builder_org_id, sub_org_id));
 create policy certs_update on public.sub_certificates for update to authenticated
   using (private.cert_can_edit(builder_org_id, sub_org_id)) with check (private.cert_can_edit(builder_org_id, sub_org_id));
-create policy certs_delete on public.sub_certificates for delete to authenticated using (private.cert_can_edit(builder_org_id, sub_org_id));
+create policy certs_delete on public.sub_certificates for delete to authenticated using (
+  (private.is_member(builder_org_id) and private.has_perm(builder_org_id, 'subs_vendors', 'edit'))
+  or (verified_at is null and private.cert_can_edit(builder_org_id, sub_org_id)));
 grant select, insert, update, delete on public.sub_certificates to authenticated;
 
 -- Each company gets a private "compliance" folder for certificate documents (created on first use)
@@ -131,18 +147,24 @@ language sql stable security definer set search_path = '' as $$
   ), best as (
     select r.kind,
            (select max(coalesce(c.expires_on, 'infinity'::date)) from public.sub_certificates c
-             where c.builder_org_id = p_builder and c.sub_org_id = p_sub and c.kind = r.kind
+             where c.builder_org_id = p_builder and c.sub_org_id = p_sub and c.kind = r.kind and c.verified_at is not null
                and (c.effective_on is null or c.effective_on <= current_date)) exp,
+           exists (select 1 from public.sub_certificates c where c.builder_org_id = p_builder and c.sub_org_id = p_sub and c.kind = r.kind
+                     and c.verified_at is null and (c.expires_on is null or c.expires_on >= current_date)) unreviewed,
            exists (select 1 from public.sub_certificates c where c.builder_org_id = p_builder and c.sub_org_id = p_sub and c.kind = r.kind) had
     from req r
   ), graded as (
-    select kind, case when not had then 3 when exp is null or exp < current_date then 2 when exp <= current_date + 30 then 1 else 0 end g, exp
+    -- 0 ok, 1 expiring, 2 waiting for the builder's review, 3 expired, 4 missing
+    select kind, exp, case
+      when exp is not null and exp >= current_date then case when exp <= current_date + 30 then 1 else 0 end
+      when unreviewed then 2 when had then 3 else 4 end g
     from best
   )
-  select case coalesce(max(g), 0) when 0 then 'ok' when 1 then 'expiring' when 2 then 'expired' else 'missing' end,
+  select case coalesce(max(g), 0) when 0 then 'ok' when 1 then 'expiring' when 2 then 'review' when 3 then 'expired' else 'missing' end,
          coalesce(string_agg(
-           case g when 3 then private.cert_label(kind) || ' missing'
-                  when 2 then private.cert_label(kind) || ' expired'
+           case g when 4 then private.cert_label(kind) || ' missing'
+                  when 3 then private.cert_label(kind) || ' expired'
+                  when 2 then private.cert_label(kind) || ' waiting for review'
                   when 1 then private.cert_label(kind) || ' expires ' || to_char(exp, 'Mon DD') end, '; ' order by g desc)
            filter (where g > 0), '')
   from graded;
@@ -168,7 +190,7 @@ begin
   if b.lien_waiver_required and b.lien_waiver_received_at is null then raise exception 'A lien waiver is required before payment' using errcode = '22023'; end if;
   if b.sub_org_id is not null and (select compliance_blocks_payment from public.organizations where id = b.org_id) then
     select c.status, c.detail into v_status, v_detail from private.sub_compliance_raw(b.org_id, b.sub_org_id) c;
-    if v_status in ('expired', 'missing') then
+    if v_status in ('review', 'expired', 'missing') then
       raise exception 'This sub isn''t compliant: %', v_detail using errcode = '22023';
     end if;
   end if;
