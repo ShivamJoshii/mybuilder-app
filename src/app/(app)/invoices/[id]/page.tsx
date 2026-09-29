@@ -11,6 +11,7 @@ import { Input, Select } from '@/components/ui/input'
 import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { PrintButton } from '@/components/kit/print-button'
+import { DocHeader, DOC_ORG_COLUMNS } from '@/components/kit/doc-header'
 import { formatCAD, formatDate, todayIn } from '@/lib/utils'
 import { INVOICE_STATUS, PAYMENT_METHODS } from '@/lib/estimate'
 import { InvoiceForm } from '../invoice-form'
@@ -32,9 +33,10 @@ export default async function InvoicePage({ params }: PageProps<'/invoices/[id]'
     supabase.from('client_invoice_lines').select('*').eq('invoice_id', id).order('sort'),
     supabase.rpc('invoice_totals', { p: id }),
     supabase.from('client_payments').select('*').eq('invoice_id', id).order('paid_on'),
-    supabase.from('organizations').select('name,street,city,province,postal_code,phone,email').eq('id', inv.org_id).single(),
+    supabase.from('organizations').select(DOC_ORG_COLUMNS).eq('id', inv.org_id).single(),
     supabase.from('jobs').select('title,street,city,province,postal_code').eq('id', inv.job_id).single(),
   ])
+  const { data: billTo } = await supabase.from('job_clients').select('first_name,last_name').eq('job_id', inv.job_id).order('created_at')
   const t = tot?.[0]
   const st = INVOICE_STATUS[inv.status]
   const draft = inv.status === 'draft'
@@ -81,11 +83,7 @@ export default async function InvoicePage({ params }: PageProps<'/invoices/[id]'
       {!editor && (
         <Card className="p-6 print:border-0 print:shadow-none">
           <div className="flex flex-wrap justify-between gap-4 border-b border-border pb-4">
-            <div>
-              <div className="text-lg font-semibold">{org?.name}</div>
-              <div className="text-[13px] text-text-3">{[org?.street, org?.city, org?.province, org?.postal_code].filter(Boolean).join(', ')}</div>
-              <div className="text-[13px] text-text-3">{[org?.phone, org?.email].filter(Boolean).join(' · ')}</div>
-            </div>
+            <DocHeader org={org} showTax />
             <div className="text-right text-[13px]">
               <div className="text-lg font-semibold">Invoice #{inv.number}</div>
               <Badge tone={st.tone}>{st.label}</Badge>
@@ -93,7 +91,10 @@ export default async function InvoicePage({ params }: PageProps<'/invoices/[id]'
               {inv.due_date && <div className="text-text-3">Due {formatDate(inv.due_date)}</div>}
             </div>
           </div>
-          <div className="mt-4 text-[13px] text-text-3">{job?.title}{job?.street ? ` · ${[job.street, job.city, job.province, job.postal_code].filter(Boolean).join(', ')}` : ''}</div>
+          <div className="mt-4 text-[13px]">
+            <span className="text-text-3">Bill to </span><span className="font-medium">{(billTo ?? []).map((c) => `${c.first_name} ${c.last_name}`.trim()).join(' & ') || job?.title}</span>
+            <span className="text-text-3"> · {job?.title}{job?.street ? `, ${[job.street, job.city, job.province, job.postal_code].filter(Boolean).join(', ')}` : ''}</span>
+          </div>
           <h1 className="text-xl font-semibold">{inv.title}</h1>
           {inv.description && <p className="mt-3 whitespace-pre-wrap text-[14px]">{inv.description}</p>}
           <table className="mt-5 w-full text-[13px]">

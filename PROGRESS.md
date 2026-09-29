@@ -40,7 +40,8 @@ Last updated: 2026-09-29 (overnight build)
 | Submittals: request from sub, numbered revisions with attachments, reviewer decisions (approved / as noted / revise / rejected), ball-in-court | Built, browser-tested |
 | Summary dashboard: role-specific “needs attention” widgets, money snapshot, latest logs | Built |
 | Global search across all modules | Built, browser-tested |
-| Accounting sync (QuickBooks Online / Xero), company logo on documents, mobile polish | Next |
+| Company logo + GST/HST (and QST) numbers on proposals, change orders, POs and invoices; invoices show “Bill to” | Built, browser-tested |
+| Accounting sync (QuickBooks Online / Xero), mobile polish | Next |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 

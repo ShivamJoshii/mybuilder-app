@@ -2,6 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { headObject, signUpload } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 import { getAppContext, requireBuilder, hasAction } from '@/lib/context'
 import type { ActionState } from '@/components/kit/action-form'
@@ -49,15 +50,18 @@ export async function updateCompany(_: ActionState, fd: FormData): Promise<Actio
     province: z.string().length(2).nullable(),
     postal_code: z.string().regex(postal, 'Use a Canadian postal code like T5J 0N3').nullable(),
     timezone: z.string().max(60),
+    gst_number: z.string().regex(/^[0-9]{9} ?RT ?[0-9]{4}$/i, 'GST/HST number looks like 123456789 RT0001').nullable(),
+    qst_number: z.string().max(20).nullable(),
   }).safeParse({
     name: fd.get('name'), legal_name: blank(fd.get('legal_name')), phone: blank(fd.get('phone')),
     email: blank(fd.get('email')), website: blank(fd.get('website')), street: blank(fd.get('street')),
     city: blank(fd.get('city')), province: blank(fd.get('province')), postal_code: blank(fd.get('postal_code')),
     timezone: fd.get('timezone') ?? 'America/Edmonton',
+    gst_number: blank(fd.get('gst_number')), qst_number: blank(fd.get('qst_number')),
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
   const supabase = await createClient()
-  const { data, error } = await supabase.from('organizations').update(parsed.data).eq('id', ctx.workspace.orgId).select('id')
+  const { data, error } = await supabase.from('organizations').update({ ...parsed.data, gst_number: parsed.data.gst_number?.toUpperCase().replace(/\s/g, '').replace(/^(\d{9})RT(\d{4})$/, '$1 RT$2') ?? null }).eq('id', ctx.workspace.orgId).select('id')
   if (error || !data?.length) return { error: 'Could not save company details.' }
   revalidatePath('/', 'layout')
   return { ok: 'Company details saved.' }
@@ -335,4 +339,29 @@ export async function toggleCustomField(id: string, active: boolean) {
   const supabase = await createClient()
   await supabase.from('custom_field_defs').update({ is_active: active }).eq('id', uuid.parse(id))
   revalidatePath('/settings/custom-fields')
+}
+
+const LOGO_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
+
+export async function startLogoUpload(mime: string, size: number) {
+  const ctx = await requireAction('settings.manage')
+  if (!LOGO_TYPES.includes(mime)) throw new Error('Use a PNG, JPG, WebP or SVG image')
+  if (size > 2 * 1024 * 1024) throw new Error('Logos can be up to 2 MB')
+  const key = `${ctx.workspace.orgId}/branding/logo-${Date.now()}`
+  return { key, url: await signUpload(key, mime) }
+}
+
+export async function finishLogoUpload(key: string) {
+  const ctx = await requireAction('settings.manage')
+  if (!key.startsWith(`${ctx.workspace.orgId}/branding/`) || !(await headObject(key))) throw new Error('Upload did not complete')
+  const supabase = await createClient()
+  await supabase.from('organizations').update({ logo_url: `storage:${key}` }).eq('id', ctx.workspace.orgId)
+  revalidatePath('/', 'layout')
+}
+
+export async function removeLogo() {
+  const ctx = await requireAction('settings.manage')
+  const supabase = await createClient()
+  await supabase.from('organizations').update({ logo_url: null }).eq('id', ctx.workspace.orgId)
+  revalidatePath('/', 'layout')
 }

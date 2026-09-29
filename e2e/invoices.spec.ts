@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { test, expect } from '@playwright/test'
 import { signUp, createBuilder, uid } from './helpers'
 
@@ -32,6 +33,14 @@ test('contract from estimate → progress draw invoice → payment → WIP and r
   await page.getByRole('button', { name: 'Send to budget' }).last().click()
   await expect(page.getByText(/Sent to budget/).first()).toBeVisible()
 
+  // Branding + GST number on documents
+  await page.goto('/settings/company')
+  await page.getByLabel('Upload logo').setInputFiles(path.join(__dirname, 'fixtures', 'logo.png'))
+  await expect(page.getByRole('img', { name: 'Company logo' })).toBeVisible()
+  await page.getByLabel('GST/HST number').fill('123456789rt0001')
+  await page.getByRole('button', { name: 'Save company' }).click()
+  await expect(page.getByText('Company details saved.')).toBeVisible()
+
   // Draw 1: 25% of contract, 10% owner holdback
   await page.goto('/invoices/new')
   await page.getByLabel('Title').fill('Draw 1 — foundation')
@@ -46,6 +55,8 @@ test('contract from estimate → progress draw invoice → payment → WIP and r
   await page.getByRole('button', { name: 'Send to client' }).click()
   await page.getByRole('button', { name: 'Send', exact: true }).click()
   await expect(page.getByTestId('invoice-balance')).toHaveText('$23,750.00')   // 25,000 + 1,250 GST − 2,500 holdback
+  await expect(page.getByText('GST/HST 123456789 RT0001')).toBeVisible()
+  await expect(page.getByRole('img', { name: /logo/ })).toBeVisible()
 
   await page.goto('/reports?tab=ar')
   await expect(page.getByRole('link', { name: '#1 Draw 1 — foundation' })).toBeVisible()

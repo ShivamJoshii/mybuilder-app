@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { ActionForm } from '@/components/kit/action-form'
 import { PROVINCES } from '@/lib/utils'
 import { updateCompany, updateClientDefaults } from '../actions'
+import { LogoUpload } from './logo-upload'
 
 export const metadata: Metadata = { title: 'Company' }
 
@@ -33,12 +34,18 @@ export default async function CompanyPage() {
       <PageHeader title="Company" />
       <div className="max-w-3xl space-y-5 p-5">
         <Card>
+          <CardHeader title="Logo" />
+          <div className="p-4"><LogoUpload orgId={ctx.workspace.orgId} hasLogo={Boolean(org?.logo_url)} version={org?.updated_at ?? ''} /></div>
+        </Card>
+        <Card>
           <CardHeader title="Company information" description="Shown on printouts and to your subs and clients." />
           <ActionForm action={updateCompany} resetOnSuccess={false} className="grid gap-4 p-4 sm:grid-cols-2">
             <Field label="Company name" htmlFor="name" required><Input id="name" name="name" defaultValue={org?.name} required /></Field>
             <Field label="Legal name" htmlFor="legal_name"><Input id="legal_name" name="legal_name" defaultValue={org?.legal_name ?? ''} /></Field>
             <Field label="Phone" htmlFor="phone"><Input id="phone" name="phone" type="tel" defaultValue={org?.phone ?? ''} /></Field>
             <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" defaultValue={org?.email ?? ''} /></Field>
+            <Field label="GST/HST number" htmlFor="gst_number" hint="Printed on invoices (required by CRA over $30)."><Input id="gst_number" name="gst_number" defaultValue={org?.gst_number ?? ''} placeholder="123456789 RT0001" /></Field>
+            <Field label="QST number" htmlFor="qst_number" hint="Quebec only."><Input id="qst_number" name="qst_number" defaultValue={org?.qst_number ?? ''} /></Field>
             <Field label="Website" htmlFor="website" className="sm:col-span-2"><Input id="website" name="website" defaultValue={org?.website ?? ''} /></Field>
             <Field label="Street address" htmlFor="street" className="sm:col-span-2"><Input id="street" name="street" defaultValue={org?.street ?? ''} /></Field>
             <Field label="City" htmlFor="city"><Input id="city" name="city" defaultValue={org?.city ?? ''} /></Field>

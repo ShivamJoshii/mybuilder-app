@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { PrintButton } from '@/components/kit/print-button'
+import { DocHeader, DOC_ORG_COLUMNS } from '@/components/kit/doc-header'
 import { DecisionForm } from '@/components/kit/decision-form'
 import { Signatures } from '@/components/kit/signatures'
 import { Worksheet, type CatalogItem } from '@/components/kit/cost-worksheet'
@@ -38,7 +39,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
 
   const { data: priv } = builder ? await supabase.from('change_order_private').select('internal_notes,default_markup_pct').eq('change_order_id', id).maybeSingle() : { data: null }
   const [{ data: org }, { data: job }, { data: sigs }] = await Promise.all([
-    supabase.from('organizations').select('name,phone,email,street,city,province,postal_code').eq('id', co.org_id).single(),
+    supabase.from('organizations').select(DOC_ORG_COLUMNS).eq('id', co.org_id).single(),
     supabase.from('jobs').select('title,street,city,province').eq('id', co.job_id).single(),
     supabase.from('change_order_signatures').select('*').eq('change_order_id', id).order('signed_at'),
   ])
@@ -112,11 +113,7 @@ export default async function ChangeOrderPage({ params }: PageProps<'/change-ord
 
       <Card className="p-6 print:border-0 print:shadow-none">
         <div className="flex flex-wrap justify-between gap-4 border-b border-border pb-4">
-          <div>
-            <div className="text-lg font-semibold">{org?.name}</div>
-            <div className="text-[13px] text-text-3">{[org?.street, org?.city, org?.province, org?.postal_code].filter(Boolean).join(', ')}</div>
-            <div className="text-[13px] text-text-3">{[org?.phone, org?.email].filter(Boolean).join(' · ')}</div>
-          </div>
+          <DocHeader org={org} />
           <div className="text-right text-[13px]">
             <Badge tone={st.tone}>{st.label}</Badge>
             <div className="mt-1 text-text-3">{co.released_at ? `Issued ${formatDate(co.released_at)}` : 'Not yet released'}</div>

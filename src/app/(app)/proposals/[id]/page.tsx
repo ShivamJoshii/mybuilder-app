@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { PrintButton } from '@/components/kit/print-button'
+import { DocHeader, DOC_ORG_COLUMNS } from '@/components/kit/doc-header'
 import { formatCAD, formatDate, fullName } from '@/lib/utils'
 import { PROPOSAL_STATUS, totals, type EstGroup, type SnapshotGroup } from '@/lib/estimate'
 import { DecisionForm } from '@/components/kit/decision-form'
@@ -31,7 +32,7 @@ export default async function ProposalPage({ params }: PageProps<'/proposals/[id
   const canEdit = builder && (can(ctx, 'proposals', 'edit') || can(ctx, 'estimates', 'edit'))
   const canDelete = builder && (can(ctx, 'proposals', 'delete') || can(ctx, 'estimates', 'delete'))
   const [{ data: org }, { data: job }, { data: sigs }] = await Promise.all([
-    supabase.from('organizations').select('name,phone,email,street,city,province,postal_code').eq('id', p.org_id).single(),
+    supabase.from('organizations').select(DOC_ORG_COLUMNS).eq('id', p.org_id).single(),
     supabase.from('jobs').select('title,street,city,province,postal_code').eq('id', p.job_id).single(),
     supabase.from('proposal_signatures').select('*').eq('proposal_id', id).order('signed_at'),
   ])
@@ -104,11 +105,7 @@ export default async function ProposalPage({ params }: PageProps<'/proposals/[id
 
       <Card className="p-6 print:border-0 print:shadow-none">
         <div className="flex flex-wrap justify-between gap-4 border-b border-border pb-4">
-          <div>
-            <div className="text-lg font-semibold">{org?.name}</div>
-            <div className="text-[13px] text-text-3">{[org?.street, org?.city, org?.province, org?.postal_code].filter(Boolean).join(', ')}</div>
-            <div className="text-[13px] text-text-3">{[org?.phone, org?.email].filter(Boolean).join(' · ')}</div>
-          </div>
+          <DocHeader org={org} />
           <div className="text-right text-[13px]">
             <Badge tone={st.tone}>{st.label}</Badge>
             <div className="mt-1 text-text-3">{p.released_at ? `Issued ${formatDate(p.released_at)}` : 'Not yet released'}</div>

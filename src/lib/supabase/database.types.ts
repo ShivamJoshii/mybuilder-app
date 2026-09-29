@@ -1641,13 +1641,13 @@ isOneToOne: false
                   ]
                 },"organizations": {
                   Row: {
-                    "city": string | null,"country": string,"created_at": string,"created_by": string | null,"email": string | null,"id": string,"kind": Database["public"]['Enums']["org_kind"],"legal_name": string | null,"logo_url": string | null,"name": string,"phone": string | null,"postal_code": string | null,"province": string | null,"street": string | null,"timezone": string,"updated_at": string,"website": string | null
+                    "city": string | null,"country": string,"created_at": string,"created_by": string | null,"email": string | null,"gst_number": string | null,"id": string,"kind": Database["public"]['Enums']["org_kind"],"legal_name": string | null,"logo_url": string | null,"name": string,"phone": string | null,"postal_code": string | null,"province": string | null,"qst_number": string | null,"street": string | null,"timezone": string,"updated_at": string,"website": string | null
                   }
                   Insert: {
-                    "city"?: string | null,"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name": string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
+                    "city"?: string | null,"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gst_number"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name": string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"qst_number"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
                   }
                   Update: {
-                    "city"?: string | null,"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name"?: string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
+                    "city"?: string | null,"country"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gst_number"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["org_kind"],"legal_name"?: string | null,"logo_url"?: string | null,"name"?: string,"phone"?: string | null,"postal_code"?: string | null,"province"?: string | null,"qst_number"?: string | null,"street"?: string | null,"timezone"?: string,"updated_at"?: string,"website"?: string | null
                   }
                   Relationships: [
                     

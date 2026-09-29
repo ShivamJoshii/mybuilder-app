@@ -11,6 +11,7 @@ import { Card, CardHeader } from '@/components/ui/card'
 import { Select } from '@/components/ui/input'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { PrintButton } from '@/components/kit/print-button'
+import { DocHeader, type DocOrg } from '@/components/kit/doc-header'
 import { DecisionForm } from '@/components/kit/decision-form'
 import { Signatures } from '@/components/kit/signatures'
 import { LinesEditor, type Line } from '@/components/kit/lines-editor'
@@ -26,7 +27,7 @@ export default async function PoPage({ params }: PageProps<'/purchase-orders/[id
   const { id } = await params
   const ctx = await getAppContext()
   const supabase = await createClient()
-  const { data: po } = await supabase.from('purchase_orders').select('*, sub:organizations!purchase_orders_sub_org_id_fkey(name), builder:organizations!purchase_orders_org_id_fkey(name,street,city,province,postal_code,phone,email)').eq('id', id).is('deleted_at', null).maybeSingle()
+  const { data: po } = await supabase.from('purchase_orders').select('*, sub:organizations!purchase_orders_sub_org_id_fkey(name), builder:organizations!purchase_orders_org_id_fkey(id,name,street,city,province,postal_code,phone,email,logo_url,gst_number,qst_number,updated_at)').eq('id', id).is('deleted_at', null).maybeSingle()
   if (!po) notFound()
   const builder = ctx.workspace.mode === 'builder'
   const canEdit = builder && can(ctx, 'purchase_orders', 'edit')
@@ -45,7 +46,7 @@ export default async function PoPage({ params }: PageProps<'/purchase-orders/[id
   const hold = hb?.[0]
   const draft = po.status === 'draft'
   const st = PO_STATUS[po.status]
-  const org = po.builder as { name: string; street: string | null; city: string | null; province: string | null; postal_code: string | null; phone: string | null; email: string | null } | null
+  const org = po.builder as DocOrg | null
   const payee = (po.sub as { name: string } | null)?.name ?? po.vendor_name
 
   return (
@@ -72,11 +73,7 @@ export default async function PoPage({ params }: PageProps<'/purchase-orders/[id
       ) : (
         <Card className="p-6 print:border-0 print:shadow-none">
           <div className="flex flex-wrap justify-between gap-4 border-b border-border pb-4">
-            <div>
-              <div className="text-lg font-semibold">{org?.name}</div>
-              <div className="text-[13px] text-text-3">{[org?.street, org?.city, org?.province, org?.postal_code].filter(Boolean).join(', ')}</div>
-              <div className="text-[13px] text-text-3">{[org?.phone, org?.email].filter(Boolean).join(' · ')}</div>
-            </div>
+            <DocHeader org={org} showTax />
             <div className="text-right text-[13px]">
               <Badge tone={st.tone}>{st.label}</Badge>
               {po.status === 'accepted' && <div className="mt-1"><Badge>{WORK_STATUS[po.work_status]}</Badge></div>}
