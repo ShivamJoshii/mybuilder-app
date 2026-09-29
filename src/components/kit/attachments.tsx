@@ -23,7 +23,10 @@ export async function Attachments({ jobId, recordType, recordId, path, share, ca
         <ul className="divide-y divide-border">
           {files.map((f) => (
             <li key={f.id} className="flex items-center gap-2 px-4 py-2 text-[13px]">
-              <Paperclip className="size-4 text-text-3" />
+              {f.mime.startsWith('image/')
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={`/files/${f.id}/download?inline=1`} alt="" className="size-10 rounded object-cover" />
+                : <Paperclip className="size-4 text-text-3" />}
               <a href={`/files/${f.id}/download?inline=1`} target="_blank" rel="noreferrer" className="flex-1 truncate text-brand hover:underline">{f.name}</a>
               <span className="text-xs text-text-3">{Math.max(1, Math.round(f.size_bytes / 1024))} KB</span>
               <form action={detachFile.bind(null, recordType, recordId, f.id, path)}><Button type="submit" size="icon" variant="ghost" aria-label={`Remove ${f.name}`}><X /></Button></form>

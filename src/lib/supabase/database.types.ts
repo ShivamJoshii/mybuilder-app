@@ -1671,6 +1671,105 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"selection_choice_costs": {
+                  Row: {
+                    "builder_cost": number,"choice_id": string
+                  }
+                  Insert: {
+                    "builder_cost"?: number,"choice_id": string
+                  }
+                  Update: {
+                    "builder_cost"?: number,"choice_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "selection_choice_costs_choice_id_fkey"
+      columns: ["choice_id"]
+isOneToOne: true
+      referencedRelation: "selection_choices"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"selection_choices": {
+                  Row: {
+                    "client_price": number,"created_at": string,"description": string | null,"id": string,"is_available": boolean,"product_code": string | null,"selection_id": string,"sort": number,"title": string,"vendor": string | null
+                  }
+                  Insert: {
+                    "client_price"?: number,"created_at"?: string,"description"?: string | null,"id"?: string,"is_available"?: boolean,"product_code"?: string | null,"selection_id": string,"sort"?: number,"title": string,"vendor"?: string | null
+                  }
+                  Update: {
+                    "client_price"?: number,"created_at"?: string,"description"?: string | null,"id"?: string,"is_available"?: boolean,"product_code"?: string | null,"selection_id"?: string,"sort"?: number,"title"?: string,"vendor"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "selection_choices_selection_id_fkey"
+      columns: ["selection_id"]
+isOneToOne: false
+      referencedRelation: "selections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"selections": {
+                  Row: {
+                    "allowance": number | null,"approved_at": string | null,"approved_by": string | null,"category": string | null,"change_order_id": string | null,"created_at": string,"created_by": string,"days_before": number | null,"deadline": string | null,"deleted_at": string | null,"id": string,"instructions": string | null,"job_id": string,"location": string | null,"org_id": string,"released_at": string | null,"schedule_item_id": string | null,"selected_at": string | null,"selected_by": string | null,"selected_choice_id": string | null,"share_client": boolean,"share_subs": boolean,"status": Database["public"]['Enums']["selection_status"],"title": string
+                  }
+                  Insert: {
+                    "allowance"?: number | null,"approved_at"?: string | null,"approved_by"?: string | null,"category"?: string | null,"change_order_id"?: string | null,"created_at"?: string,"created_by"?: string,"days_before"?: number | null,"deadline"?: string | null,"deleted_at"?: string | null,"id"?: string,"instructions"?: string | null,"job_id": string,"location"?: string | null,"org_id": string,"released_at"?: string | null,"schedule_item_id"?: string | null,"selected_at"?: string | null,"selected_by"?: string | null,"selected_choice_id"?: string | null,"share_client"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["selection_status"],"title": string
+                  }
+                  Update: {
+                    "allowance"?: number | null,"approved_at"?: string | null,"approved_by"?: string | null,"category"?: string | null,"change_order_id"?: string | null,"created_at"?: string,"created_by"?: string,"days_before"?: number | null,"deadline"?: string | null,"deleted_at"?: string | null,"id"?: string,"instructions"?: string | null,"job_id"?: string,"location"?: string | null,"org_id"?: string,"released_at"?: string | null,"schedule_item_id"?: string | null,"selected_at"?: string | null,"selected_by"?: string | null,"selected_choice_id"?: string | null,"share_client"?: boolean,"share_subs"?: boolean,"status"?: Database["public"]['Enums']["selection_status"],"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "selections_approved_by_fkey"
+      columns: ["approved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_change_order_id_fkey"
+      columns: ["change_order_id"]
+isOneToOne: false
+      referencedRelation: "change_orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_choice_fk"
+      columns: ["selected_choice_id"]
+isOneToOne: false
+      referencedRelation: "selection_choices"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_schedule_item_id_fkey"
+      columns: ["schedule_item_id"]
+isOneToOne: false
+      referencedRelation: "schedule_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "selections_selected_by_fkey"
+      columns: ["selected_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tags": {
                   Row: {
                     "color": string | null,"id": string,"module": string,"name": string,"org_id": string
@@ -1895,8 +1994,17 @@ isOneToOne: false
 "apply_schedule_changes":
 { Args: { "p_cascaded_ids"?: (string)[],"p_changes": Json,"p_notes"?: string,"p_reason"?: string }; Returns: number
                            },
+"approve_selection":
+{ Args: { "p_create_co"?: boolean,"p_sel": string }; Returns: string
+                           },
 "can_see_change_order":
 { Args: { "p_co": string }; Returns: boolean
+                           },
+"can_see_selection":
+{ Args: { "p_sel": string }; Returns: boolean
+                           },
+"choose_selection":
+{ Args: { "p_choice": string,"p_sel": string }; Returns: undefined
                            },
 "client_can":
 { Args: { "p_job": string,"p_key": string }; Returns: boolean
@@ -1969,6 +2077,9 @@ isOneToOne: false
 "release_proposal":
 { Args: { "p_proposal": string }; Returns: undefined
                            },
+"release_selection":
+{ Args: { "p_sel": string }; Returns: undefined
+                           },
 "resolve_share_link":
 { Args: { "p_token": string }; Returns: {
               "mime": string,"name": string,"size_bytes": number,"storage_key": string
@@ -1982,6 +2093,11 @@ isOneToOne: false
                            },
 "save_estimate":
 { Args: { "p_estimate": string,"p_groups": Json,"p_items": Json,"p_settings": Json }; Returns: undefined
+                           },
+"selection_choices_public":
+{ Args: { "p_sel": string }; Returns: {
+              "description": string,"id": string,"is_available": boolean,"product_code": string,"sort": number,"title": string,"vendor": string
+            }[]
                            },
 "send_estimate_to_budget":
 { Args: { "p_estimate": string }; Returns: undefined
@@ -2007,12 +2123,15 @@ isOneToOne: false
 "unlock_estimate":
 { Args: { "p_estimate": string }; Returns: undefined
                            },
+"unlock_selection":
+{ Args: { "p_sel": string }; Returns: undefined
+                           },
 "update_my_sub_profile":
 { Args: { "p_link": string,"p_profile": Json }; Returns: undefined
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","selection_status": "draft"|"pending"|"selected"|"approved","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -2128,7 +2247,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"selection_status": ["draft", "pending", "selected", "approved"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const
