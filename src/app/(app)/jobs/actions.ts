@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireBuilder, can } from '@/lib/context'
 import { todayIn } from '@/lib/utils'
 import type { ActionState } from '@/components/kit/action-form'
+import { parsePortalSettings } from '@/lib/portal-settings'
 
 export type JobFormState = { error?: string; fieldErrors?: Record<string, string> }
 
@@ -214,4 +215,14 @@ export async function saveAsTemplate(jobId: string, _: ActionState, fd: FormData
   if (error || !data) return { error: 'Could not save the template.' }
   revalidatePath('/', 'layout')
   redirect(`/jobs/${data}`)
+}
+
+/** Per-job client portal settings (override the company defaults). */
+export async function saveJobPortal(jobId: string, _: ActionState, fd: FormData): Promise<ActionState> {
+  await requireBuilder('jobs', 'edit')
+  const supabase = await createClient()
+  const { error } = await supabase.from('job_client_permissions').upsert({ job_id: z.string().uuid().parse(jobId), settings: parsePortalSettings(fd) })
+  if (error) return { error: 'Could not save the portal settings.' }
+  revalidatePath(`/jobs/${jobId}`)
+  return { ok: 'Client portal settings saved for this job.' }
 }

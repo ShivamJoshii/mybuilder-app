@@ -10,6 +10,7 @@ import { ActionForm } from '@/components/kit/action-form'
 import { PROVINCES } from '@/lib/utils'
 import { updateCompany, updateClientDefaults } from '../actions'
 import { LogoUpload } from './logo-upload'
+import { PortalSettingsFields } from '@/components/kit/portal-settings-fields'
 
 export const metadata: Metadata = { title: 'Company' }
 
@@ -24,11 +25,6 @@ export default async function CompanyPage() {
     supabase.from('client_permission_defaults').select('settings').eq('org_id', ctx.workspace.orgId).maybeSingle(),
   ])
   const s = (defaults?.settings ?? {}) as Record<string, unknown>
-  const check = (name: string, label: string) => (
-    <label className="flex items-center gap-2 text-[13px]">
-      <input type="checkbox" name={name} defaultChecked={Boolean(s[name])} className="accent-brand" />{label}
-    </label>
-  )
   return (
     <>
       <PageHeader title="Company" />
@@ -69,28 +65,7 @@ export default async function CompanyPage() {
         <Card>
           <CardHeader title="Client portal defaults" description="What homeowners can see on new jobs. You can change it per job." />
           <ActionForm action={updateClientDefaults} resetOnSuccess={false} className="space-y-4 p-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Schedule" htmlFor="schedule">
-                <Select id="schedule" name="schedule" defaultValue={String(s.schedule ?? 'phases')}>
-                  <option value="none">Hidden</option>
-                  <option value="phases">Phases only</option>
-                  <option value="all">All schedule items</option>
-                </Select>
-              </Field>
-              <Field label="Show schedule this many days ahead" htmlFor="schedule_days_ahead">
-                <Input id="schedule_days_ahead" name="schedule_days_ahead" type="number" min={0} max={365} defaultValue={Number(s.schedule_days_ahead ?? 30)} />
-              </Field>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {check('submit_change_orders', 'Can request change orders')}
-              {check('submit_warranty_claims', 'Can submit warranty claims')}
-              {check('see_locked_selections', 'Sees locked selections')}
-              {check('job_price_summary', 'Sees job price summary')}
-              {check('invoices', 'Sees invoices')}
-              {check('purchase_orders', 'Sees purchase orders and bills')}
-              {check('budget', 'Sees the budget')}
-              {check('pm_contact', 'Sees project manager contact info')}
-            </div>
+            <PortalSettingsFields s={s} />
             <label className="flex items-center gap-2 border-t border-border pt-3 text-[13px] font-medium">
               <input type="checkbox" name="apply_existing" className="accent-brand" /> Also apply to all existing jobs
             </label>

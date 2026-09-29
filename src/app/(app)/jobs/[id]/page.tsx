@@ -13,11 +13,13 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { ActionForm } from '@/components/kit/action-form'
 import { formatCAD, formatDate } from '@/lib/utils'
 import { CopyButton } from '@/components/kit/copy-button'
-import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient, setJobMember, deleteJob, saveAsTemplate } from '../actions'
+import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient, setJobMember, deleteJob, saveAsTemplate, saveJobPortal } from '../actions'
 import { AddClientForm } from './client-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { CommentThread } from '@/components/kit/comments'
 import { CustomFields } from '@/components/kit/custom-fields'
+import { ClientMoney } from '@/components/kit/client-money'
+import { PortalSettingsFields } from '@/components/kit/portal-settings-fields'
 
 export const metadata: Metadata = { title: 'Job' }
 
@@ -82,6 +84,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
   }
 
   const canEdit = isBuilder && can(ctx, 'jobs', 'edit')
+  const portal = canEdit ? await portalSettings(id, job.org_id) : {}
   let subCanShare = false
   if (ctx.workspace.mode === 'sub') {
     const { data: mine } = await supabase.from('job_subs').select('can_share_with_client').eq('job_id', id).eq('sub_org_id', ctx.workspace.subOrgId).maybeSingle()
@@ -132,6 +135,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
               {priv?.contract_price != null && <Row label="Contract price">{formatCAD(Number(priv.contract_price))}</Row>}
             </dl>
           </Card>
+          {ctx.workspace.mode === 'client' && <ClientMoney jobId={id} />}
           <Card>
             <CardHeader title="Notes" />
             <div className="space-y-3 p-4 text-[13px]">
@@ -222,6 +226,16 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
               {can(ctx, 'clients', 'add') && <AddClientForm action={addJobClient.bind(null, id)} />}
             </Card>
           )}
+
+          {isBuilder && canEdit && (
+            <Card>
+              <CardHeader title="Client portal on this job" description="What this job's clients can see and do. Starts from your company defaults." />
+              <ActionForm action={saveJobPortal.bind(null, id)} resetOnSuccess={false} className="space-y-4 p-4">
+                <PortalSettingsFields s={portal} idPrefix="job-" />
+                <Button type="submit">Save portal settings</Button>
+              </ActionForm>
+            </Card>
+          )}
         </div>
 
         <div className="space-y-5">
@@ -271,4 +285,13 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
       </div>
     </div>
   )
+}
+
+async function portalSettings(jobId: string, orgId: string): Promise<Record<string, unknown>> {
+  const supabase = await createClient()
+  const [{ data: own }, { data: def }] = await Promise.all([
+    supabase.from('job_client_permissions').select('settings').eq('job_id', jobId).maybeSingle(),
+    supabase.from('client_permission_defaults').select('settings').eq('org_id', orgId).maybeSingle(),
+  ])
+  return { ...((def?.settings ?? {}) as Record<string, unknown>), ...((own?.settings ?? {}) as Record<string, unknown>) }
 }

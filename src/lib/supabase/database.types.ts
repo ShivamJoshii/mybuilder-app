@@ -3174,6 +3174,9 @@ isOneToOne: false
 "client_can":
 { Args: { "p_job": string,"p_key": string }; Returns: boolean
                            },
+"client_job_financials":
+{ Args: { "p_job": string }; Returns: Json
+                           },
 "clock_in":
 { Args: { "p_cost_code"?: string,"p_job": string,"p_lat"?: number,"p_lng"?: number }; Returns: string
                            },

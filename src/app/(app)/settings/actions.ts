@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getAppContext, requireBuilder, hasAction } from '@/lib/context'
 import type { ActionState } from '@/components/kit/action-form'
 import { CUSTOM_FIELD_MODULES } from '@/lib/custom-fields'
+import { parsePortalSettings } from '@/lib/portal-settings'
 
 const blank = (v: FormDataEntryValue | null) => (typeof v === 'string' && v.trim() !== '' ? v.trim() : null)
 const uuid = z.string().uuid()
@@ -70,18 +71,7 @@ export async function updateCompany(_: ActionState, fd: FormData): Promise<Actio
 
 export async function updateClientDefaults(_: ActionState, fd: FormData): Promise<ActionState> {
   const ctx = await requireAction('settings.manage')
-  const settings = {
-    schedule: z.enum(['none', 'phases', 'all']).parse(fd.get('schedule') ?? 'phases'),
-    schedule_days_ahead: z.coerce.number().int().min(0).max(365).parse(fd.get('schedule_days_ahead') ?? 30),
-    submit_change_orders: fd.get('submit_change_orders') === 'on',
-    submit_warranty_claims: fd.get('submit_warranty_claims') === 'on',
-    see_locked_selections: fd.get('see_locked_selections') === 'on',
-    job_price_summary: fd.get('job_price_summary') === 'on',
-    invoices: fd.get('invoices') === 'on',
-    purchase_orders: fd.get('purchase_orders') === 'on',
-    budget: fd.get('budget') === 'on',
-    pm_contact: fd.get('pm_contact') === 'on',
-  }
+  const settings = parsePortalSettings(fd)
   const supabase = await createClient()
   const { error } = await supabase.from('client_permission_defaults').upsert({ org_id: ctx.workspace.orgId, settings })
   if (error) return { error: 'Could not save client defaults.' }
