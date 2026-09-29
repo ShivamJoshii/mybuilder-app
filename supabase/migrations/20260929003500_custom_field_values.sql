@@ -20,7 +20,7 @@ language plpgsql stable security definer set search_path = '' as $$
 begin
   case p_module
     when 'jobs'       then select j.org_id, j.id into org_id, job_id from public.jobs j where j.id = p_record;
-    when 'leads'      then select l.org_id, null into org_id, job_id from public.leads l where l.id = p_record;
+    when 'leads'      then select l.org_id, null::uuid into org_id, job_id from public.leads l where l.id = p_record;
     when 'daily_logs' then select d.org_id, d.job_id into org_id, job_id from public.daily_logs d where d.id = p_record;
     when 'todos'      then select t.org_id, t.job_id into org_id, job_id from public.todos t where t.id = p_record;
     when 'rfis'       then select r.org_id, r.job_id into org_id, job_id from public.rfis r where r.id = p_record;
