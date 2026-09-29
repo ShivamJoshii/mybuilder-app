@@ -1,20 +1,25 @@
 # Progress
 
-Last updated: 2026-09-29 (overnight build 1)
+Last updated: 2026-09-29 (overnight build)
 
 ## Status at a glance
 
 | Area | State |
 | --- | --- |
-| Database foundation (tenants, roles, jobs, cost codes, custom fields, audit log) | Built, tested |
-| Row level security on every table | Built, 58 database tests passing |
+| Foundation: tenants, 13 roles + permission grid, jobs, cost codes, custom fields, audit log | Built, tested |
 | Sign up, sign in, onboarding, invites (internal, sub, client) | Built, browser-tested |
-| App shell: top nav, builder switcher, job picker, page header pattern | Built |
-| Jobs: list (filters, sort, saved views), job page, create/edit, soft delete | Built, browser-tested |
-| Settings: company, client portal defaults, users, roles + permission grid, subs/vendors, cost codes, custom fields, sub company profiles, my profile | Built |
-| Shared kit: filter drawer (date presets), data grid, record form with unsaved-changes guard, saved views, comments, confirm dialogs | Built |
-| Comments module (conversations + feed) and global search | Built |
-| All other modules (schedule, logs, files, money…) | Routed + permission-gated placeholders, per build order |
+| App shell: top nav, builder switcher, job picker, page header, search, bell | Built |
+| Jobs: list (filters, sort, saved views), job page (subs, clients, team access, comments), create/edit | Built, browser-tested |
+| Settings: company, client portal defaults, users, roles, subs/vendors, cost codes, custom fields, sales lists, web forms, notifications, profiles | Built |
+| Shared kit: filter drawer, data grid, query-builder filter, saved views, record form (draft/publish, unsaved guard), comments, related items, confirm, print | Built |
+| Comments module + global search | Built |
+| To-dos (assignees incl. subs/clients, checklist, priority, reminders) | Built, browser-tested |
+| Daily logs (live weather, tags, drafts, sharing, sub-authored logs) | Built, browser-tested |
+| RFIs (numbering, send/complete/reopen, sub-raised, responses, related items) | Built, browser-tested |
+| Notifications engine (37 event types, per-user email/text/push matrix, in-app bell, delivery outbox) | Built; email/SMS sending waits for Postmark/Twilio |
+| Schedule (calendar, list, Gantt with dependencies + critical path + baseline, online/offline, confirmations, shift log, workday exceptions) | Built, browser-tested |
+| Sales/CRM (leads, pipeline board, activities, convert to job, website lead forms) | Built, browser-tested |
+| Files, messages, chat, estimating, change orders, selections, bids/POs/bills, budget, invoices, warranty | Next, per build order |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -49,8 +54,9 @@ Last updated: 2026-09-29 (overnight build 1)
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): tenant isolation, roles, subs, clients, invites, comments | 58 | `pnpm db:test` |
-| Browser (Playwright): builder onboarding, jobs, filters, saved views, comments, sub + crew portals | 3 flows | `pnpm test:e2e` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads | 128 | `pnpm db:test` |
+| Unit (Vitest): workday calendar, dependency cascade, loops, critical path | 9 | `pnpm test` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads | 9 flows | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)
