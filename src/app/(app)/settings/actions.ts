@@ -6,6 +6,7 @@ import { headObject, signUpload } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 import { getAppContext, requireBuilder, hasAction } from '@/lib/context'
 import type { ActionState } from '@/components/kit/action-form'
+import { CUSTOM_FIELD_MODULES } from '@/lib/custom-fields'
 
 const blank = (v: FormDataEntryValue | null) => (typeof v === 'string' && v.trim() !== '' ? v.trim() : null)
 const uuid = z.string().uuid()
@@ -307,9 +308,9 @@ export async function toggleCostCode(id: string, active: boolean) {
 export async function addCustomField(_: ActionState, fd: FormData): Promise<ActionState> {
   const ctx = await requireAction('settings.manage')
   const parsed = z.object({
-    module: z.string().min(1),
+    module: z.enum(CUSTOM_FIELD_MODULES),
     label: z.string().trim().min(2, 'Enter a label').max(60),
-    data_type: z.enum(['text', 'long_text', 'number', 'currency', 'date', 'boolean', 'single_select', 'multi_select', 'file', 'hyperlink']),
+    data_type: z.enum(['text', 'long_text', 'number', 'currency', 'date', 'boolean', 'single_select', 'multi_select', 'hyperlink']),
     options: z.array(z.string().trim().min(1)).max(100),
     tooltip: z.string().max(200).nullable(),
   }).safeParse({

@@ -11,12 +11,13 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ActionForm } from '@/components/kit/action-form'
 import { addCustomField, toggleCustomField } from '../actions'
+import { CUSTOM_FIELD_MODULES } from '@/lib/custom-fields'
 
 export const metadata: Metadata = { title: 'Custom fields' }
 
 const TYPES = [
   ['text', 'Text'], ['long_text', 'Long text'], ['number', 'Number'], ['currency', 'Currency'], ['date', 'Date'],
-  ['boolean', 'Yes / No'], ['single_select', 'Single select'], ['multi_select', 'Multi select'], ['file', 'File'], ['hyperlink', 'Link'],
+  ['boolean', 'Yes / No'], ['single_select', 'Single select'], ['multi_select', 'Multi select'], ['hyperlink', 'Link'],
 ] as const
 
 export default async function CustomFieldsPage() {
@@ -25,7 +26,7 @@ export default async function CustomFieldsPage() {
   const supabase = await createClient()
   const [{ data: fields }, { data: modules }] = await Promise.all([
     supabase.from('custom_field_defs').select('*').eq('org_id', ctx.workspace.orgId).order('module').order('sort'),
-    supabase.from('app_modules').select('key,label').order('sort'),
+    supabase.from('app_modules').select('key,label').in('key', [...CUSTOM_FIELD_MODULES]).order('sort'),
   ])
   const label = new Map((modules ?? []).map((m) => [m.key, m.label]))
   const typeLabel = new Map<string, string>(TYPES.map(([k, v]) => [k, v]))

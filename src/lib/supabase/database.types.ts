@@ -785,6 +785,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"custom_field_values": {
+                  Row: {
+                    "def_id": string,"job_id": string | null,"org_id": string,"record_id": string,"updated_at": string,"updated_by": string | null,"value": NonNullable<Json>
+                  }
+                  Insert: {
+                    "def_id": string,"job_id"?: string | null,"org_id": string,"record_id": string,"updated_at"?: string,"updated_by"?: string | null,"value": NonNullable<Json>
+                  }
+                  Update: {
+                    "def_id"?: string,"job_id"?: string | null,"org_id"?: string,"record_id"?: string,"updated_at"?: string,"updated_by"?: string | null,"value"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "custom_field_values_def_id_fkey"
+      columns: ["def_id"]
+isOneToOne: false
+      referencedRelation: "custom_field_defs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "custom_field_values_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "custom_field_values_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"daily_logs": {
                   Row: {
                     "author_type": string,"created_at": string,"created_by": string,"deleted_at": string | null,"id": string,"include_weather": boolean,"include_weather_notes": boolean,"job_id": string,"log_date": string,"notes": string,"org_id": string,"published_at": string | null,"share_clients": boolean,"share_internal": boolean,"share_subs": boolean,"status": Database["public"]['Enums']["log_status"],"tag_ids": (string)[],"title": string | null,"updated_at": string,"weather": Json | null,"weather_notes": string | null

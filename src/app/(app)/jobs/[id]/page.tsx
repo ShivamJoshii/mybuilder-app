@@ -15,6 +15,7 @@ import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient
 import { AddClientForm } from './client-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { CommentThread } from '@/components/kit/comments'
+import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'Job' }
 
@@ -132,6 +133,8 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
               )}
             </div>
           </Card>
+
+          <CustomFields module="jobs" recordId={id} orgId={job.org_id} path={`/jobs/${id}`} canEdit={canEdit} audience={ctx.workspace.mode === 'builder' ? 'internal' : ctx.workspace.mode} />
 
           <CommentThread jobId={id} recordType="job" recordId={id} mode={ctx.workspace.mode} path={`/jobs/${id}`} canShareWithClient={subCanShare} />
 

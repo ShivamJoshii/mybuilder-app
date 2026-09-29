@@ -17,6 +17,7 @@ import { timeAgo } from '@/components/kit/comments'
 import { Attachments } from '@/components/kit/attachments'
 import { formatDate, initials } from '@/lib/utils'
 import { rfiStatus, respond } from '../actions'
+import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'RFI' }
 
@@ -80,6 +81,7 @@ export default async function RfiPage({ params }: PageProps<'/rfis/[id]'>) {
           </div>
         )}
       </Card>
+      <CustomFields module="rfis" recordId={id} orgId={r.org_id} path={`/rfis/${id}`} canEdit={editor} audience={ctx.workspace.mode === 'builder' ? 'internal' : ctx.workspace.mode} />
       <Attachments jobId={r.job_id} recordType="rfi" recordId={id} path={`/rfis/${id}`} share={{ subs: r.assignee_sub_org_id != null || r.author_type === 'sub', clients: false }} canAdd={isCreator || editor || isAssignee} />
       <Card>
         <CardHeader title="Responses" description={r.status === 'not_sent' ? 'Send the RFI to start collecting responses.' : undefined} />

@@ -42,6 +42,8 @@ Last updated: 2026-09-29 (overnight build)
 | Global search across all modules | Built, browser-tested |
 | Company logo + GST/HST (and QST) numbers on proposals, change orders, POs and invoices; invoices show “Bill to” | Built, browser-tested |
 | Accounting: cost type / cost code → account mapping; QuickBooks-shaped CSV exports for bills and invoices; payments register | Built, browser-tested |
+| Bid documents: pick plan sheets for a bid package; invited bidders open those sheets and the package attachments before they're on the job | Built, browser-tested |
+| Custom fields on jobs, leads, daily logs, to-dos, RFIs and warranty claims: typed values, per-field visibility to subs / clients | Built, browser-tested |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
@@ -88,7 +90,6 @@ Last updated: 2026-09-29 (overnight build)
   in PDF page units stored per version, so they survive zoom and never bleed into a new version.
 - Holdback defaults to 10% per PO (editable); release creates a draft bill that requires a lien waiver.
 - Releasing a PO to a sub adds them to the job (schedule, files, RFIs).
-- Bid documents: bidders not yet on the job can't open job attachments yet — to do with plan-sharing to bidders.
 - Builder-only fields (schedule internal/sub/client notes, change order notes and markup, warranty notes) live in
   separate rows with their own RLS, so an audience can never read another audience's text through the API.
 - Named permissions are enforced in the database, not just hidden in the UI: approving/paying bills,
@@ -114,9 +115,9 @@ Last updated: 2026-09-29 (overnight build)
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions | 314 | `pnpm db:test` |
-| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime | 18 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals | 20 flows (run against a production build) | `pnpm test:e2e` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals, security audit regressions, bid documents, custom fields | 331 | `pnpm db:test` |
+| Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime, custom field parsing | 21 | `pnpm test` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals, custom fields | 21 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

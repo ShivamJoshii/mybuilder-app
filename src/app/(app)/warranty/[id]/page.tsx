@@ -16,6 +16,7 @@ import { CommentThread } from '@/components/kit/comments'
 import { formatDate, formatDateTime } from '@/lib/utils'
 import { APPT_STATUS, CLAIM_CATEGORIES, CLAIM_STATUS, PRIORITY } from '@/lib/warranty'
 import { addAppointment, leaveFeedback, updateAppointment, updateClaim } from '../actions'
+import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'Warranty claim' }
 
@@ -152,6 +153,7 @@ export default async function ClaimPage({ params }: PageProps<'/warranty/[id]'>)
       )}
       {c.status === 'resolved' && mode === 'client' && c.client_rating && <Alert tone="success">Thanks — your feedback was sent.</Alert>}
 
+      <CustomFields module="warranties" recordId={id} orgId={c.org_id} path={`/warranty/${id}`} canEdit={canEdit} audience={builder ? 'internal' : mode} />
       <Attachments jobId={c.job_id} recordType="warranty_claim" recordId={id} path={`/warranty/${id}`} share={{ subs: Boolean(c.assignee_sub_org_id), clients: true }} canAdd={canEdit || (mode === 'client' && c.status !== 'closed')} />
       <CommentThread jobId={c.job_id} recordType="warranty_claim" recordId={id} mode={mode} path={`/warranty/${id}`} />
     </div>

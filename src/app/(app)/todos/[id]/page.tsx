@@ -14,6 +14,7 @@ import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { TodoCheck } from '../todo-check'
 import { ChecklistItem } from './checklist-item'
 import { deleteTodo } from '../actions'
+import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'To-do' }
 
@@ -68,6 +69,7 @@ export default async function TodoPage({ params }: PageProps<'/todos/[id]'>) {
           </ul>
         </Card>
       )}
+      <CustomFields module="todos" recordId={id} orgId={ctx.jobs.find((j) => j.id === todo.job_id)?.org_id ?? ''} path={`/todos/${id}`} canEdit={ctx.workspace.mode === 'builder' && can(ctx, 'todos', 'edit')} audience={ctx.workspace.mode === 'builder' ? 'internal' : ctx.workspace.mode} />
       <Attachments jobId={todo.job_id} recordType="todo" recordId={id} path={`/todos/${id}`} share={{ subs: todo.assignees.some((a) => a.sub_org_id), clients: false }} />
       <CommentThread jobId={todo.job_id} recordType="todo" recordId={id} mode={ctx.workspace.mode} path={`/todos/${id}`} canShareWithClient={false} />
     </div>

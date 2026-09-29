@@ -15,6 +15,7 @@ import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { formatDate, todayIn } from '@/lib/utils'
 import { StatusSelect } from '../status-select'
 import { addActivity, completeActivity, convertLead, deleteLead, markLost } from '../actions'
+import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'Lead' }
 
@@ -147,6 +148,7 @@ export default async function LeadPage({ params }: PageProps<'/leads/[id]'>) {
           </ActionForm>
         )}
       </Card>
+      <CustomFields module="leads" recordId={id} orgId={lead.org_id} path={`/leads/${id}`} canEdit={canEdit} />
     </div>
   )
 }

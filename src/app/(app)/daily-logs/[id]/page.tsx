@@ -12,6 +12,7 @@ import { Attachments } from '@/components/kit/attachments'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { formatDate } from '@/lib/utils'
 import { deleteLog } from '../actions'
+import { CustomFields } from '@/components/kit/custom-fields'
 
 export const metadata: Metadata = { title: 'Daily log' }
 
@@ -70,6 +71,7 @@ export default async function LogPage({ params }: PageProps<'/daily-logs/[id]'>)
           By {author ? `${author.first_name} ${author.last_name}`.trim() || author.email : 'unknown'} · {new Date(log.created_at).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' })}
         </div>
       </Card>
+      <CustomFields module="daily_logs" recordId={id} orgId={log.org_id} path={`/daily-logs/${id}`} canEdit={ctx.workspace.mode === 'builder' && can(ctx, 'daily_logs', 'edit')} audience={ctx.workspace.mode === 'builder' ? 'internal' : ctx.workspace.mode} />
       <Attachments jobId={log.job_id} recordType="daily_log" recordId={id} path={`/daily-logs/${id}`} share={{ subs: log.share_subs, clients: log.share_clients }} canAdd={canEdit} />
       {log.status === 'published' && (
         <CommentThread jobId={log.job_id} recordType="daily_log" recordId={id} mode={ctx.workspace.mode} path={`/daily-logs/${id}`} canShareWithClient={false} />
