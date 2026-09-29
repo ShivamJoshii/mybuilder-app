@@ -382,3 +382,10 @@ export async function saveAccounting(_: ActionState, fd: FormData): Promise<Acti
   revalidatePath('/settings/accounting')
   return { ok: 'Accounting settings saved.' }
 }
+
+export async function dismissSetup() {
+  const ctx = await requireAction('settings.manage')
+  const supabase = await createClient()
+  await supabase.from('organizations').update({ setup_dismissed_at: new Date().toISOString() }).eq('id', ctx.workspace.orgId)
+  revalidatePath('/summary')
+}

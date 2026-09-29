@@ -7,6 +7,7 @@ test('builder signs up, creates a company and a job', async ({ page }) => {
   await createBuilder(page, `Alpha Homes ${id}`)
 
   await expect(page.getByRole('heading', { name: 'Create your first job' })).toBeVisible()
+  await expect(page.getByText('0 of 6 done.', { exact: false })).toBeVisible()
   await page.screenshot({ path: 'test-results/01-summary-empty.png', fullPage: true })
 
   await page.getByRole('link', { name: 'New job' }).first().click()
@@ -26,6 +27,13 @@ test('builder signs up, creates a company and a job', async ({ page }) => {
   await page.goto('/jobs')
   await expect(page.getByRole('link', { name: 'Lot 12 Maple Crescent' })).toBeVisible()
   await page.screenshot({ path: 'test-results/04-jobs-list.png', fullPage: true })
+
+  // Getting started reflects progress and can be hidden
+  await page.goto('/summary')
+  await expect(page.getByText('1 of 6 done.', { exact: false })).toBeVisible()
+  await expect(page.getByText('Create your first job', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Hide getting started' }).click()
+  await expect(page.getByRole('heading', { name: 'Getting started' })).toHaveCount(0)
 
   // Bad postal code is rejected
   await page.goto('/jobs/new')

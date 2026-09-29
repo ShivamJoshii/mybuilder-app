@@ -55,6 +55,7 @@ Last updated: 2026-09-29 (overnight build)
 | Database speed at scale: row-security rules now use per-query job lists; 40,000 to-dos load in ~60 ms (was 34 s), a PM's view in ~10 ms (was 4 s). Seed + timing notes in `supabase/perf/` | Built, measured |
 | Estimate a lead before it's sold: the lead gets a Presale job for its estimate and proposal; converting reuses it | Built, browser-tested |
 | Accessibility: automated WCAG 2 AA scan (axe) of 24 main pages with no serious violations; muted text darkened to meet contrast | Built, browser-tested |
+| Getting-started checklist for new builder companies (logo/GST, team, subs, first job, client, schedule, import) | Built, browser-tested |
 | Installable web app (manifest + icons) for phones and tablets | Built |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Second audit of tonight's features (8 findings): attachments tied to the record's job, sub certificates need builder verification, template copies respect module permissions, documents frozen while out for signature, signing evidence recorded server-side, signer IPs private, certificate documents scoped, templates don't send reminders | Fixed, regression tests added |

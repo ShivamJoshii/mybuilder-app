@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Hammer, MousePointerClick, Plus } from 'lucide-react'
-import { getAppContext, can, selectedJobs } from '@/lib/context'
+import { getAppContext, can, hasAction, selectedJobs } from '@/lib/context'
+import { SetupChecklist } from '@/components/kit/setup-checklist'
 import { navFor } from '@/lib/modules'
 import { PageHeader, selectionLabel } from '@/components/shell/page-header'
 import { Card, CardHeader } from '@/components/ui/card'
@@ -39,6 +40,7 @@ export default async function SummaryPage({ searchParams }: PageProps<'/summary'
       <PageHeader title="Summary" jobName={label} jobHref={picked.length === 1 ? `/jobs/${picked[0].id}` : undefined} />
       <div className="space-y-5 p-5">
         {denied && <Alert>You don’t have access to that page. Contact an administrator if you need it.</Alert>}
+        {mode === 'builder' && hasAction(ctx, 'settings.manage') && <SetupChecklist orgId={ctx.workspace.orgId} />}
 
         {ctx.jobs.length === 0 ? (
           <Card>
