@@ -9,7 +9,7 @@
   --border-strong: #cfd4dc;
   --text: #16191f;
   --text-2: #4a5160;
-  --text-3: #7a8191;
+  --text-3: #5d6473;   /* 4.5:1+ on every surface (WCAG AA) */
   --brand: #1d4ed8;
   --brand-hover: #1e40af;
   --brand-soft: #e8efff;

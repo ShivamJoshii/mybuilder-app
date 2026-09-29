@@ -190,7 +190,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
                   </form>
                 ) : (
                   <p className="border-t border-border px-4 py-3 text-[13px] text-text-3">
-                    All your subs are on this job. <Link className="text-brand hover:underline" href="/settings/subs">Add a sub or vendor</Link>
+                    All your subs are on this job. <Link className="text-brand underline" href="/settings/subs">Add a sub or vendor</Link>
                   </p>
                 )
               )}
