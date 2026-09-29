@@ -42,3 +42,8 @@ export function formatDate(d: string | null | undefined) {
   const [y, m, day] = d.slice(0, 10).split('-').map(Number)
   return new Date(y, m - 1, day).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+/** ISO date (YYYY-MM-DD) n days from now. */
+export function isoDaysFromNow(n: number) {
+  return new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10)
+}

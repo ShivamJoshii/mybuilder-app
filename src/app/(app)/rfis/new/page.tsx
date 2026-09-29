@@ -8,6 +8,7 @@ import { linkableRecords } from '@/lib/related'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { RfiForm } from './rfi-form'
+import { isoDaysFromNow } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'New RFI' }
 
@@ -37,5 +38,5 @@ export default async function NewRfiPage() {
   const picked = selectedJobs(ctx)
   return <RfiForm jobs={jobs.map((j) => ({ id: j.id, title: j.title }))} assignees={assignees} targets={await linkableRecords(ids)}
     defaultJob={picked.length === 1 ? picked[0].id : undefined}
-    defaultDue={new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10)} />
+    defaultDue={isoDaysFromNow(7)} />
 }
