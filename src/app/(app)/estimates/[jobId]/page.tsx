@@ -13,8 +13,8 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { formatCAD, formatDate } from '@/lib/utils'
 import { PROPOSAL_STATUS, type EstGroup, type EstItem } from '@/lib/estimate'
-import { Worksheet, type CatalogItem } from './worksheet'
-import { createProposal, sendToBudget, startEstimate, unlockEstimate } from '../actions'
+import { Worksheet, type CatalogItem } from '@/components/kit/cost-worksheet'
+import { createProposal, saveEstimate, sendToBudget, startEstimate, unlockEstimate } from '../actions'
 
 export const metadata: Metadata = { title: 'Estimate' }
 
@@ -74,7 +74,7 @@ export default async function EstimatePage({ params }: PageProps<'/estimates/[jo
       <div className="space-y-4 p-5">
         {!approved && !locked && canEdit && <Alert tone="info">When your client approves a proposal, send the estimate to the budget to lock it and set the contract price.</Alert>}
         {seeCost ? (
-          <Worksheet key={`${est.updated_at}-${locked}`} estimateId={est.id} jobId={job.id} editable={canEdit && !locked}
+          <Worksheet key={`${est.updated_at}-${locked}`} save={saveEstimate.bind(null, est.id, job.id)} editable={canEdit && !locked}
             initial={{ settings: { default_markup_pct: Number(est.default_markup_pct), tax_rate: Number(est.tax_rate), tax_label: est.tax_label },
               groups: (groups ?? []) as EstGroup[], items: (items ?? []).map((i) => ({ ...i, quantity: Number(i.quantity), unit_cost: Number(i.unit_cost), markup_value: Number(i.markup_value) })) as EstItem[] }}
             codes={codes ?? []} catalog={(catalog ?? []).map((c) => ({ ...c, unit_cost: Number(c.unit_cost), markup_value: Number(c.markup_value) })) as CatalogItem[]} />

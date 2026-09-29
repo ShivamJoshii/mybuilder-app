@@ -72,7 +72,7 @@ export function DecisionForm({
       <input type="hidden" name="signature" value={signature} />
       <Textarea name="comment" aria-label="Comment" placeholder="Comment (optional)" maxLength={4000} rows={2} />
       <label className="flex items-start gap-2 text-[13px] text-text-2">
-        <Checkbox name="agree" className="mt-0.5" /> I agree that my electronic signature is the legal equivalent of my handwritten signature and I approve the scope and pricing in this proposal.
+        <Checkbox name="agree" className="mt-0.5" /> I agree that my electronic signature is the legal equivalent of my handwritten signature and I approve the scope and pricing shown above.
       </label>
       <div className="flex gap-2">
         <Button type="submit" name="decision" value="approved" variant="primary" disabled={pending}><CheckCircle2 />Approve{needSignature ? ' and sign' : ''}</Button>

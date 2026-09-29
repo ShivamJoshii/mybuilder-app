@@ -1,11 +1,11 @@
 'use server'
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getAppContext } from '@/lib/context'
 import type { ActionState } from '@/components/kit/action-form'
+import { parseDecision } from '@/lib/signature'
 
 const uuid = z.string().uuid()
 
@@ -50,30 +50,13 @@ export async function deleteProposal(id: string) {
   redirect(`/estimates/${data[0].job_id}`)
 }
 
-const decisionSchema = z.object({
-  decision: z.enum(['approved', 'declined']),
-  signer_name: z.string().trim().min(1, 'Enter the signer\'s full name').max(120),
-  signature: z.string().max(300_000).refine((s) => s === '' || s.startsWith('typed:') || s.startsWith('data:image/png;base64,'), 'Invalid signature'),
-  comment: z.string().trim().max(4000),
-  agree: z.boolean(),
-})
-
 export async function decideProposal(id: string, _: ActionState, fd: FormData): Promise<ActionState> {
   await getAppContext()
-  const parsed = decisionSchema.safeParse({
-    decision: fd.get('decision'), signer_name: fd.get('signer_name'), signature: fd.get('signature') ?? '',
-    comment: fd.get('comment') ?? '', agree: fd.get('agree') === 'on',
-  })
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
-  const d = parsed.data
-  if (d.decision === 'approved' && !d.agree) return { error: 'Confirm that you agree to the proposal.' }
-  const h = await headers()
+  const d = await parseDecision(fd)
+  if ('error' in d) return { error: d.error }
   const supabase = await createClient()
-  const { error } = await supabase.rpc('decide_proposal', {
-    p_proposal: uuid.parse(id), p_decision: d.decision, p_signer_name: d.signer_name, p_signature: d.signature,
-    p_comment: d.comment || undefined, p_ip: (h.get('x-forwarded-for') ?? '').split(',')[0].trim() || undefined, p_ua: h.get('user-agent')?.slice(0, 400) ?? undefined,
-  })
+  const { error } = await supabase.rpc('decide_proposal', { p_proposal: uuid.parse(id), ...d.args })
   if (error) return { error: error.code === '23514' ? 'Add your signature to approve.' : error.code === '22023' ? error.message : 'Could not record the decision.' }
   revalidatePath(`/proposals/${id}`); revalidatePath('/proposals')
-  return { ok: d.decision === 'approved' ? 'Proposal approved. Thank you!' : 'Proposal declined.' }
+  return { ok: d.decision === 'approved' ? 'Approved. Thank you!' : 'Declined.' }
 }

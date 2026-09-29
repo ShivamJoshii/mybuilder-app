@@ -48,3 +48,11 @@ export const PROPOSAL_STATUS: Record<string, { label: string; tone: 'neutral' | 
   approved: { label: 'Approved', tone: 'success' },
   declined: { label: 'Declined', tone: 'danger' },
 }
+
+export const CO_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' | 'warning' }> = {
+  draft: { label: 'Draft', tone: 'neutral' },
+  pending: { label: 'Awaiting approval', tone: 'brand' },
+  approved: { label: 'Approved', tone: 'success' },
+  declined: { label: 'Declined', tone: 'danger' },
+}
+export type SnapshotLine = { title: string; description: string | null; quantity: number; unit: string; price: number; taxable: boolean }

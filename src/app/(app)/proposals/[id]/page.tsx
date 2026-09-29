@@ -14,7 +14,8 @@ import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { PrintButton } from '@/components/kit/print-button'
 import { formatCAD, formatDate, fullName } from '@/lib/utils'
 import { PROPOSAL_STATUS, totals, type EstGroup, type SnapshotGroup } from '@/lib/estimate'
-import { DecisionForm } from './decision-form'
+import { DecisionForm } from '@/components/kit/decision-form'
+import { Signatures } from '@/components/kit/signatures'
 import { decideProposal, deleteProposal, releaseProposal, updateProposal } from '../actions'
 
 export const metadata: Metadata = { title: 'Proposal' }
@@ -151,17 +152,7 @@ export default async function ProposalPage({ params }: PageProps<'/proposals/[id
         </div>
         {p.closing && <p className="mt-6 whitespace-pre-wrap text-[14px] leading-relaxed">{p.closing}</p>}
 
-        {(sigs ?? []).map((s) => (
-          <div key={s.id} className="mt-6 rounded-md border border-border p-4">
-            <div className="text-xs text-text-3">{s.decision === 'approved' ? 'Approved' : 'Declined'} by {s.signer_name}{s.on_behalf ? ' (recorded by the builder)' : ''} on {formatDate(s.signed_at)}</div>
-            {s.signature?.startsWith('typed:') && <div className="mt-2 font-serif text-3xl italic">{s.signature.slice(6)}</div>}
-            {s.signature?.startsWith('data:image/png;base64,') && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.signature} alt={`Signature of ${s.signer_name}`} className="mt-2 h-20" />
-            )}
-            {s.comment && <p className="mt-2 text-[13px]">{s.comment}</p>}
-          </div>
-        ))}
+        <Signatures sigs={sigs ?? []} />
       </Card>
 
       {p.status === 'released' && (isClient || canEdit) && (

@@ -37,7 +37,7 @@ export const MODULES: ModuleDef[] = [
     emptyTitle: 'Record what happened on site', emptyBody: 'Notes, photos and weather for every day on the job.' },
   { slug: 'todos', label: 'To-dos', module: 'todos', icon: CheckSquare, modes: ['builder', 'sub'], jobScoped: true, isNew: true, buildStep: 3,
     emptyTitle: 'Assign work and track it', emptyBody: 'To-dos with checklists, due dates and reminders.' },
-  { slug: 'change-orders', label: 'Change orders', module: 'change_orders', icon: FileCheck2, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 8,
+  { slug: 'change-orders', label: 'Change orders', module: 'change_orders', icon: FileCheck2, modes: ['builder', 'client'], jobScoped: true, buildStep: 8,
     emptyTitle: 'Get changes approved in writing', emptyBody: 'Price changes, collect client signatures and update the budget automatically.' },
   { slug: 'selections', label: 'Selections', module: 'selections', icon: ClipboardList, modes: ['builder', 'sub', 'client'], jobScoped: true, buildStep: 8,
     emptyTitle: 'Let clients choose finishes', emptyBody: 'Options, allowances and approvals with deadlines tied to the schedule.' },

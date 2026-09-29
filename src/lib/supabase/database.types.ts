@@ -65,16 +65,22 @@ isOneToOne: false
                   ]
                 },"budget_lines": {
                   Row: {
-                    "cost_code_id": string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at": string,"id": string,"job_id": string,"org_id": string,"original_cost": number,"original_price": number,"source": string
+                    "change_order_id": string | null,"cost_code_id": string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at": string,"id": string,"job_id": string,"org_id": string,"original_cost": number,"original_price": number,"source": string
                   }
                   Insert: {
-                    "cost_code_id"?: string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at"?: string,"id"?: string,"job_id": string,"org_id": string,"original_cost"?: number,"original_price"?: number,"source"?: string
+                    "change_order_id"?: string | null,"cost_code_id"?: string | null,"cost_type": Database["public"]['Enums']["cost_type"],"created_at"?: string,"id"?: string,"job_id": string,"org_id": string,"original_cost"?: number,"original_price"?: number,"source"?: string
                   }
                   Update: {
-                    "cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"id"?: string,"job_id"?: string,"org_id"?: string,"original_cost"?: number,"original_price"?: number,"source"?: string
+                    "change_order_id"?: string | null,"cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"created_at"?: string,"id"?: string,"job_id"?: string,"org_id"?: string,"original_cost"?: number,"original_price"?: number,"source"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "budget_lines_change_order_id_fkey"
+      columns: ["change_order_id"]
+isOneToOne: false
+      referencedRelation: "change_orders"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "budget_lines_cost_code_id_fkey"
       columns: ["cost_code_id"]
 isOneToOne: false
@@ -114,6 +120,87 @@ isOneToOne: false
     },{
       foreignKeyName: "builder_sub_links_sub_org_id_fkey"
       columns: ["sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"change_order_items": {
+                  Row: {
+                    "change_order_id": string,"cost_code_id": string | null,"cost_type": Database["public"]['Enums']["cost_type"],"description": string | null,"id": string,"internal_notes": string | null,"markup_type": Database["public"]['Enums']["markup_type"],"markup_value": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string,"unit_cost": number,"co_item_price": number | null
+                  }
+                  Insert: {
+                    "change_order_id": string,"cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"description"?: string | null,"id"?: string,"internal_notes"?: string | null,"markup_type"?: Database["public"]['Enums']["markup_type"],"markup_value"?: number,"quantity"?: number,"sort"?: number,"taxable"?: boolean,"title": string,"unit"?: string,"unit_cost"?: number
+                  }
+                  Update: {
+                    "change_order_id"?: string,"cost_code_id"?: string | null,"cost_type"?: Database["public"]['Enums']["cost_type"],"description"?: string | null,"id"?: string,"internal_notes"?: string | null,"markup_type"?: Database["public"]['Enums']["markup_type"],"markup_value"?: number,"quantity"?: number,"sort"?: number,"taxable"?: boolean,"title"?: string,"unit"?: string,"unit_cost"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "change_order_items_change_order_id_fkey"
+      columns: ["change_order_id"]
+isOneToOne: false
+      referencedRelation: "change_orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_order_items_cost_code_id_fkey"
+      columns: ["cost_code_id"]
+isOneToOne: false
+      referencedRelation: "cost_codes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"change_order_signatures": {
+                  Row: {
+                    "change_order_id": string,"comment": string | null,"decision": string,"id": string,"ip": string | null,"on_behalf": boolean,"signature": string | null,"signed_at": string,"signer_name": string,"signer_user_id": string | null,"user_agent": string | null
+                  }
+                  Insert: {
+                    "change_order_id": string,"comment"?: string | null,"decision": string,"id"?: string,"ip"?: string | null,"on_behalf"?: boolean,"signature"?: string | null,"signed_at"?: string,"signer_name": string,"signer_user_id"?: string | null,"user_agent"?: string | null
+                  }
+                  Update: {
+                    "change_order_id"?: string,"comment"?: string | null,"decision"?: string,"id"?: string,"ip"?: string | null,"on_behalf"?: boolean,"signature"?: string | null,"signed_at"?: string,"signer_name"?: string,"signer_user_id"?: string | null,"user_agent"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "change_order_signatures_change_order_id_fkey"
+      columns: ["change_order_id"]
+isOneToOne: false
+      referencedRelation: "change_orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_order_signatures_signer_user_id_fkey"
+      columns: ["signer_user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"change_orders": {
+                  Row: {
+                    "approval_deadline": string | null,"collect_signature": boolean,"created_at": string,"created_by": string,"decided_at": string | null,"default_markup_pct": number,"description": string | null,"id": string,"internal_notes": string | null,"job_id": string,"number": number,"org_id": string,"released_at": string | null,"requested_by_client": boolean,"snapshot": Json | null,"status": Database["public"]['Enums']["co_status"],"subtotal": number | null,"tax": number | null,"tax_label": string,"tax_rate": number,"title": string,"total": number | null
+                  }
+                  Insert: {
+                    "approval_deadline"?: string | null,"collect_signature"?: boolean,"created_at"?: string,"created_by"?: string,"decided_at"?: string | null,"default_markup_pct"?: number,"description"?: string | null,"id"?: string,"internal_notes"?: string | null,"job_id": string,"number": number,"org_id": string,"released_at"?: string | null,"requested_by_client"?: boolean,"snapshot"?: Json | null,"status"?: Database["public"]['Enums']["co_status"],"subtotal"?: number | null,"tax"?: number | null,"tax_label"?: string,"tax_rate"?: number,"title": string,"total"?: number | null
+                  }
+                  Update: {
+                    "approval_deadline"?: string | null,"collect_signature"?: boolean,"created_at"?: string,"created_by"?: string,"decided_at"?: string | null,"default_markup_pct"?: number,"description"?: string | null,"id"?: string,"internal_notes"?: string | null,"job_id"?: string,"number"?: number,"org_id"?: string,"released_at"?: string | null,"requested_by_client"?: boolean,"snapshot"?: Json | null,"status"?: Database["public"]['Enums']["co_status"],"subtotal"?: number | null,"tax"?: number | null,"tax_label"?: string,"tax_rate"?: number,"title"?: string,"total"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "change_orders_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_orders_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_orders_org_id_fkey"
+      columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
       referencedColumns: ["id"]
@@ -1808,8 +1895,22 @@ isOneToOne: false
 "apply_schedule_changes":
 { Args: { "p_cascaded_ids"?: (string)[],"p_changes": Json,"p_notes"?: string,"p_reason"?: string }; Returns: number
                            },
+"can_see_change_order":
+{ Args: { "p_co": string }; Returns: boolean
+                           },
+"client_can":
+{ Args: { "p_job": string,"p_key": string }; Returns: boolean
+                           },
 "clone_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
+                           },
+"co_item_price":
+{ Args: { "i": Database["public"]['Tables']["change_order_items"]['Row'] }; Returns: number
+                           },
+"co_price_lines":
+{ Args: { "p_co": string }; Returns: {
+              "description": string,"id": string,"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
+            }[]
                            },
 "convert_lead_to_job":
 { Args: { "p_amount"?: number,"p_contract"?: Database["public"]['Enums']["contract_type"],"p_lead": string,"p_title": string }; Returns: string
@@ -1819,6 +1920,9 @@ isOneToOne: false
                            },
 "create_sub_org":
 { Args: { "p_name": string }; Returns: string
+                           },
+"decide_change_order":
+{ Args: { "p_co": string,"p_comment"?: string,"p_decision": string,"p_ip"?: string,"p_signature": string,"p_signer_name": string,"p_ua"?: string }; Returns: undefined
                            },
 "decide_proposal":
 { Args: { "p_comment"?: string,"p_decision": string,"p_ip"?: string,"p_proposal": string,"p_signature": string,"p_signer_name": string,"p_ua"?: string }; Returns: undefined
@@ -1859,6 +1963,9 @@ isOneToOne: false
 "my_permissions":
 { Args: { "p_org": string }; Returns: Json
                            },
+"release_change_order":
+{ Args: { "p_co": string }; Returns: undefined
+                           },
 "release_proposal":
 { Args: { "p_proposal": string }; Returns: undefined
                            },
@@ -1869,6 +1976,9 @@ isOneToOne: false
                            },
 "respond_schedule_item":
 { Args: { "p_confirm": boolean,"p_item": string }; Returns: undefined
+                           },
+"save_change_order":
+{ Args: { "p_co": string,"p_items": Json,"p_settings": Json }; Returns: undefined
                            },
 "save_estimate":
 { Args: { "p_estimate": string,"p_groups": Json,"p_items": Json,"p_settings": Json }; Returns: undefined
@@ -1902,7 +2012,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","co_status": "draft"|"pending"|"approved"|"declined","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","marked_as": "none"|"allowance"|"bid"|"selection","markup_type": "percent"|"amount","member_status": "active"|"inactive"|"archived","option_status": "pending"|"approved"|"declined","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","proposal_status": "draft"|"released"|"approved"|"declined","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -2018,7 +2128,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"co_status": ["draft", "pending", "approved", "declined"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"marked_as": ["none", "allowance", "bid", "selection"],"markup_type": ["percent", "amount"],"member_status": ["active", "inactive", "archived"],"option_status": ["pending", "approved", "declined"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"proposal_status": ["draft", "released", "approved", "declined"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const

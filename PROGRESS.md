@@ -23,7 +23,8 @@ Last updated: 2026-09-29 (overnight build)
 | Estimating: worksheet (groups, optional groups, cost codes, markup %/$, provincial tax presets, catalog), price-only view for sales roles | Built, browser-tested |
 | Proposals: frozen snapshot on release, client e-signature (typed or drawn, IP + user agent logged), builder can record on behalf, print | Built, browser-tested |
 | Send to budget (locks estimate, writes original budget, sets contract price), unlock | Built, browser-tested |
-| Change orders, selections, bids/POs/bills, budget screens, invoices, warranty, messages | Next, per build order |
+| Change orders (numbered, cost worksheet, release for e-signature, approval updates budget + contract price, client change requests) | Built, browser-tested |
+| Selections, bids/POs/bills, budget screens, invoices, warranty, messages | Next, per build order |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -58,15 +59,17 @@ Last updated: 2026-09-29 (overnight build)
   Editable per estimate.
 - E-signatures are captured in-house (no DocuSign); we store name, signature image or
   typed name, timestamp, IP and browser, plus the frozen proposal they signed.
+- Subs don't see change orders (they carry client pricing); trade-side changes will come
+  through purchase orders.
 - Invited clients get a copyable invite link on the job page until email sending is on.
 
 ## Tests
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals | 160 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders | 174 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math | 12 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget | 10 flows | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders | 11 flows | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

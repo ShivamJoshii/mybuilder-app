@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/card'
 import { cn, formatCAD } from '@/lib/utils'
 import { COST_TYPES, MARKED_AS, itemCost, itemPrice, totals, type CostType, type EstGroup, type EstItem, type MarkedAs, type MarkupType } from '@/lib/estimate'
 import { PROVINCE_TAX } from '@/lib/tax'
-import { saveEstimate } from '../actions'
 
 type Row = Omit<EstItem, 'quantity' | 'unit_cost' | 'markup_value'> & { quantity: string; unit_cost: string; markup_value: string }
 type Settings = { default_markup_pct: string; tax_rate: string; tax_label: string }
@@ -20,12 +19,16 @@ const toRow = (i: EstItem): Row => ({ ...i, quantity: String(i.quantity), unit_c
 const toItem = (r: Row): EstItem => ({ ...r, quantity: Number(r.quantity) || 0, unit_cost: Number(r.unit_cost) || 0, markup_value: Number(r.markup_value) || 0 })
 const UNGROUPED = '__none'
 
+export type SaveResult = { ok?: true; error?: string }
+export type WorksheetPayload = { settings: { default_markup_pct: number; tax_rate: number; tax_label: string }; groups: EstGroup[]; items: EstItem[] }
+
+/** Cost/markup/price worksheet shared by estimates (with groups) and change orders (flat). */
 export function Worksheet({
-  estimateId, jobId, initial, codes, catalog, editable,
+  save: saveAction, initial, codes, catalog, editable, withGroups = true, saveLabel = 'Save estimate',
 }: {
-  estimateId: string; jobId: string
+  save: (payload: WorksheetPayload) => Promise<SaveResult>
   initial: { settings: { default_markup_pct: number; tax_rate: number; tax_label: string }; groups: EstGroup[]; items: EstItem[] }
-  codes: CostCode[]; catalog: CatalogItem[]; editable: boolean
+  codes: CostCode[]; catalog: CatalogItem[]; editable: boolean; withGroups?: boolean; saveLabel?: string
 }) {
   const [settings, setSettings] = useState<Settings>({
     default_markup_pct: String(initial.settings.default_markup_pct), tax_rate: String(initial.settings.tax_rate), tax_label: initial.settings.tax_label,
@@ -72,12 +75,12 @@ export function Worksheet({
   const removeGroup = (id: string) => { touch(); setGroups((gs) => gs.filter((g) => g.id !== id)); setRows((rs) => rs.filter((r) => r.group_id !== id)) }
 
   const save = () => start(async () => {
-    const res = await saveEstimate(estimateId, jobId, {
+    const res = await saveAction({
       settings: { default_markup_pct: Number(settings.default_markup_pct) || 0, tax_rate: Number(settings.tax_rate) || 0, tax_label: settings.tax_label },
       groups, items: items.map((i) => ({ ...i, description: i.description || null, internal_notes: i.internal_notes || null })),
     })
     if (res.error) setMsg({ error: res.error })
-    else { setDirty(false); setMsg({ ok: 'Estimate saved.' }) }
+    else { setDirty(false); setMsg({ ok: withGroups ? 'Estimate saved.' : 'Saved.' }) }
   })
 
   const sections: { id: string; group: EstGroup | null }[] = [
@@ -95,7 +98,7 @@ export function Worksheet({
         <Stat label={settings.tax_label || 'Tax'} value={formatCAD(t.tax)} sub={`${settings.tax_rate || 0}%`} />
         <Stat label="Total with tax" value={formatCAD(t.total)} strong />
         <Card className="flex flex-col justify-center gap-1 p-3 text-xs text-text-3">
-          <span>Optional groups are left out of totals until approved.</span>
+          <span>{withGroups ? 'Optional groups are left out of totals until approved.' : 'Use a negative quantity for credits.'}</span>
         </Card>
       </div>
 
@@ -120,7 +123,7 @@ export function Worksheet({
         </label>
         <div className="ml-auto flex items-center gap-2">
           {dirty && <span className="text-xs text-warning">Unsaved changes</span>}
-          {editable && <Button variant="primary" onClick={save} disabled={pending || !dirty}><Save />{pending ? 'Saving…' : 'Save estimate'}</Button>}
+          {editable && <Button variant="primary" onClick={save} disabled={pending || !dirty}><Save />{pending ? 'Saving…' : saveLabel}</Button>}
         </div>
       </Card>
       {msg.error && <Alert>{msg.error}</Alert>}
@@ -155,7 +158,7 @@ export function Worksheet({
                   <th className="w-6" /><th className="px-2 py-1.5">Title</th><th className="px-2 py-1.5">Cost code</th><th className="px-2 py-1.5">Type</th>
                   <th className="px-2 py-1.5 text-right">Qty</th><th className="px-2 py-1.5">Unit</th><th className="px-2 py-1.5 text-right">Unit cost</th>
                   <th className="px-2 py-1.5 text-right">Builder cost</th><th className="px-2 py-1.5">Markup</th><th className="px-2 py-1.5 text-right">Client price</th>
-                  <th className="px-2 py-1.5">Tax</th><th className="px-2 py-1.5">Marked as</th><th className="w-8" />
+                  <th className="px-2 py-1.5">Tax</th>{withGroups && <th className="px-2 py-1.5">Marked as</th>}<th className="w-8" />
                 </tr>
               </thead>
               <tbody>
@@ -195,11 +198,11 @@ export function Worksheet({
                         </td>
                         <td className="px-2 py-1 text-right font-medium tabular-nums" data-price>{formatCAD(itemPrice(it))}</td>
                         <td className="px-2 py-1"><Checkbox aria-label="Taxable" checked={r.taxable} disabled={ro} onChange={(e) => setRow(r.id, { taxable: e.target.checked })} /></td>
-                        <td className="px-1 py-1">
+                        {withGroups && <td className="px-1 py-1">
                           <Select aria-label="Marked as" className="h-8 w-28" value={r.marked_as} disabled={ro} onChange={(e) => setRow(r.id, { marked_as: e.target.value as MarkedAs })}>
                             {MARKED_AS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
                           </Select>
-                        </td>
+                        </td>}
                         <td className="pr-2">{editable && <Button variant="ghost" size="sm" aria-label={`Delete line ${r.title}`} onClick={() => { touch(); setRows((rs) => rs.filter((x) => x.id !== r.id)) }}><Trash2 /></Button>}</td>
                       </tr>
                       {isOpen && (
@@ -237,7 +240,7 @@ export function Worksheet({
           </Card>
         )
       })}
-      {editable && <Button onClick={addGroup}><FolderPlus />Add group</Button>}
+      {editable && withGroups && <Button onClick={addGroup}><FolderPlus />Add group</Button>}
     </div>
   )
 }
