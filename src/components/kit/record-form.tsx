@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
@@ -47,7 +48,7 @@ export function RecordForm({
   }, [dirty])
 
   return (
-    <form ref={formRef} action={(fd) => { setDirty(false); action(fd) }} onChange={() => setDirty(true)} className="flex min-h-full flex-col">
+    <form ref={formRef} onSubmit={keepValues((fd) => { setDirty(false); action(fd) })} onChange={() => setDirty(true)} className="flex min-h-full flex-col">
       <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface px-5 py-3">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-semibold">{title}</h1>

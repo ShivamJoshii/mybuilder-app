@@ -152,7 +152,7 @@ export default async function ClaimPage({ params }: PageProps<'/warranty/[id]'>)
       )}
       {c.status === 'resolved' && mode === 'client' && c.client_rating && <Alert tone="success">Thanks — your feedback was sent.</Alert>}
 
-      <Attachments jobId={c.job_id} recordType="warranty_claim" recordId={id} path={`/warranty/${id}`} share={{ subs: Boolean(c.assignee_sub_org_id), clients: true }} canAdd={canEdit} />
+      <Attachments jobId={c.job_id} recordType="warranty_claim" recordId={id} path={`/warranty/${id}`} share={{ subs: Boolean(c.assignee_sub_org_id), clients: true }} canAdd={canEdit || (mode === 'client' && c.status !== 'closed')} />
       <CommentThread jobId={c.job_id} recordType="warranty_claim" recordId={id} mode={mode} path={`/warranty/${id}`} />
     </div>
   )

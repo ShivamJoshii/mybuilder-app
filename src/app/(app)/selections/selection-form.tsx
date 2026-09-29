@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Field, Input, Select, Textarea } from '@/components/ui/input'
@@ -23,7 +24,7 @@ export function SelectionForm({ action, jobs, scheduleItems, defaults, submitLab
   const [mode, setMode] = useState<'none' | 'date' | 'schedule'>(defaults.schedule_item_id ? 'schedule' : defaults.deadline ? 'date' : 'none')
   const items = scheduleItems.filter((s) => s.job_id === jobId)
   return (
-    <form action={formAction} className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={keepValues(formAction)} className="grid gap-4 sm:grid-cols-2">
       {state.error && <Alert className="sm:col-span-2">{state.error}</Alert>}
       <Field label="Job" htmlFor="job_id" required className="sm:col-span-2">
         <Select id="job_id" name="job_id" value={jobId} onChange={(e) => setJobId(e.target.value)} required disabled={jobs.length === 1 && Boolean(defaults.job_id)}>

@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { login, type FormState } from '../actions'
@@ -9,7 +10,7 @@ import { SubmitButton } from '../submit-button'
 export function LoginForm({ next, email }: { next: string; email?: string }) {
   const [state, action] = useActionState<FormState, FormData>(login, {})
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={keepValues(action)} className="space-y-4">
       <h1 className="text-lg font-semibold">Sign in</h1>
       {state.error && <Alert>{state.error}</Alert>}
       <input type="hidden" name="next" value={next} />

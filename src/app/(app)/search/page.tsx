@@ -114,5 +114,6 @@ const SOURCES: { table: string; label: string; select: string; cols: string[]; t
   { table: 'spec_documents', label: 'Specification', select: 'id,job_id,title,deleted_at', cols: ['title', 'body'], title: (r) => t(r, 'title'), href: (r) => `/plans/specs/${t(r, 'id')}` },
   { table: 'files', label: 'File', select: 'id,job_id,name,kind,deleted_at', cols: ['name'], title: (r) => t(r, 'name'), href: (r) => `/${t(r, 'kind')}?file=${t(r, 'id')}` },
   { table: 'email_threads', label: 'Email', select: 'id,job_id,subject', cols: ['subject'], title: (r) => t(r, 'subject'), href: (r) => `/messages/${t(r, 'id')}` },
+  { table: 'submittals', label: 'Submittal', select: 'id,job_id,number,title,deleted_at', cols: ['title', 'spec_section'], title: (r) => `#${t(r, 'number')} ${t(r, 'title')}`, href: (r) => `/submittals/${t(r, 'id')}` },
   { table: 'bid_packages', label: 'Bid package', select: 'id,job_id,number,title,deleted_at', cols: ['title'], title: (r) => t(r, 'title'), href: (r) => `/bids/${t(r, 'id')}` },
 ]

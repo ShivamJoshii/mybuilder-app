@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState, useState } from 'react'
 import { HardHat, Home } from 'lucide-react'
 import { createCompany, type FormState } from '../actions'
@@ -15,7 +16,7 @@ export function OnboardingForm() {
     { value: 'sub' as const, icon: HardHat, title: 'I’m a trade or supplier', body: 'Work with the builders who hire you.' },
   ]
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={keepValues(action)} className="space-y-4">
       <div>
         <h1 className="text-lg font-semibold">Set up your company</h1>
         <p className="mt-1 text-[13px] text-text-3">You can invite your team after this.</p>

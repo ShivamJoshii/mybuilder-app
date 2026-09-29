@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState, useRef, useState } from 'react'
 import { CheckCircle2, Eraser, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -43,7 +44,7 @@ export function DecisionForm({
   if (state.ok) return <Alert tone="success">{state.ok}</Alert>
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form onSubmit={keepValues(formAction)} className="space-y-3">
       {state.error && <Alert>{state.error}</Alert>}
       {onBehalf && <Alert tone="info">You are recording the {party}&apos;s decision on their behalf. This is noted on the signature.</Alert>}
       <label className="block text-[13px] font-medium text-text-2">Full name

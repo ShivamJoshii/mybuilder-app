@@ -37,7 +37,10 @@ Last updated: 2026-09-29 (overnight build)
 | Chat: 1:1 and group conversations with team, job subs and job clients (membership checked server-side), unread counts, live updates (3s polling; Supabase Realtime later) | Built, browser-tested (two browsers) |
 | Messages: job email with a per-job address; send from the job (Reply-To = job address), inbound webhook threads replies (In-Reply-To, then subject), notifications | Built, browser-tested; sending waits for Postmark keys (stays “Queued”) |
 | Time clock: clock in/out by job + cost code with GPS, manual shifts, provincial overtime (AB 8/44 default), approve/reject, labour rates (admin-only), labour cost into budget and WIP, payroll CSV export | Built, browser-tested |
-| Accounting sync (QuickBooks Online / Xero), client portal summary polish, mobile | Next |
+| Submittals: request from sub, numbered revisions with attachments, reviewer decisions (approved / as noted / revise / rejected), ball-in-court | Built, browser-tested |
+| Summary dashboard: role-specific “needs attention” widgets, money snapshot, latest logs | Built |
+| Global search across all modules | Built, browser-tested |
+| Accounting sync (QuickBooks Online / Xero), company logo on documents, mobile polish | Next |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -86,15 +89,16 @@ Last updated: 2026-09-29 (overnight build)
   accepting POs for a sub, approving change orders and selections for a client, approving time.
 - Payroll export is a generic CSV (name, email, period, regular/OT hours); the exact Wagepoint import
   mapping is still to confirm with a Wagepoint account.
+- Forms keep what you typed when the server rejects it (React 19 otherwise resets forms after every action).
 - Invited clients get a copyable invite link on the job page until email sending is on.
 
 ## Tests
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions | 277 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages, time clock, named permissions, submittals | 287 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones, overtime | 18 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock | 19 flows (run against a production build) | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages, time clock, submittals | 20 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

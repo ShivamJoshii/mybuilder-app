@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input, Textarea } from '@/components/ui/input'
@@ -16,7 +17,7 @@ export function PricingForm({ action, items, prices, notes, open }: {
   const [vals, setVals] = useState<Record<string, string>>(Object.fromEntries(items.map((i) => [i.id, prices[i.id] ? String(prices[i.id].unit_cost) : ''])))
   const total = items.reduce((s, i) => s + Math.round(i.quantity * (Number(vals[i.id]) || 0) * 100) / 100, 0)
   return (
-    <form action={formAction} className="space-y-3">
+    <form onSubmit={keepValues(formAction)} className="space-y-3">
       {state.error && <Alert>{state.error}</Alert>}
       {state.ok && <Alert tone="success">{state.ok}</Alert>}
       <table className="w-full text-[13px]">

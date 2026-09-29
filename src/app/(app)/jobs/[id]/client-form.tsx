@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState, useRef, useEffect } from 'react'
 import { Field, Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,7 +11,7 @@ export function AddClientForm({ action }: { action: (s: JobFormState, fd: FormDa
   const ref = useRef<HTMLFormElement>(null)
   useEffect(() => { if (!pending && !state.error) ref.current?.reset() }, [pending, state])
   return (
-    <form ref={ref} action={formAction} className="grid gap-3 border-t border-border p-4 sm:grid-cols-2">
+    <form ref={ref} onSubmit={keepValues(formAction)} className="grid gap-3 border-t border-border p-4 sm:grid-cols-2">
       {state.error && <Alert className="sm:col-span-2">{state.error}</Alert>}
       <Field label="First name" htmlFor="c_first" required><Input id="c_first" name="first_name" required /></Field>
       <Field label="Last name" htmlFor="c_last"><Input id="c_last" name="last_name" /></Field>

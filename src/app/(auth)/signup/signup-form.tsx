@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { signup, type FormState } from '../actions'
@@ -10,7 +11,7 @@ export function SignupForm({ next, email }: { next: string; email?: string }) {
   const [state, action] = useActionState<FormState, FormData>(signup, {})
   if (state.message) return <Alert tone="success">{state.message}</Alert>
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={keepValues(action)} className="space-y-4">
       <h1 className="text-lg font-semibold">Create your account</h1>
       {state.error && <Alert>{state.error}</Alert>}
       <input type="hidden" name="next" value={next} />

@@ -15,6 +15,7 @@ export const RECORD_TYPES: Record<string, { label: string; href: (jobId: string,
   proposal: { label: 'Proposal', href: (_j, id) => `/proposals/${id}` },
   invoice: { label: 'Invoice', href: (_j, id) => `/invoices/${id}` },
   plan_sheet: { label: 'Plan sheet', href: (_j, id) => `/plans/${id}` },
+  submittal: { label: 'Submittal', href: (_j, id) => `/submittals/${id}` },
   schedule_item: { label: 'Schedule item', href: (_j, id) => `/schedule/${id}` },
 }
 

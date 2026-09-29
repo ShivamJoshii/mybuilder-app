@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState, useEffect, useRef } from 'react'
 import { Alert } from '@/components/ui/alert'
 
@@ -17,7 +18,7 @@ export function ActionForm({
   const ref = useRef<HTMLFormElement>(null)
   useEffect(() => { if (state.ok && resetOnSuccess) ref.current?.reset() }, [state, resetOnSuccess])
   return (
-    <form ref={ref} action={formAction} className={className}>
+    <form ref={ref} onSubmit={keepValues(formAction)} className={className}>
       {state.error && <Alert className="mb-3">{state.error}</Alert>}
       {state.ok && <Alert tone="success" className="mb-3">{state.ok}</Alert>}
       {children}

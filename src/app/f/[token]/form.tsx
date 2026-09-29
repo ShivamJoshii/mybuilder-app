@@ -1,4 +1,5 @@
 'use client'
+import { keepValues } from '@/lib/forms'
 import { useActionState } from 'react'
 import { Field, Input, Textarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,7 @@ export function LeadFormClient({ token, thankYou }: { token: string; thankYou: s
   const [state, action, pending] = useActionState<PublicFormState, FormData>(submitLead.bind(null, token), {})
   if (state.done) return <Alert tone="success">{thankYou}</Alert>
   return (
-    <form action={action} className="grid gap-3 sm:grid-cols-2">
+    <form onSubmit={keepValues(action)} className="grid gap-3 sm:grid-cols-2">
       {state.error && <Alert className="sm:col-span-2">{state.error}</Alert>}
       <Field label="First name" htmlFor="pf_first" required><Input id="pf_first" name="first_name" required maxLength={80} autoComplete="given-name" /></Field>
       <Field label="Last name" htmlFor="pf_last"><Input id="pf_last" name="last_name" maxLength={80} autoComplete="family-name" /></Field>

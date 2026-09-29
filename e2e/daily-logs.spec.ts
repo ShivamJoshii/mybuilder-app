@@ -16,7 +16,7 @@ test('builder writes a daily log with weather, tags and a draft', async ({ page 
   await page.getByLabel('Title', { exact: true }).fill('Draft notes')
   await page.getByLabel('Notes', { exact: false }).and(page.locator('textarea')).fill('Half done, finish later')
   await page.getByRole('button', { name: 'Save draft' }).click()
-  await expect(page).toHaveURL(/\/daily-logs\/[0-9a-f-]{36}$/)
+  await expect(page).toHaveURL(/\/daily-logs\/[0-9a-f-]{36}$/, { timeout: 15_000 })   // weather lookup on save
   await expect(page.getByText('Draft', { exact: true })).toBeVisible()
 
   // Published log with weather + new tag
