@@ -444,6 +444,31 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"job_schedule_settings": {
+                  Row: {
+                    "is_online": boolean,"job_id": string,"online_at": string | null,"org_id": string,"updated_at": string
+                  }
+                  Insert: {
+                    "is_online"?: boolean,"job_id": string,"online_at"?: string | null,"org_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "is_online"?: boolean,"job_id"?: string,"online_at"?: string | null,"org_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "job_schedule_settings_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: true
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_schedule_settings_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"job_subs": {
                   Row: {
                     "added_at": string,"can_assign_rfis_to_subs": boolean,"can_share_with_client": boolean,"can_view_owner_info": boolean,"job_id": string,"see_all_schedule_items": boolean,"sub_org_id": string
@@ -837,6 +862,180 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"schedule_assignees": {
+                  Row: {
+                    "id": string,"item_id": string,"responded_at": string | null,"responded_by": string | null,"status": Database["public"]['Enums']["confirm_status"],"sub_org_id": string | null,"user_id": string | null
+                  }
+                  Insert: {
+                    "id"?: string,"item_id": string,"responded_at"?: string | null,"responded_by"?: string | null,"status"?: Database["public"]['Enums']["confirm_status"],"sub_org_id"?: string | null,"user_id"?: string | null
+                  }
+                  Update: {
+                    "id"?: string,"item_id"?: string,"responded_at"?: string | null,"responded_by"?: string | null,"status"?: Database["public"]['Enums']["confirm_status"],"sub_org_id"?: string | null,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "schedule_assignees_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "schedule_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_assignees_responded_by_fkey"
+      columns: ["responded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_assignees_sub_org_id_fkey"
+      columns: ["sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_assignees_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"schedule_baselines": {
+                  Row: {
+                    "captured_at": string,"captured_by": string | null,"id": string,"items": NonNullable<Json>,"job_id": string
+                  }
+                  Insert: {
+                    "captured_at"?: string,"captured_by"?: string | null,"id"?: string,"items": NonNullable<Json>,"job_id": string
+                  }
+                  Update: {
+                    "captured_at"?: string,"captured_by"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"job_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "schedule_baselines_captured_by_fkey"
+      columns: ["captured_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_baselines_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"schedule_items": {
+                  Row: {
+                    "color": string | null,"completed_at": string | null,"created_at": string,"created_by": string,"deleted_at": string | null,"duration": number,"end_date": string,"end_time": string | null,"id": string,"is_hourly": boolean,"job_id": string,"notes_all": string | null,"notes_client": string | null,"notes_internal": string | null,"notes_sub": string | null,"org_id": string,"phase_id": string | null,"progress": number,"reminder_days": number | null,"show_client": boolean,"show_on_gantt": boolean,"show_subs": boolean,"start_date": string,"start_time": string | null,"title": string,"updated_at": string
+                  }
+                  Insert: {
+                    "color"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"duration"?: number,"end_date": string,"end_time"?: string | null,"id"?: string,"is_hourly"?: boolean,"job_id": string,"notes_all"?: string | null,"notes_client"?: string | null,"notes_internal"?: string | null,"notes_sub"?: string | null,"org_id": string,"phase_id"?: string | null,"progress"?: number,"reminder_days"?: number | null,"show_client"?: boolean,"show_on_gantt"?: boolean,"show_subs"?: boolean,"start_date": string,"start_time"?: string | null,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "color"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"duration"?: number,"end_date"?: string,"end_time"?: string | null,"id"?: string,"is_hourly"?: boolean,"job_id"?: string,"notes_all"?: string | null,"notes_client"?: string | null,"notes_internal"?: string | null,"notes_sub"?: string | null,"org_id"?: string,"phase_id"?: string | null,"progress"?: number,"reminder_days"?: number | null,"show_client"?: boolean,"show_on_gantt"?: boolean,"show_subs"?: boolean,"start_date"?: string,"start_time"?: string | null,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "schedule_items_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_items_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_items_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_items_phase_id_fkey"
+      columns: ["phase_id"]
+isOneToOne: false
+      referencedRelation: "schedule_phases"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"schedule_links": {
+                  Row: {
+                    "lag_days": number,"predecessor_id": string,"successor_id": string,"type": Database["public"]['Enums']["dep_type"]
+                  }
+                  Insert: {
+                    "lag_days"?: number,"predecessor_id": string,"successor_id": string,"type"?: Database["public"]['Enums']["dep_type"]
+                  }
+                  Update: {
+                    "lag_days"?: number,"predecessor_id"?: string,"successor_id"?: string,"type"?: Database["public"]['Enums']["dep_type"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "schedule_links_predecessor_id_fkey"
+      columns: ["predecessor_id"]
+isOneToOne: false
+      referencedRelation: "schedule_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_links_successor_id_fkey"
+      columns: ["successor_id"]
+isOneToOne: false
+      referencedRelation: "schedule_items"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"schedule_phases": {
+                  Row: {
+                    "color": string,"id": string,"job_id": string,"name": string,"org_id": string,"sort": number
+                  }
+                  Insert: {
+                    "color"?: string,"id"?: string,"job_id": string,"name": string,"org_id": string,"sort"?: number
+                  }
+                  Update: {
+                    "color"?: string,"id"?: string,"job_id"?: string,"name"?: string,"org_id"?: string,"sort"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "schedule_phases_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_phases_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"schedule_shifts": {
+                  Row: {
+                    "cascaded": boolean,"id": number,"item_id": string,"new_end": string,"new_start": string,"notes": string | null,"old_end": string,"old_start": string,"reason": string | null,"shifted_at": string,"shifted_by": string | null
+                  }
+                  Insert: {
+                    "cascaded"?: boolean,"id"?: never,"item_id": string,"new_end": string,"new_start": string,"notes"?: string | null,"old_end": string,"old_start": string,"reason"?: string | null,"shifted_at"?: string,"shifted_by"?: string | null
+                  }
+                  Update: {
+                    "cascaded"?: boolean,"id"?: never,"item_id"?: string,"new_end"?: string,"new_start"?: string,"notes"?: string | null,"old_end"?: string,"old_start"?: string,"reason"?: string | null,"shifted_at"?: string,"shifted_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "schedule_shifts_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "schedule_items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "schedule_shifts_shifted_by_fkey"
+      columns: ["shifted_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tags": {
                   Row: {
                     "color": string | null,"id": string,"module": string,"name": string,"org_id": string
@@ -1018,6 +1217,31 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"workday_exceptions": {
+                  Row: {
+                    "category": string | null,"created_at": string,"end_date": string,"id": string,"job_id": string | null,"org_id": string,"repeat_annually": boolean,"start_date": string,"title": string,"type": Database["public"]['Enums']["workday_exception_type"]
+                  }
+                  Insert: {
+                    "category"?: string | null,"created_at"?: string,"end_date": string,"id"?: string,"job_id"?: string | null,"org_id": string,"repeat_annually"?: boolean,"start_date": string,"title": string,"type": Database["public"]['Enums']["workday_exception_type"]
+                  }
+                  Update: {
+                    "category"?: string | null,"created_at"?: string,"end_date"?: string,"id"?: string,"job_id"?: string | null,"org_id"?: string,"repeat_annually"?: boolean,"start_date"?: string,"title"?: string,"type"?: Database["public"]['Enums']["workday_exception_type"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "workday_exceptions_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "workday_exceptions_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -1032,6 +1256,9 @@ isOneToOne: false
                            },
 "add_sub_vendor":
 { Args: { "p_builder": string,"p_company_name": string,"p_contact_first"?: string,"p_contact_last"?: string,"p_email": string,"p_phone"?: string,"p_trade"?: string }; Returns: string
+                           },
+"apply_schedule_changes":
+{ Args: { "p_cascaded_ids"?: (string)[],"p_changes": Json,"p_notes"?: string,"p_reason"?: string }; Returns: number
                            },
 "clone_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
@@ -1062,6 +1289,9 @@ isOneToOne: false
 "my_permissions":
 { Args: { "p_org": string }; Returns: Json
                            },
+"respond_schedule_item":
+{ Args: { "p_confirm": boolean,"p_item": string }; Returns: undefined
+                           },
 "set_active_org":
 { Args: { "p_org": string }; Returns: undefined
                            },
@@ -1082,7 +1312,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high"
+            "confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1198,7 +1428,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"]
+            "confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const
