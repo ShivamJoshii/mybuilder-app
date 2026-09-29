@@ -532,6 +532,111 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"related_items": {
+                  Row: {
+                    "created_at": string,"created_by": string,"from_id": string,"from_type": string,"id": string,"job_id": string,"org_id": string,"to_id": string,"to_type": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"from_id": string,"from_type": string,"id"?: string,"job_id": string,"org_id": string,"to_id": string,"to_type": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"from_id"?: string,"from_type"?: string,"id"?: string,"job_id"?: string,"org_id"?: string,"to_id"?: string,"to_type"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "related_items_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "related_items_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "related_items_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"rfi_responses": {
+                  Row: {
+                    "author_id": string,"body": string,"created_at": string,"id": string,"rfi_id": string
+                  }
+                  Insert: {
+                    "author_id"?: string,"body": string,"created_at"?: string,"id"?: string,"rfi_id": string
+                  }
+                  Update: {
+                    "author_id"?: string,"body"?: string,"created_at"?: string,"id"?: string,"rfi_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rfi_responses_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rfi_responses_rfi_id_fkey"
+      columns: ["rfi_id"]
+isOneToOne: false
+      referencedRelation: "rfis"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"rfis": {
+                  Row: {
+                    "assignee_sub_org_id": string | null,"assignee_user_id": string | null,"author_sub_org_id": string | null,"author_type": string,"completed_at": string | null,"created_at": string,"created_by": string,"deleted_at": string | null,"due_date": string,"id": string,"job_id": string,"number": number,"org_id": string,"question": string,"sent_at": string | null,"status": Database["public"]['Enums']["rfi_status"],"title": string,"updated_at": string
+                  }
+                  Insert: {
+                    "assignee_sub_org_id"?: string | null,"assignee_user_id"?: string | null,"author_sub_org_id"?: string | null,"author_type"?: string,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"due_date": string,"id"?: string,"job_id": string,"number"?: number,"org_id": string,"question": string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["rfi_status"],"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "assignee_sub_org_id"?: string | null,"assignee_user_id"?: string | null,"author_sub_org_id"?: string | null,"author_type"?: string,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string,"deleted_at"?: string | null,"due_date"?: string,"id"?: string,"job_id"?: string,"number"?: number,"org_id"?: string,"question"?: string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["rfi_status"],"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rfis_assignee_sub_org_id_fkey"
+      columns: ["assignee_sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rfis_assignee_user_id_fkey"
+      columns: ["assignee_user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rfis_author_sub_org_id_fkey"
+      columns: ["author_sub_org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rfis_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rfis_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rfis_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"role_actions": {
                   Row: {
                     "action": string,"role_id": string
@@ -863,6 +968,9 @@ isOneToOne: false
 "set_job_selection":
 { Args: { "p_all": boolean,"p_job_ids": (string)[],"p_org": string }; Returns: undefined
                            },
+"set_rfi_status":
+{ Args: { "p_action": string,"p_rfi": string }; Returns: undefined
+                           },
 "set_todo_complete":
 { Args: { "p_done": boolean,"p_todo": string }; Returns: undefined
                            },
@@ -871,7 +979,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","todo_priority": "low"|"medium"|"high"
+            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -987,7 +1095,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"todo_priority": ["low", "medium", "high"]
+            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"]
           }
         }
 } as const
