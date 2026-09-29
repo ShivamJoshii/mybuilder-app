@@ -3,10 +3,13 @@ import { SETTINGS_NAV } from '@/lib/modules'
 import { TopNav } from '@/components/shell/top-nav'
 import { JobSidebar, type SwitchOption } from '@/components/shell/job-sidebar'
 import { fullName, initials } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function AppLayout({ children }: LayoutProps<'/'>) {
   const ctx = await getAppContext()
   const mode = ctx.workspace.mode
+  const supabase = await createClient()
+  const { count: unread } = await supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null)
 
   // Menu items are filtered by what the role can view (builder only; subs/clients get the portal set)
   const allowedModules = mode === 'builder'
@@ -45,6 +48,7 @@ export default async function AppLayout({ children }: LayoutProps<'/'>) {
         userInitials={initials(ctx.profile)}
         userName={fullName(ctx.profile)}
         userEmail={ctx.email}
+        unread={unread ?? 0}
       />
       <div className="flex min-h-0 flex-1">
         <JobSidebar

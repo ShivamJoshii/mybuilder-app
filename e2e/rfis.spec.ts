@@ -61,6 +61,12 @@ test('RFI round trip between builder and sub', async ({ page }) => {
   await signOut(page)
 
   await signIn(page, ownerEmail)
+  await expect(page.getByRole('link', { name: /Notifications, \d+ unread/ })).toBeVisible()
+  await page.goto('/notifications')
+  await expect(page.getByText('New response on RFI #1: Tub drain location')).toBeVisible()
+  await page.screenshot({ path: 'test-results/51-notifications.png', fullPage: true })
+  await page.getByRole('button', { name: 'Mark all read' }).click()
+  await expect(page.getByRole('link', { name: 'Notifications', exact: true })).toBeVisible()
   await page.goto('/rfis')
   await page.getByRole('link', { name: 'Tub drain location' }).click()
   await page.getByRole('button', { name: 'Reopen' }).click()

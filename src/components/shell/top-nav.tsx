@@ -16,9 +16,10 @@ export type TopNavProps = {
   userInitials: string
   userName: string
   userEmail: string
+  unread: number
 }
 
-export function TopNav({ mode, allowedModules, settings, userInitials, userName, userEmail }: TopNavProps) {
+export function TopNav({ mode, allowedModules, settings, userInitials, userName, userEmail, unread }: TopNavProps) {
   const pathname = usePathname()
   const allowed = allowedModules ? new Set(allowedModules) : null
   const groups = navFor(mode)
@@ -74,7 +75,10 @@ export function TopNav({ mode, allowedModules, settings, userInitials, userName,
               className="h-8 w-56 rounded-md border border-white/10 bg-nav-2 pl-8 pr-2 text-[13px] text-white placeholder:text-nav-text/50 focus:w-72 focus:outline-none focus:ring-2 focus:ring-brand/60"
             />
           </form>
-          <Link href="/notifications" className="rounded p-2 hover:bg-nav-2" aria-label="Notifications"><Bell className="size-4" /></Link>
+          <Link href="/notifications" className="relative rounded p-2 hover:bg-nav-2" aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}>
+            <Bell className="size-4" />
+            {unread > 0 && <span className="absolute right-0.5 top-0.5 flex min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">{unread > 99 ? '99+' : unread}</span>}
+          </Link>
           <Link href="/chat" className="rounded p-2 hover:bg-nav-2" aria-label="Chat"><MessagesSquare className="size-4" /></Link>
           <Menu modal={false}>
             <MenuTrigger className="rounded p-2 outline-none hover:bg-nav-2" aria-label="Help"><HelpCircle className="size-4" /></MenuTrigger>
@@ -98,6 +102,7 @@ export function TopNav({ mode, allowedModules, settings, userInitials, userName,
                 <MenuItem key={s.href} asChild><Link href={s.href}><Settings />{s.label}</Link></MenuItem>
               ))}
               <MenuItem asChild><Link href="/settings/profile"><Settings />My profile</Link></MenuItem>
+              <MenuItem asChild><Link href="/settings/notifications"><Bell />Notification settings</Link></MenuItem>
               <MenuSeparator />
               <MenuItem onSelect={() => (document.getElementById('signout-form') as HTMLFormElement | null)?.requestSubmit()}>
                 <LogOut />Sign out

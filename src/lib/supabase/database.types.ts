@@ -37,6 +37,19 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"app_notification_types": {
+                  Row: {
+                    "default_email": boolean,"default_push": boolean,"default_text": boolean,"grp": string,"key": string,"label": string,"module": string,"sort": number
+                  }
+                  Insert: {
+                    "default_email"?: boolean,"default_push"?: boolean,"default_text"?: boolean,"grp": string,"key": string,"label": string,"module": string,"sort": number
+                  }
+                  Update: {
+                    "default_email"?: boolean,"default_push"?: boolean,"default_text"?: boolean,"grp"?: string,"key"?: string,"label"?: string,"module"?: string,"sort"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"audit_log": {
                   Row: {
                     "action": string,"actor_id": string | null,"after": Json | null,"at": string,"before": Json | null,"id": number,"org_id": string | null,"record_id": string,"table_name": string
@@ -472,6 +485,93 @@ isOneToOne: false
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"notification_deliveries": {
+                  Row: {
+                    "attempts": number,"channel": Database["public"]['Enums']["delivery_channel"],"created_at": string,"id": string,"last_error": string | null,"notification_id": string,"sent_at": string | null,"status": Database["public"]['Enums']["delivery_status"]
+                  }
+                  Insert: {
+                    "attempts"?: number,"channel": Database["public"]['Enums']["delivery_channel"],"created_at"?: string,"id"?: string,"last_error"?: string | null,"notification_id": string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["delivery_status"]
+                  }
+                  Update: {
+                    "attempts"?: number,"channel"?: Database["public"]['Enums']["delivery_channel"],"created_at"?: string,"id"?: string,"last_error"?: string | null,"notification_id"?: string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["delivery_status"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notification_deliveries_notification_id_fkey"
+      columns: ["notification_id"]
+isOneToOne: false
+      referencedRelation: "notifications"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"notification_prefs": {
+                  Row: {
+                    "email": boolean,"push": boolean,"text": boolean,"type": string,"user_id": string
+                  }
+                  Insert: {
+                    "email": boolean,"push": boolean,"text": boolean,"type": string,"user_id": string
+                  }
+                  Update: {
+                    "email"?: boolean,"push"?: boolean,"text"?: boolean,"type"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notification_prefs_type_fkey"
+      columns: ["type"]
+isOneToOne: false
+      referencedRelation: "app_notification_types"
+      referencedColumns: ["key"]
+    },{
+      foreignKeyName: "notification_prefs_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"notifications": {
+                  Row: {
+                    "actor_id": string | null,"body": string | null,"created_at": string,"id": string,"job_id": string | null,"link": string | null,"org_id": string | null,"read_at": string | null,"title": string,"type": string,"user_id": string
+                  }
+                  Insert: {
+                    "actor_id"?: string | null,"body"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string | null,"link"?: string | null,"org_id"?: string | null,"read_at"?: string | null,"title": string,"type": string,"user_id": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"body"?: string | null,"created_at"?: string,"id"?: string,"job_id"?: string | null,"link"?: string | null,"org_id"?: string | null,"read_at"?: string | null,"title"?: string,"type"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notifications_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_type_fkey"
+      columns: ["type"]
+isOneToOne: false
+      referencedRelation: "app_notification_types"
+      referencedColumns: ["key"]
+    },{
+      foreignKeyName: "notifications_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -953,6 +1053,9 @@ isOneToOne: false
               "accepted": boolean,"email": string,"expired": boolean,"kind": Database["public"]['Enums']["invite_kind"],"org_name": string
             }[]
                            },
+"mark_notifications_read":
+{ Args: { "p_ids"?: (string)[] }; Returns: undefined
+                           },
 "my_context":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -979,7 +1082,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high"
+            "contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1095,7 +1198,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"]
+            "contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"]
           }
         }
 } as const

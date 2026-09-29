@@ -9,7 +9,7 @@ export default async function SettingsLayout({ children }: LayoutProps<'/setting
     ? SETTINGS_NAV.filter((s) => (s.module ? can(ctx, s.module) : true) && (s.action ? hasAction(ctx, s.action) : true))
         .map(({ label, href }) => ({ label, href }))
     : ctx.orgs.some((o) => o.kind === 'sub' && o.is_admin) ? [{ label: 'Company profile', href: '/settings/sub-profile' }] : []
-  items.push({ label: 'My profile', href: '/settings/profile' })
+  items.push({ label: 'My profile', href: '/settings/profile' }, { label: 'Notifications', href: '/settings/notifications' })
   return (
     <div className="flex min-h-full flex-col md:flex-row">
       <nav className="shrink-0 border-b border-border bg-surface p-3 md:w-56 md:border-b-0 md:border-r" aria-label="Settings">
