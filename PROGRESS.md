@@ -35,7 +35,8 @@ Last updated: 2026-09-29 (overnight build)
 | Reports: work in progress (earned vs billed, over/under billing), receivables aging, payables aging | Built, browser-tested |
 | Warranty: client requests (portal setting), assignment to team or sub, service visits the sub confirms/completes, internal notes kept private, client rating | Built, browser-tested |
 | Chat: 1:1 and group conversations with team, job subs and job clients (membership checked server-side), unread counts, live updates (3s polling; Supabase Realtime later) | Built, browser-tested (two browsers) |
-| Messages (email in/out), time clock, accounting sync | Next, per build order |
+| Messages: job email with a per-job address; send from the job (Reply-To = job address), inbound webhook threads replies (In-Reply-To, then subject), notifications | Built, browser-tested; sending waits for Postmark keys (stays “Queued”) |
+| Time clock, accounting sync, client portal summary polish | Next |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -49,8 +50,9 @@ Last updated: 2026-09-29 (overnight build)
    the push to `ShivamJoshii/mybuilder-app` was refused (the token itself is fine).
    Add the repo as a session source, or connect a folder on your Mac. A git bundle of
    everything is attached in the chat meanwhile.
-3. **Email sending (later).** Invites currently show a copyable link. Postmark keys will
-   switch that to real emails.
+3. **Email (Postmark).** Set POSTMARK_SERVER_TOKEN, a verified sender (EMAIL_FROM), an inbound
+   domain (MX for in.mybuilder.ca → Postmark) and INBOUND_WEBHOOK_SECRET. Until then invites show a
+   copyable link and job email stays queued.
 
 ## Decisions I made on my own
 
@@ -85,9 +87,9 @@ Last updated: 2026-09-29 (overnight build)
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat | 259 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat, messages | 265 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones | 14 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat | 17 flows (run against a production build) | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat, messages | 18 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)

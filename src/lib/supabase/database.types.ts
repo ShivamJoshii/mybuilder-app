@@ -772,6 +772,56 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"email_messages": {
+                  Row: {
+                    "attachments": number,"body_text": string,"cc_emails": (string)[],"created_at": string,"direction": string,"error": string | null,"from_email": string,"from_name": string | null,"id": string,"in_reply_to": string | null,"message_id": string | null,"sent_by": string | null,"status": string,"subject": string,"thread_id": string,"to_emails": (string)[]
+                  }
+                  Insert: {
+                    "attachments"?: number,"body_text"?: string,"cc_emails"?: (string)[],"created_at"?: string,"direction": string,"error"?: string | null,"from_email": string,"from_name"?: string | null,"id"?: string,"in_reply_to"?: string | null,"message_id"?: string | null,"sent_by"?: string | null,"status"?: string,"subject": string,"thread_id": string,"to_emails"?: (string)[]
+                  }
+                  Update: {
+                    "attachments"?: number,"body_text"?: string,"cc_emails"?: (string)[],"created_at"?: string,"direction"?: string,"error"?: string | null,"from_email"?: string,"from_name"?: string | null,"id"?: string,"in_reply_to"?: string | null,"message_id"?: string | null,"sent_by"?: string | null,"status"?: string,"subject"?: string,"thread_id"?: string,"to_emails"?: (string)[]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "email_messages_sent_by_fkey"
+      columns: ["sent_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "email_messages_thread_id_fkey"
+      columns: ["thread_id"]
+isOneToOne: false
+      referencedRelation: "email_threads"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"email_threads": {
+                  Row: {
+                    "created_at": string,"id": string,"job_id": string,"last_at": string,"org_id": string,"subject": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"job_id": string,"last_at"?: string,"org_id": string,"subject": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"job_id"?: string,"last_at"?: string,"org_id"?: string,"subject"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "email_threads_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "email_threads_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"estimate_groups": {
                   Row: {
                     "estimate_id": string,"id": string,"is_optional": boolean,"name": string,"option_status": Database["public"]['Enums']["option_status"],"sort": number
@@ -1090,6 +1140,31 @@ isOneToOne: false
                   Relationships: [
                     {
       foreignKeyName: "job_groups_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"job_mailboxes": {
+                  Row: {
+                    "job_id": string,"org_id": string,"token": string
+                  }
+                  Insert: {
+                    "job_id": string,"org_id": string,"token"?: string
+                  }
+                  Update: {
+                    "job_id"?: string,"org_id"?: string,"token"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "job_mailboxes_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: true
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "job_mailboxes_org_id_fkey"
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
@@ -2773,6 +2848,9 @@ isOneToOne: false
 { Args: { "p_estimate": string }; Returns: {
               "description": string,"group_id": string,"id": string,"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
             }[]
+                           },
+"ingest_inbound_email":
+{ Args: { "p_attachments"?: number,"p_body": string,"p_cc": (string)[],"p_from": string,"p_from_name": string,"p_in_reply_to": string,"p_message_id": string,"p_subject": string,"p_to": (string)[],"p_token": string }; Returns: string
                            },
 "invite_internal_user":
 { Args: { "p_email": string,"p_org": string,"p_role": string }; Returns: string
