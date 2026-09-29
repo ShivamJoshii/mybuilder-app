@@ -107,6 +107,31 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"bid_package_sheets": {
+                  Row: {
+                    "package_id": string,"sheet_id": string
+                  }
+                  Insert: {
+                    "package_id": string,"sheet_id": string
+                  }
+                  Update: {
+                    "package_id"?: string,"sheet_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "bid_package_sheets_package_id_fkey"
+      columns: ["package_id"]
+isOneToOne: false
+      referencedRelation: "bid_packages"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "bid_package_sheets_sheet_id_fkey"
+      columns: ["sheet_id"]
+isOneToOne: false
+      referencedRelation: "plan_sheets"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"bid_packages": {
                   Row: {
                     "created_at": string,"created_by": string,"deleted_at": string | null,"due_at": string | null,"id": string,"job_id": string,"number": number,"org_id": string,"released_at": string | null,"scope": string | null,"status": Database["public"]['Enums']["bid_package_status"],"title": string

@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { test, expect } from '@playwright/test'
 import { signUp, signIn, signOut, createBuilder, uid } from './helpers'
 
@@ -22,6 +23,13 @@ test('bid → award → PO accepted by sub → sub bills → builder pays; budge
   await page.keyboard.press('Escape')
   const link = await page.locator('[data-copy*="/invite/"]').first().getAttribute('data-copy')
 
+  // Plans on the job (the sub is not on the job, only invited to bid)
+  await page.goto('/plans/upload')
+  await page.getByLabel('Plan file').setInputFiles(path.join(__dirname, 'fixtures', 'plan-set.pdf'))
+  await expect(page.getByText('2 sheets found.')).toBeVisible()
+  await page.getByRole('button', { name: 'Upload plans' }).click()
+  await expect(page).toHaveURL(/\/plans$/)
+
   // Bid package
   await page.goto('/bids/new')
   await page.getByLabel('Title').fill('Framing labour')
@@ -39,6 +47,13 @@ test('bid → award → PO accepted by sub → sub bills → builder pays; budge
   await page.getByLabel(`Frame Co ${id}`).check()
   await page.getByRole('button', { name: 'Save bidders' }).click()
   await expect(page.getByLabel(`Frame Co ${id}`)).toBeChecked()
+  await page.getByRole('checkbox', { name: 'A-101' }).check()
+  await page.getByRole('button', { name: 'Save plans' }).click()
+  await expect(page.getByRole('checkbox', { name: 'A-101' })).toBeChecked()
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await page.getByLabel('Choose files').setInputFiles({ name: 'framing-scope.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF\n') })
+  await page.getByRole('dialog').getByRole('button', { name: 'Upload', exact: true }).click()
+  await expect(page.getByRole('link', { name: 'framing-scope.pdf' })).toBeVisible()
   await page.getByRole('button', { name: 'Send to bidders' }).click()
   await page.getByRole('button', { name: 'Send', exact: true }).click()
   await expect(page.getByText('Open for bids')).toBeVisible()
@@ -57,6 +72,14 @@ test('bid → award → PO accepted by sub → sub bills → builder pays; budge
   await page.goto('/bids')
   await expect(page.getByText(`Bid Homes ${id}`)).toBeVisible()
   await page.getByRole('link', { name: 'Framing labour' }).click()
+  // bidder sees the shared sheet and the attachment, not the rest of the set
+  await expect(page.getByRole('link', { name: 'framing-scope.pdf' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'A-102' })).toHaveCount(0)
+  const bidPage = page.url()
+  await page.getByRole('link', { name: 'A-101' }).click()
+  await expect(page.getByText('Loading sheet…')).toHaveCount(0, { timeout: 15000 })
+  await expect(page.getByTestId('markup-layer')).toBeVisible()
+  await page.goto(bidPage)
   await page.getByLabel('Unit price for Main floor framing').fill('5000')
   await page.getByLabel('Unit price for Roof sheathing').fill('30')
   await expect(page.getByTestId('bid-total')).toHaveText('$8,000.00')

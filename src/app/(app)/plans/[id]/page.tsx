@@ -47,7 +47,7 @@ export default async function SheetPage({ params }: PageProps<'/plans/[id]'>) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-4 py-2">
-        <Button asChild variant="ghost" size="sm"><Link href="/plans"><ArrowLeft />Plans</Link></Button>
+        <Button asChild variant="ghost" size="sm"><Link href={job ? '/plans' : '/bids'}><ArrowLeft />{job ? 'Plans' : 'Bids'}</Link></Button>
         <div className="min-w-0">
           <div className="text-xs text-text-3">{job?.title}{sheet.discipline ? ` · ${sheet.discipline}` : ''}</div>
           <h1 className="truncate text-base font-semibold">{sheet.number}{sheet.title ? ` — ${sheet.title}` : ''}</h1>

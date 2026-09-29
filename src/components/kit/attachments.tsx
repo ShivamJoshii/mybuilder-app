@@ -29,7 +29,7 @@ export async function Attachments({ jobId, recordType, recordId, path, share, ca
                 : <Paperclip className="size-4 text-text-3" />}
               <a href={`/files/${f.id}/download?inline=1`} target="_blank" rel="noreferrer" className="flex-1 truncate text-brand hover:underline">{f.name}</a>
               <span className="text-xs text-text-3">{Math.max(1, Math.round(f.size_bytes / 1024))} KB</span>
-              <form action={detachFile.bind(null, recordType, recordId, f.id, path)}><Button type="submit" size="icon" variant="ghost" aria-label={`Remove ${f.name}`}><X /></Button></form>
+              {canAdd && <form action={detachFile.bind(null, recordType, recordId, f.id, path)}><Button type="submit" size="icon" variant="ghost" aria-label={`Remove ${f.name}`}><X /></Button></form>}
             </li>
           ))}
         </ul>

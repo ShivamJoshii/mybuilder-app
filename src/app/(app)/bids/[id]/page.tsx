@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Award, Send, XCircle } from 'lucide-react'
+import { ArrowLeft, Award, FileText, Send, XCircle } from 'lucide-react'
 import { getAppContext, can } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { linkedSubs, costCodes } from '@/lib/financial'
@@ -18,7 +18,7 @@ import { Attachments } from '@/components/kit/attachments'
 import { cn, formatCAD, formatDateTime, utcToZonedInput } from '@/lib/utils'
 import { BID_REQUEST_STATUS, BID_STATUS } from '@/lib/estimate'
 import { PricingForm } from './pricing-form'
-import { awardBid, declineBid, releaseBids, saveBidLines, setInvites, submitBid, updateBidPackage } from '../actions'
+import { awardBid, declineBid, releaseBids, saveBidLines, setBidSheets, setInvites, submitBid, updateBidPackage } from '../actions'
 
 export const metadata: Metadata = { title: 'Bid package' }
 
@@ -28,11 +28,29 @@ export default async function BidPage({ params }: PageProps<'/bids/[id]'>) {
   const supabase = await createClient()
   const { data: p } = await supabase.from('bid_packages').select('*').eq('id', id).is('deleted_at', null).maybeSingle()
   if (!p) notFound()
-  const [{ data: items }, { data: reqs }, { data: info }] = await Promise.all([
+  const [{ data: items }, { data: reqs }, { data: info }, { data: shared }] = await Promise.all([
     supabase.from('bid_package_items').select('*').eq('package_id', id).order('sort'),
     supabase.from('bid_requests').select('id,sub_org_id,status,total,notes,decline_reason,submitted_at,organizations(name)').eq('package_id', id).order('created_at'),
     supabase.rpc('bid_job_info', { p_package: id }),
+    supabase.from('bid_package_sheets').select('sheet_id, plan_sheets(id,number,title,discipline)').eq('package_id', id),
   ])
+  const sharedSheets = (shared ?? []).map((r) => r.plan_sheets as { id: string; number: string; title: string; discipline: string | null } | null)
+    .filter((x): x is { id: string; number: string; title: string; discipline: string | null } => Boolean(x))
+    .sort((a, b) => a.number.localeCompare(b.number, 'en', { numeric: true }))
+  const sheetList = sharedSheets.length > 0 && (
+    <Card>
+      <CardHeader title="Plans for this bid" />
+      <ul className="divide-y divide-border">
+        {sharedSheets.map((sh) => (
+          <li key={sh.id} className="flex items-center gap-2 px-4 py-2 text-[13px]">
+            <FileText className="size-4 text-text-3" />
+            <Link href={`/plans/${sh.id}`} className="font-medium text-brand hover:underline">{sh.number}</Link>
+            <span className="text-text-2">{sh.title}</span>{sh.discipline && <span className="text-xs text-text-3">· {sh.discipline}</span>}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  )
   const job = info?.[0]
   const builder = ctx.workspace.mode === 'builder'
   const canEdit = builder && can(ctx, 'bids', 'edit')
@@ -62,6 +80,8 @@ export default async function BidPage({ params }: PageProps<'/bids/[id]'>) {
       <div className="mx-auto max-w-4xl space-y-5 p-5">
         <Button asChild variant="ghost"><Link href="/bids"><ArrowLeft />Bid requests</Link></Button>
         {header}
+        {sheetList}
+        <Attachments jobId={p.job_id} recordType="bid_package" recordId={id} path={`/bids/${id}`} share={{ subs: true, clients: false }} canAdd={false} />
         <Alert tone={mine.status === 'awarded' ? 'success' : mine.status === 'declined' || mine.status === 'not_awarded' ? 'danger' : 'info'}>
           Your bid: <span className="font-medium">{rs.label}</span>{mine.total != null ? ` · ${formatCAD(Number(mine.total))}` : ''}
           {mine.status === 'awarded' ? ' — you won this work. A purchase order will follow.' : ''}
@@ -84,7 +104,9 @@ export default async function BidPage({ params }: PageProps<'/bids/[id]'>) {
 
   // ------------------------------------------------------------------ Builder view
   const draft = p.status === 'draft'
-  const [codes, subs] = await Promise.all([costCodes(p.org_id), linkedSubs(p.org_id)])
+  const [codes, subs, { data: sheetRows }] = await Promise.all([costCodes(p.org_id), linkedSubs(p.org_id),
+    supabase.from('plan_sheets').select('id,number,title').eq('job_id', p.job_id).is('deleted_at', null)])
+  const jobSheets = [...(sheetRows ?? [])].sort((a, b) => a.number.localeCompare(b.number, 'en', { numeric: true }))
   const invited = new Set((reqs ?? []).map((r) => r.sub_org_id))
   const { data: allPrices } = (reqs ?? []).length ? await supabase.from('bid_request_prices').select('request_id,item_id,unit_cost,notes').in('request_id', (reqs ?? []).map((r) => r.id)) : { data: [] }
   const price = (req: string, item: string) => (allPrices ?? []).find((x) => x.request_id === req && x.item_id === item)
@@ -183,6 +205,23 @@ export default async function BidPage({ params }: PageProps<'/bids/[id]'>) {
           </table>
         </Card>
       )}
+      {canEdit && (p.status === 'draft' || p.status === 'open') ? (
+        <Card>
+          <CardHeader title="Plans for bidders" description={jobSheets.length ? 'Bidders can open these sheets, even before they are on the job.' : 'Upload plans to this job to share sheets with bidders.'} />
+          {jobSheets.length > 0 && (
+            <form action={setBidSheets.bind(null, id)} className="space-y-3 p-4">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {jobSheets.map((sh) => (
+                  <label key={sh.id} className="flex items-center gap-2 text-[13px]">
+                    <Checkbox name="sheet" value={sh.id} defaultChecked={sharedSheets.some((x) => x.id === sh.id)} /> {sh.number}<span className="truncate text-text-3">{sh.title}</span>
+                  </label>
+                ))}
+              </div>
+              <Button type="submit" size="sm">Save plans</Button>
+            </form>
+          )}
+        </Card>
+      ) : sheetList}
       <Attachments jobId={p.job_id} recordType="bid_package" recordId={id} path={`/bids/${id}`} share={{ subs: true, clients: false }} canAdd={canEdit} />
     </div>
   )

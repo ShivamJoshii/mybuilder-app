@@ -64,6 +64,23 @@ export async function setInvites(id: string, fd: FormData) {
   revalidatePath(`/bids/${id}`)
 }
 
+/** Which plan sheets invited bidders can open. */
+export async function setBidSheets(id: string, fd: FormData) {
+  await getAppContext()
+  const want = new Set(z.array(uuid).max(2000).parse(fd.getAll('sheet')))
+  const supabase = await createClient()
+  const { data: cur } = await supabase.from('bid_package_sheets').select('sheet_id').eq('package_id', uuid.parse(id))
+  const have = new Set((cur ?? []).map((r) => r.sheet_id))
+  const add = [...want].filter((s) => !have.has(s))
+  const remove = [...have].filter((s) => !want.has(s))
+  if (add.length) {
+    const { error } = await supabase.from('bid_package_sheets').insert(add.map((sheet_id) => ({ package_id: id, sheet_id })))
+    if (error) throw new Error('Could not share those sheets')
+  }
+  if (remove.length) await supabase.from('bid_package_sheets').delete().eq('package_id', id).in('sheet_id', remove)
+  revalidatePath(`/bids/${id}`)
+}
+
 export async function releaseBids(id: string) {
   await getAppContext()
   const supabase = await createClient()
