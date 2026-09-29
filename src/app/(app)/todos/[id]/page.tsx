@@ -9,6 +9,7 @@ import { Card, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CommentThread } from '@/components/kit/comments'
+import { Attachments } from '@/components/kit/attachments'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { TodoCheck } from '../todo-check'
 import { ChecklistItem } from './checklist-item'
@@ -67,6 +68,7 @@ export default async function TodoPage({ params }: PageProps<'/todos/[id]'>) {
           </ul>
         </Card>
       )}
+      <Attachments jobId={todo.job_id} recordType="todo" recordId={id} path={`/todos/${id}`} share={{ subs: todo.assignees.some((a) => a.sub_org_id), clients: false }} />
       <CommentThread jobId={todo.job_id} recordType="todo" recordId={id} mode={ctx.workspace.mode} path={`/todos/${id}`} canShareWithClient={false} />
     </div>
   )

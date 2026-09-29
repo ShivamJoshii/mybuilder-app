@@ -31,6 +31,12 @@ test('builder writes a daily log with weather, tags and a draft', async ({ page 
   await expect(page.getByRole('heading', { name: 'Framing day 3' })).toBeVisible()
   await expect(page.getByText('Delivery postponed')).toBeVisible()
   await expect(page.getByText('Shared with subs')).toBeVisible()
+  // Attach a photo to the log
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await page.getByLabel('Choose files').setInputFiles({ name: 'walls-up.png', mimeType: 'image/png',
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==', 'base64') })
+  await page.getByRole('dialog').getByRole('button', { name: 'Upload', exact: true }).click()
+  await expect(page.getByRole('link', { name: 'walls-up.png' })).toBeVisible()
   await page.screenshot({ path: 'test-results/41-log.png', fullPage: true })
 
   // Too-long title is blocked by the field

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CommentThread } from '@/components/kit/comments'
+import { Attachments } from '@/components/kit/attachments'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { formatDate } from '@/lib/utils'
 import { deleteLog } from '../actions'
@@ -69,6 +70,7 @@ export default async function LogPage({ params }: PageProps<'/daily-logs/[id]'>)
           By {author ? `${author.first_name} ${author.last_name}`.trim() || author.email : 'unknown'} · {new Date(log.created_at).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' })}
         </div>
       </Card>
+      <Attachments jobId={log.job_id} recordType="daily_log" recordId={id} path={`/daily-logs/${id}`} share={{ subs: log.share_subs, clients: log.share_clients }} canAdd={canEdit} />
       {log.status === 'published' && (
         <CommentThread jobId={log.job_id} recordType="daily_log" recordId={id} mode={ctx.workspace.mode} path={`/daily-logs/${id}`} canShareWithClient={false} />
       )}

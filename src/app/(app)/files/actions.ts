@@ -132,3 +132,21 @@ export async function shareQr(url: string) {
   const QR = await import('qrcode')
   return QR.toDataURL(url, { margin: 1, width: 240 })
 }
+
+/** Link uploaded files to a record (daily log, RFI, to-do…) and give them that record's audience. */
+export async function attachFiles(recordType: string, recordId: string, fileIds: string[], share: { subs: boolean; clients: boolean }, path: string) {
+  await getAppContext()
+  const ids = z.array(uuid).max(50).parse(fileIds)
+  if (!ids.length) return
+  const supabase = await createClient()
+  await supabase.from('record_attachments').insert(ids.map((file_id) => ({ file_id, record_type: z.string().regex(/^[a-z_]{2,40}$/).parse(recordType), record_id: uuid.parse(recordId) })))
+  if (share.subs || share.clients) await supabase.from('files').update({ share_subs: share.subs, share_clients: share.clients }).in('id', ids)
+  revalidatePath(path)
+}
+
+export async function detachFile(recordType: string, recordId: string, fileId: string, path: string) {
+  await getAppContext()
+  const supabase = await createClient()
+  await supabase.from('record_attachments').delete().eq('record_type', recordType).eq('record_id', recordId).eq('file_id', fileId)
+  revalidatePath(path)
+}
