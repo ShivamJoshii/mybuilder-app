@@ -99,16 +99,15 @@ export function TopNav({ mode, allowedModules, settings, userInitials, userName,
               ))}
               <MenuItem asChild><Link href="/settings/profile"><Settings />My profile</Link></MenuItem>
               <MenuSeparator />
-              <form action="/auth/signout" method="post">
-                <MenuItem asChild>
-                  <button type="submit" className="w-full"><LogOut />Sign out</button>
-                </MenuItem>
-              </form>
+              <MenuItem onSelect={() => (document.getElementById('signout-form') as HTMLFormElement | null)?.requestSubmit()}>
+                <LogOut />Sign out
+              </MenuItem>
             </MenuContent>
           </Menu>
         </div>
       </div>
 
+      <form id="signout-form" action="/auth/signout" method="post" hidden />
       {drawer && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setDrawer(false)} />

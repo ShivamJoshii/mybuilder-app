@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: LayoutProps<'/'>) {
   }
   for (const s of ctx.orgs.filter((o) => o.kind === 'sub')) {
     const builders = ctx.buildersAsSub.filter((b) => b.sub_org_id === s.org_id)
-    options.push({ id: s.org_id, label: `All ${builders.length} builders`, sublabel: s.name, group: 'Builders you work with' })
+    options.push({ id: s.org_id, label: `All builders (${builders.length})`, sublabel: s.name, group: 'Builders you work with' })
     for (const b of builders) options.push({ id: b.builder_org_id, label: b.builder_name, sublabel: b.company_name, group: 'Builders you work with' })
   }
   for (const c of ctx.clientOrgs) options.push({ id: c.org_id, label: c.name, sublabel: 'Your project', group: 'Client portal' })

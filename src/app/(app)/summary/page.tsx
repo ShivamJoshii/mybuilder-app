@@ -37,9 +37,10 @@ export default async function SummaryPage({ searchParams }: PageProps<'/summary'
           <Card>
             <EmptyState
               icon={Hammer}
-              title={mode === 'builder' ? 'Create your first job' : 'No jobs yet'}
-              body={mode === 'builder'
+              title={mode === 'builder' && can(ctx, 'jobs', 'add') ? 'Create your first job' : 'No jobs yet'}
+              body={mode === 'builder' && can(ctx, 'jobs', 'add')
                 ? 'Add a job to start tracking its schedule, files, subs, clients and money.'
+                : mode === 'builder' ? 'Jobs appear here when an admin gives you access.'
                 : 'When a builder adds you to a job, it shows up here.'}
               action={mode === 'builder' && can(ctx, 'jobs', 'add')
                 ? <Button asChild variant="primary"><Link href="/jobs/new"><Plus />New job</Link></Button>
