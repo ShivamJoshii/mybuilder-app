@@ -115,4 +115,5 @@ export const SETTINGS_NAV: { label: string; href: string; module?: string; actio
   { label: 'Subs and vendors', href: '/settings/subs', module: 'subs_vendors', icon: Hammer },
   { label: 'Cost codes', href: '/settings/cost-codes', module: 'cost_codes', icon: ListChecks },
   { label: 'Custom fields', href: '/settings/custom-fields', action: 'settings.manage', icon: ClipboardList },
+  { label: 'Sales', href: '/settings/sales', action: 'settings.manage', icon: Target },
 ]
