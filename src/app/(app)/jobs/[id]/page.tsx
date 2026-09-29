@@ -1,17 +1,19 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Pencil, Trash2, UserPlus, X } from 'lucide-react'
+import { CopyPlus, LayoutTemplate, Pencil, Trash2, UserPlus, X } from 'lucide-react'
 import { getAppContext, can } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
 import { fetchInternalUsers } from '@/lib/jobs'
 import { Card, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge, JobStatusBadge } from '@/components/ui/badge'
-import { Select } from '@/components/ui/input'
+import { Field, Input, Select } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { ActionForm } from '@/components/kit/action-form'
 import { formatCAD, formatDate } from '@/lib/utils'
 import { CopyButton } from '@/components/kit/copy-button'
-import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient, setJobMember, deleteJob } from '../actions'
+import { addJobSub, removeJobSub, addJobClient, inviteJobClient, removeJobClient, setJobMember, deleteJob, saveAsTemplate } from '../actions'
 import { AddClientForm } from './client-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { CommentThread } from '@/components/kit/comments'
@@ -91,10 +93,22 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
         <div className="flex items-center gap-3">
           <span className="size-3 rounded-full" style={{ background: job.color }} />
           <h1 className="text-xl font-semibold tracking-tight">{job.title}</h1>
-          <JobStatusBadge status={job.status} />
+          {job.is_template ? <Badge tone="brand">Template</Badge> : <JobStatusBadge status={job.status} />}
         </div>
         {isBuilder && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {job.is_template && can(ctx, 'jobs', 'add') && <Button asChild><Link href={`/jobs/new?template=${id}`}><CopyPlus />New job from template</Link></Button>}
+            {!job.is_template && can(ctx, 'jobs', 'add') && (
+              <Dialog>
+                <DialogTrigger asChild><Button variant="ghost"><LayoutTemplate />Save as template</Button></DialogTrigger>
+                <DialogContent title="Save as template" description="Copies the schedule, to-dos, selections, specs, estimate and folders. Subs, clients, files and money stay behind.">
+                  <ActionForm action={saveAsTemplate.bind(null, id)} className="space-y-3 p-4">
+                    <Field label="Template name" htmlFor="tpl_title" required><Input id="tpl_title" name="title" required maxLength={120} defaultValue={`${job.title} template`} /></Field>
+                    <Button type="submit" variant="primary">Save template</Button>
+                  </ActionForm>
+                </DialogContent>
+              </Dialog>
+            )}
             {can(ctx, 'jobs', 'delete') && (
               <form action={deleteJob.bind(null, id)}>
                 <ConfirmSubmit variant="ghost" title="Delete this job?" body="The job moves to the trash. Subs and clients lose access right away."><Trash2 />Delete</ConfirmSubmit>

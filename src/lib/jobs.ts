@@ -25,6 +25,7 @@ export type JobRow = {
   actual_end: string | null
   work_days: number[]
   created_at: string
+  is_template: boolean
   builder_name: string | null
   managers: { user_id: string; name: string }[]
 }
@@ -39,7 +40,7 @@ export async function fetchJobs(ctx: AppContext): Promise<JobRow[]> {
   let q = supabase
     .from('jobs')
     .select(`id,org_id,title,status,color,job_type,contract_type,street,city,province,postal_code,permit_number,lot_info,
-             square_feet,projected_start,projected_end,actual_start,actual_end,work_days,created_at,
+             square_feet,projected_start,projected_end,actual_start,actual_end,work_days,created_at,is_template,
              job_managers(user_id, profiles(first_name,last_name,email)), job_sub_notes(body)`)
     .is('deleted_at', null)
   const ws = ctx.workspace
@@ -75,7 +76,9 @@ export function queryJobs(all: JobRow[], sp: Sp, pageSize = 50) {
   const builders = arr(sp.builder)
   const created = resolveDateRange(one(sp.created), one(sp.created_from), one(sp.created_to))
 
+  const templates = one(sp.templates) === '1'
   let rows = all.filter((j) => {
+    if (j.is_template !== templates) return false
     if (q && ![j.title, j.street, j.city, j.permit_number, j.lot_info, j.sub_notes].some((v) => v?.toLowerCase().includes(q))) return false
     if (statuses.length && !statuses.includes(j.status)) return false
     if (builders.length && !builders.includes(j.org_id)) return false

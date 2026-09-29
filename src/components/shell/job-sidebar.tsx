@@ -21,7 +21,7 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'end', label: 'Projected end date' },
   { key: 'created', label: 'Created date' },
 ]
-const STATUSES = ['presale', 'open', 'warranty', 'closed'] as const
+const STATUSES = ['presale', 'open', 'warranty', 'closed', 'template'] as const
 const DEFAULT_STATUSES = ['presale', 'open', 'warranty']
 const JOB_PAGES = new Set(['/summary', '/jobs'])
 
@@ -183,7 +183,7 @@ export function JobSidebar({
                 <span className="flex size-4 items-center justify-center rounded border border-border-strong">
                   {statuses.includes(s) && <Check className="size-3 !text-brand" />}
                 </span>
-                <span className="capitalize">{s}</span>
+                <span className="capitalize">{s === 'template' ? 'Templates' : s}</span>
               </MenuItem>
             ))}
             <MenuSeparator />

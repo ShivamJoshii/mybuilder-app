@@ -72,7 +72,7 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
   return (
     <>
       <PageHeader
-        title="Jobs"
+        title={sp.templates === '1' ? 'Job templates' : 'Jobs'}
         actions={<>
           <SavedViews module="jobs" views={views} canShare={isBuilder} />
           <FilterDrawer filters={filters} />
@@ -82,12 +82,18 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
         </>}
       >
         <div className="mt-3 flex gap-4 text-[13px]" role="tablist">
-          {(['list', 'map'] as const).map((v) => (
+          {sp.templates !== '1' && (['list', 'map'] as const).map((v) => (
             <Link key={v} href={tabHref(v)} role="tab" aria-selected={view === v}
               className={cn('-mb-3 border-b-2 pb-2 font-medium capitalize', view === v ? 'border-brand text-brand' : 'border-transparent text-text-3 hover:text-text')}>
               {v}
             </Link>
           ))}
+          {isBuilder && (
+            <Link href={sp.templates === '1' ? '/jobs' : '/jobs?templates=1'} role="tab" aria-selected={sp.templates === '1'}
+              className={cn('-mb-3 border-b-2 pb-2 font-medium', sp.templates === '1' ? 'border-brand text-brand' : 'border-transparent text-text-3 hover:text-text')}>
+              {sp.templates === '1' ? 'Back to jobs' : 'Templates'}
+            </Link>
+          )}
         </div>
       </PageHeader>
       <div className="p-5">
@@ -101,7 +107,9 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
             sort={result.sort}
             dir={result.dir}
             baseParams={sp}
-            empty={all.length === 0 ? (
+            empty={sp.templates === '1' ? (
+              <EmptyState icon={Hammer} title="No templates yet" body="Open a job you like and choose “Save as template”. New jobs can then start with its schedule, to-dos, selections, specs and estimate." />
+            ) : all.length === 0 ? (
               <EmptyState icon={Hammer} title={isBuilder ? 'Create your first job' : 'No jobs yet'}
                 body={isBuilder ? 'Jobs hold everything: schedule, files, subs, clients and money.' : 'Jobs appear here when a builder adds you to one.'}
                 action={isBuilder && can(ctx, 'jobs', 'add') ? <Button asChild variant="primary"><Link href="/jobs/new"><Plus />New job</Link></Button> : undefined} />

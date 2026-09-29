@@ -36,7 +36,8 @@ export default async function ReportsPage({ searchParams }: PageProps<'/reports'
   let body: React.ReactNode = null
   if (tab === 'wip') {
     const { data } = await supabase.rpc('report_wip', { p_org: org })
-    const rows = (data ?? []).map((r) => {
+    const templateIds = new Set(ctx.jobs.filter((j) => j.is_template).map((j) => j.id))
+    const rows = (data ?? []).filter((r) => !templateIds.has(r.job_id)).map((r) => {
       const pct = n(r.revised_cost) > 0 ? Math.min(1, n(r.cost_to_date) / n(r.revised_cost)) : 0
       const earned = n(r.contract) * pct
       return { ...r, pct, earned, over: n(r.billed) - earned, margin: n(r.contract) - n(r.revised_cost) }

@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { requireBuilder, can } from '@/lib/context'
+import { todayIn } from '@/lib/utils'
+import type { ActionState } from '@/components/kit/action-form'
 
 export type JobFormState = { error?: string; fieldErrors?: Record<string, string> }
 
@@ -74,6 +76,12 @@ export async function createJob(_: JobFormState, formData: FormData): Promise<Jo
   const { data, error } = await supabase.from('jobs').insert({ ...job, org_id: ctx.workspace.orgId }).select('id').single()
   if (error || !data) return { error: 'Could not create the job.' }
   if (sub_notes) await supabase.from('job_sub_notes').insert({ job_id: data.id, org_id: ctx.workspace.orgId, body: sub_notes })
+  const template = z.string().uuid().safeParse(formData.get('template_id'))
+  if (template.success) {
+    const parts = formData.getAll('template_parts').map(String).filter((p) => ['schedule', 'todos', 'selections', 'specs', 'estimate', 'folders'].includes(p))
+    const { error: copyError } = await supabase.rpc('copy_job_content', { p_from: template.data, p_to: data.id, p_start: job.projected_start ?? todayIn(), p_parts: parts })
+    if (copyError) return { error: 'The job was created, but the template could not be copied.' }
+  }
   if (can(ctx, 'jobs', 'price') && (contract_price != null || internal_notes != null)) {
     await supabase.from('job_private').update({ contract_price, internal_notes }).eq('job_id', data.id)
   }
@@ -195,4 +203,15 @@ export async function setJobMember(jobId: string, userId: string, on: boolean) {
   if (on) await supabase.from('job_members').upsert({ job_id: jobId, user_id: userId }, { ignoreDuplicates: true })
   else await supabase.from('job_members').delete().eq('job_id', jobId).eq('user_id', userId)
   revalidatePath(`/jobs/${jobId}`)
+}
+
+export async function saveAsTemplate(jobId: string, _: ActionState, fd: FormData): Promise<ActionState> {
+  await requireBuilder('jobs', 'add')
+  const title = z.string().trim().min(1, 'Name the template').max(120).safeParse(fd.get('title'))
+  if (!title.success) return { error: title.error.issues[0].message }
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('save_as_template', { p_job: z.string().uuid().parse(jobId), p_title: title.data })
+  if (error || !data) return { error: 'Could not save the template.' }
+  revalidatePath('/', 'layout')
+  redirect(`/jobs/${data}`)
 }

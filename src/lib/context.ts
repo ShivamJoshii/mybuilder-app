@@ -40,6 +40,7 @@ export type PickerJob = {
   projected_start: string | null
   projected_end: string | null
   created_at: string
+  is_template: boolean
 }
 
 /**
@@ -113,7 +114,7 @@ export const getAppContext = cache(async (): Promise<AppContext> => {
   // Jobs for the picker. RLS already limits rows to what the user may see.
   let q = supabase
     .from('jobs')
-    .select('id,title,status,color,org_id,street,city,projected_start,projected_end,created_at')
+    .select('id,title,status,color,org_id,street,city,projected_start,projected_end,created_at,is_template')
     .is('deleted_at', null)
     .order('title')
   if (workspace.mode === 'builder' || workspace.mode === 'client') q = q.eq('org_id', workspace.orgId)
@@ -194,9 +195,9 @@ export function hasAction(ctx: Pick<AppContext, 'workspace' | 'permissions'>, ac
   return ctx.workspace.mode === 'builder' && ctx.permissions.actions.includes(action)
 }
 
-/** The jobs currently selected in the picker (all visible jobs when "all" is on). */
+/** The jobs currently selected in the picker (all real jobs when "all" is on; templates only when picked). */
 export function selectedJobs(ctx: AppContext) {
-  if (ctx.selection.allJobs) return ctx.jobs
+  if (ctx.selection.allJobs) return ctx.jobs.filter((j) => !j.is_template)
   const ids = new Set(ctx.selection.jobIds)
   return ctx.jobs.filter((j) => ids.has(j.id))
 }

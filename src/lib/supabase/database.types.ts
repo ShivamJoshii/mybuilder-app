@@ -1392,13 +1392,13 @@ isOneToOne: false
                   ]
                 },"jobs": {
                   Row: {
-                    "actual_end": string | null,"actual_start": string | null,"city": string | null,"color": string,"contract_type": Database["public"]['Enums']["contract_type"],"created_at": string,"created_by": string | null,"deleted_at": string | null,"id": string,"job_type": string | null,"lat": number | null,"lng": number | null,"lot_info": string | null,"org_id": string,"permit_number": string | null,"postal_code": string | null,"prefix": string | null,"projected_end": string | null,"projected_start": string | null,"province": string | null,"square_feet": number | null,"status": Database["public"]['Enums']["job_status"],"street": string | null,"title": string,"updated_at": string,"work_days": (number)[]
+                    "actual_end": string | null,"actual_start": string | null,"city": string | null,"color": string,"contract_type": Database["public"]['Enums']["contract_type"],"created_at": string,"created_by": string | null,"deleted_at": string | null,"id": string,"is_template": boolean,"job_type": string | null,"lat": number | null,"lng": number | null,"lot_info": string | null,"org_id": string,"permit_number": string | null,"postal_code": string | null,"prefix": string | null,"projected_end": string | null,"projected_start": string | null,"province": string | null,"square_feet": number | null,"status": Database["public"]['Enums']["job_status"],"street": string | null,"title": string,"updated_at": string,"work_days": (number)[]
                   }
                   Insert: {
-                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id": string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"title": string,"updated_at"?: string,"work_days"?: (number)[]
+                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"is_template"?: boolean,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id": string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"title": string,"updated_at"?: string,"work_days"?: (number)[]
                   }
                   Update: {
-                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id"?: string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"title"?: string,"updated_at"?: string,"work_days"?: (number)[]
+                    "actual_end"?: string | null,"actual_start"?: string | null,"city"?: string | null,"color"?: string,"contract_type"?: Database["public"]['Enums']["contract_type"],"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"is_template"?: boolean,"job_type"?: string | null,"lat"?: number | null,"lng"?: number | null,"lot_info"?: string | null,"org_id"?: string,"permit_number"?: string | null,"postal_code"?: string | null,"prefix"?: string | null,"projected_end"?: string | null,"projected_start"?: string | null,"province"?: string | null,"square_feet"?: number | null,"status"?: Database["public"]['Enums']["job_status"],"street"?: string | null,"title"?: string,"updated_at"?: string,"work_days"?: (number)[]
                   }
                   Relationships: [
                     {
@@ -3108,6 +3108,9 @@ isOneToOne: false
 "convert_lead_to_job":
 { Args: { "p_amount"?: number,"p_contract"?: Database["public"]['Enums']["contract_type"],"p_lead": string,"p_title": string }; Returns: string
                            },
+"copy_job_content":
+{ Args: { "p_from": string,"p_parts": (string)[],"p_start": string,"p_to": string }; Returns: undefined
+                           },
 "create_bill":
 { Args: { "p_bill": Json,"p_items": Json }; Returns: string
                            },
@@ -3265,6 +3268,9 @@ isOneToOne: false
                            },
 "review_submittal":
 { Args: { "p": string,"p_decision": string,"p_notes"?: string }; Returns: undefined
+                           },
+"save_as_template":
+{ Args: { "p_job": string,"p_title": string }; Returns: string
                            },
 "save_bid_items":
 { Args: { "p_items": Json,"p_package": string }; Returns: undefined

@@ -54,8 +54,8 @@ export default async function AppLayout({ children }: LayoutProps<'/'>) {
         <JobSidebar
           options={options}
           currentId={currentId}
-          jobs={ctx.jobs.map(({ id, title, status, color, builder_name, projected_start, projected_end, created_at }) =>
-            ({ id, title, status, color, builder_name, projected_start, projected_end, created_at }))}
+          jobs={ctx.jobs.map(({ id, title, status, color, builder_name, projected_start, projected_end, created_at, is_template }) =>
+            ({ id, title, status: is_template ? 'template' : status, color, builder_name, projected_start, projected_end, created_at }))}
           selection={ctx.selection}
           showBuilderNames={ctx.workspace.mode === 'sub' && !ctx.workspace.builderOrgId}
         />

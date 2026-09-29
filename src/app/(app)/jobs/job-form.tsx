@@ -17,9 +17,13 @@ export type JobFormValues = {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const COLORS = ['#4F7CAC', '#2E8B57', '#C0392B', '#D68910', '#8E44AD', '#16A085', '#2C3E50', '#E67E22', '#1ABC9C', '#7F8C8D']
 
+export const TEMPLATE_PARTS = [['schedule', 'Schedule'], ['todos', 'To-dos'], ['selections', 'Selections'], ['specs', 'Specifications'], ['estimate', 'Estimate'], ['folders', 'File folders']] as const
+
 export function JobForm({
-  title, action, cancelHref, values = {}, users, canSeePrice, saveLabel,
+  title, action, cancelHref, values = {}, users, canSeePrice, saveLabel, templates, template,
 }: {
+  templates?: { id: string; title: string }[]
+  template?: string
   title: string
   action: (state: JobFormState, fd: FormData) => Promise<JobFormState>
   cancelHref: string
@@ -33,6 +37,22 @@ export function JobForm({
   const workDays = values.work_days ?? [1, 2, 3, 4, 5]
   return (
     <RecordForm title={title} action={formAction} cancelHref={cancelHref} error={state.error} saveLabel={saveLabel}>
+      {templates && templates.length > 0 && (
+        <FormSection title="Start from a template">
+          <Field label="Template" htmlFor="template_id" hint="Dates move so the first schedule item starts on the projected start (or today)." className="sm:col-span-2">
+            <Select id="template_id" name="template_id" defaultValue={template ?? ''}>
+              <option value="">Blank job</option>
+              {templates.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
+            </Select>
+          </Field>
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[13px] sm:col-span-2" role="group" aria-label="Copy from the template">
+            {TEMPLATE_PARTS.map(([k, l]) => (
+              <label key={k} className="flex items-center gap-2"><input type="checkbox" name="template_parts" value={k} defaultChecked className="accent-brand" />{l}</label>
+            ))}
+          </div>
+        </FormSection>
+      )}
+
       <FormSection title="Job information">
         <Field label="Job name" htmlFor="title" required error={fe.title} className="sm:col-span-2">
           <Input id="title" name="title" required maxLength={120} defaultValue={values.title} />
