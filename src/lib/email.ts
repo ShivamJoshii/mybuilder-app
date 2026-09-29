@@ -15,7 +15,7 @@ export async function sendMail(m: Mail): Promise<{ status: 'sent' | 'queued' | '
   const from = process.env.EMAIL_FROM ?? 'notifications@mybuilder.ca'
   const headers = [{ Name: 'Message-ID', Value: m.messageId }, ...(m.inReplyTo ? [{ Name: 'In-Reply-To', Value: m.inReplyTo }, { Name: 'References', Value: m.inReplyTo }] : [])]
   try {
-    const res = await fetch('https://api.postmarkapp.com/email', {
+    const res = await fetch(process.env.POSTMARK_API_URL ?? 'https://api.postmarkapp.com/email', {
       method: 'POST', signal: AbortSignal.timeout(10_000),
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Postmark-Server-Token': token },
       body: JSON.stringify({ From: `${m.fromName.replace(/[<>"]/g, '')} <${from}>`, ReplyTo: m.replyTo, To: m.to.join(','), Cc: m.cc.join(',') || undefined,

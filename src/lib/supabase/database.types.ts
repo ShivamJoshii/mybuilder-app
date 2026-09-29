@@ -1623,13 +1623,13 @@ isOneToOne: false
                   ]
                 },"notification_deliveries": {
                   Row: {
-                    "attempts": number,"channel": Database["public"]['Enums']["delivery_channel"],"created_at": string,"id": string,"last_error": string | null,"notification_id": string,"sent_at": string | null,"status": Database["public"]['Enums']["delivery_status"]
+                    "attempts": number,"channel": Database["public"]['Enums']["delivery_channel"],"claimed_at": string | null,"created_at": string,"id": string,"last_error": string | null,"notification_id": string,"sent_at": string | null,"status": Database["public"]['Enums']["delivery_status"]
                   }
                   Insert: {
-                    "attempts"?: number,"channel": Database["public"]['Enums']["delivery_channel"],"created_at"?: string,"id"?: string,"last_error"?: string | null,"notification_id": string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["delivery_status"]
+                    "attempts"?: number,"channel": Database["public"]['Enums']["delivery_channel"],"claimed_at"?: string | null,"created_at"?: string,"id"?: string,"last_error"?: string | null,"notification_id": string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["delivery_status"]
                   }
                   Update: {
-                    "attempts"?: number,"channel"?: Database["public"]['Enums']["delivery_channel"],"created_at"?: string,"id"?: string,"last_error"?: string | null,"notification_id"?: string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["delivery_status"]
+                    "attempts"?: number,"channel"?: Database["public"]['Enums']["delivery_channel"],"claimed_at"?: string | null,"created_at"?: string,"id"?: string,"last_error"?: string | null,"notification_id"?: string,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["delivery_status"]
                   }
                   Relationships: [
                     {
@@ -2056,6 +2056,19 @@ isOneToOne: false
       referencedRelation: "organizations"
       referencedColumns: ["id"]
     }
+                  ]
+                },"reminder_log": {
+                  Row: {
+                    "fire_key": string,"kind": string,"ref_id": string,"sent_at": string,"user_id": string
+                  }
+                  Insert: {
+                    "fire_key": string,"kind": string,"ref_id": string,"sent_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "fire_key"?: string,"kind"?: string,"ref_id"?: string,"sent_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"rfi_responses": {
                   Row: {
@@ -3079,6 +3092,11 @@ isOneToOne: false
 "choose_selection":
 { Args: { "p_choice": string,"p_sel": string }; Returns: undefined
                            },
+"claim_deliveries":
+{ Args: { "p_limit"?: number }; Returns: {
+              "body": string,"channel": Database["public"]['Enums']["delivery_channel"],"created_at": string,"delivery_id": string,"email": string,"first_name": string,"link": string,"org_name": string,"title": string
+            }[]
+                           },
 "claim_feedback":
 { Args: { "p_claim": string,"p_feedback": string,"p_rating": number }; Returns: undefined
                            },
@@ -3136,6 +3154,9 @@ isOneToOne: false
 { Args: { "p_estimate": string }; Returns: {
               "description": string,"group_id": string,"id": string,"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
             }[]
+                           },
+"finish_delivery":
+{ Args: { "p_error"?: string,"p_id": string,"p_status": Database["public"]['Enums']["delivery_status"] }; Returns: undefined
                            },
 "ingest_inbound_email":
 { Args: { "p_attachments"?: number,"p_body": string,"p_cc": (string)[],"p_from": string,"p_from_name": string,"p_in_reply_to": string,"p_message_id": string,"p_subject": string,"p_to": (string)[],"p_token": string }; Returns: string

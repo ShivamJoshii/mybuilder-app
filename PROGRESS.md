@@ -47,6 +47,7 @@ Last updated: 2026-09-29 (overnight build)
 | Sub compliance: WCB clearance / liability / auto / licence / COR certificates per builder with documents and expiry; subs file their own; required set + optional payment block; warnings on POs and bills | Built, browser-tested |
 | Job templates: save any job as a template; new jobs copy its schedule (with links), to-dos + checklists, selections + choices, specs, estimate and folders, shifted to the new start date; templates never get subs/clients and stay out of "all jobs" | Built, browser-tested |
 | Reminders (pg_cron every 15 min): to-do reminders + 7am digest, schedule reminders to assignees, bid deadlines, selection deadlines to clients, expiring WCB/insurance to both sides — each sent once | Built, tested (DB) |
+| Notification email worker (`/api/cron/deliver`): claims queued emails, sends via Postmark, retries up to 5 times; text/push marked skipped until configured | Built, tested against a stub |
 | Security audit (13 findings: invites, sub-link consent, share links, storage keys, holdbacks, audiences, prices, assignees) | Fixed, 24 regression tests |
 | Direct QuickBooks Online / Xero sync (needs Intuit/Xero developer apps), online payments, mobile app | Later |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
@@ -64,7 +65,8 @@ Last updated: 2026-09-29 (overnight build)
    everything is attached in the chat meanwhile.
 3. **Email (Postmark).** Set POSTMARK_SERVER_TOKEN, a verified sender (EMAIL_FROM), an inbound
    domain (MX for in.mybuilder.ca → Postmark) and INBOUND_WEBHOOK_SECRET. Until then invites show a
-   copyable link and job email stays queued.
+   copyable link and job email stays queued. Also set CRON_SECRET and have a scheduler (Vercel cron or
+   Supabase pg_net) call `GET /api/cron/deliver` every minute — that sends queued notification emails.
 4. **Storage (Cloudflare R2).** Create a bucket + API token and set STORAGE_* (endpoint, keys, bucket).
    Locally Supabase Storage stands in.
 5. **QuickBooks Online sync (later).** Needs an Intuit developer app (client ID/secret). CSV exports work today.
