@@ -77,6 +77,11 @@ export async function createJob(_: JobFormState, formData: FormData): Promise<Jo
   const { data, error } = await supabase.from('jobs').insert({ ...job, org_id: ctx.workspace.orgId }).select('id').single()
   if (error || !data) return { error: 'Could not create the job.' }
   if (sub_notes) await supabase.from('job_sub_notes').insert({ job_id: data.id, org_id: ctx.workspace.orgId, body: sub_notes })
+  if (job.contract_type === 'open_book') {
+    // open-book jobs start with the money visible to the client; the builder can switch it off per job
+    const { data: def } = await supabase.from('client_permission_defaults').select('settings').eq('org_id', ctx.workspace.orgId).maybeSingle()
+    await supabase.from('job_client_permissions').upsert({ job_id: data.id, settings: { ...((def?.settings ?? {}) as Record<string, unknown>), job_price_summary: true, budget: true, purchase_orders: true } })
+  }
   const template = z.string().uuid().safeParse(formData.get('template_id'))
   if (template.success) {
     const parts = formData.getAll('template_parts').map(String).filter((p) => ['schedule', 'todos', 'selections', 'specs', 'estimate', 'folders'].includes(p))

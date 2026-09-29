@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button'
 import { JobStatusBadge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { JOB_STATUSES, cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/server'
+import { customFilterDefs, matchesCustomFilters, type FieldDef } from '@/lib/custom-fields'
 
 export const metadata: Metadata = { title: 'Jobs' }
 
@@ -25,7 +27,22 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
   // Open the user's default view when they land on the bare list
   const def = views.find((v) => v.is_default)
   if (def && Object.keys(sp).length === 0 && def.query) redirect(`/jobs?${def.query}`)
-  const all = await fetchJobs(ctx)
+  const fetched = await fetchJobs(ctx)
+  // custom fields marked "Show in filters"
+  const supabase = await createClient()
+  const orgId = ctx.workspace.mode === 'builder' ? ctx.workspace.orgId : ''
+  const { data: cfDefs } = isBuilder
+    ? await supabase.from('custom_field_defs').select('id,label,data_type,options,tooltip,is_required,visible_to_subs,visible_to_clients').eq('org_id', orgId).eq('module', 'jobs').eq('is_active', true).eq('is_filterable', true).order('sort')
+    : { data: [] }
+  const defs = (cfDefs ?? []) as FieldDef[]
+  const cfActive = defs.some((d) => sp[`cf_${d.id}`] != null)
+  let all = fetched
+  if (cfActive) {
+    const { data: vals } = await supabase.from('custom_field_values').select('def_id,record_id,value').in('def_id', defs.map((d) => d.id)).eq('org_id', orgId)
+    const byJob = new Map<string, Map<string, unknown>>()
+    for (const v of vals ?? []) { if (!byJob.has(v.record_id)) byJob.set(v.record_id, new Map()); byJob.get(v.record_id)!.set(v.def_id, v.value) }
+    all = fetched.filter((j) => matchesCustomFilters(defs, byJob.get(j.id) ?? new Map(), sp))
+  }
   const result = queryJobs(all, sp)
   const view = sp.view === 'map' ? 'map' : 'list'
 
@@ -40,6 +57,7 @@ export default async function JobsPage({ searchParams }: PageProps<'/jobs'>) {
     { type: 'multi', name: 'pm', label: 'Project managers', options: pmOptions },
     { type: 'multi', name: 'status', label: 'Status', options: JOB_STATUSES.map((s) => ({ value: s.value, label: s.label })) },
     { type: 'date', name: 'created', label: 'Created date' },
+    ...(customFilterDefs(defs) as FilterDef[]),
   ]
   if (isSub) {
     filters.push({ type: 'multi', name: 'builder', label: 'Builder',

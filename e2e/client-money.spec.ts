@@ -53,7 +53,7 @@ test('open-book job: builder lets the client see the contract, costs and bills',
   await expect(page.getByText('$250,000.00').first()).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Purchase orders and bills' })).toBeVisible()
   await expect(page.getByText('Kent Building Supplies')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Budget and costs to date' })).toHaveCount(0)   // not switched on
+  await expect(page.getByRole('heading', { name: 'Budget and costs to date' })).toBeVisible()   // on by default for open-book jobs
   await signOut(page)
   await signIn(page, ownerEmail)
 })

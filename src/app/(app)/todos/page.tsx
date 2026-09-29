@@ -38,6 +38,8 @@ export default async function TodosPage({ searchParams }: PageProps<'/todos'>) {
   const mySubs = ctx.orgs.filter((o) => o.kind === 'sub').map((o) => o.org_id)
   const todos = applyTodoQuery(all, rows, ctx.userId, mySubs)
   const views = await fetchViews(ctx, 'todos')
+  const def = views.find((v) => v.is_default)
+  if (def?.query && Object.keys(sp).length === 0) redirect(`/todos?${def.query}`)
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
 
   const people = new Map<string, string>()

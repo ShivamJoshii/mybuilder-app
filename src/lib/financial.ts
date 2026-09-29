@@ -14,6 +14,14 @@ export async function costCodes(orgId: string) {
   return data ?? []
 }
 
+/** Codes offered on the time clock: the labour codes, or every code if none are marked as labour. */
+export async function labourCodes(orgId: string) {
+  const supabase = await createClient()
+  const { data } = await supabase.from('cost_codes').select('id,code,title,is_labor').eq('org_id', orgId).eq('is_active', true).order('code')
+  const labour = (data ?? []).filter((c) => c.is_labor)
+  return (labour.length ? labour : data ?? []).map(({ id, code, title }) => ({ id, code, title }))
+}
+
 /** Team members and linked subs, as "u:<id>" / "s:<id>" options. */
 export async function teamAndSubs(orgId: string) {
   const supabase = await createClient()

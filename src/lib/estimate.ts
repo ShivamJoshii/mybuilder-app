@@ -40,7 +40,7 @@ export const MARKED_AS: { value: MarkedAs; label: string }[] = [
 ]
 
 export type SnapshotGroup = { id: string; name: string; sort: number; optional: boolean; total: number
-  lines: { title: string; description: string | null; quantity: number; unit: string; price: number; taxable: boolean }[] }
+  lines: { title: string; description: string | null; quantity: number; unit: string; price: number; taxable: boolean; marked_as?: string }[] }
 
 export const PROPOSAL_STATUS: Record<string, { label: string; tone: 'neutral' | 'brand' | 'success' | 'danger' }> = {
   draft: { label: 'Draft', tone: 'neutral' },

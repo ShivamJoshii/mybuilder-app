@@ -13,6 +13,11 @@ import { ActionForm } from '@/components/kit/action-form'
 import { ConfirmSubmit } from '@/components/kit/confirm-submit'
 import { saveRole, deleteRole } from '../../actions'
 
+// Only options the database actually enforces are shown (see private.has_perm / perm_scope call sites)
+const SEES_COST = new Set(['estimates', 'change_orders', 'selections', 'bids', 'purchase_orders', 'bills', 'budget', 'time_clock', 'reports'])
+const SEES_PRICE = new Set(['jobs', 'estimates', 'change_orders', 'selections'])
+const OWN_SCOPE = new Set(['leads', 'todos', 'proposals'])
+
 export const metadata: Metadata = { title: 'Role' }
 
 const AREAS: Record<string, string> = { jobs: 'Jobs', sales: 'Sales', project: 'Project management', files: 'Files', messaging: 'Messaging', financial: 'Financial', admin: 'Company' }
@@ -25,7 +30,7 @@ export default async function RolePage({ params }: PageProps<'/settings/roles/[i
     supabase.from('roles').select('*').eq('id', id).eq('org_id', ctx.workspace.orgId).maybeSingle(),
     supabase.from('app_modules').select('*').order('sort'),
     supabase.from('role_permissions').select('*').eq('role_id', id),
-    supabase.from('app_actions').select('*').order('module'),
+    supabase.from('app_actions').select('*').neq('key', 'subscription.manage').order('module'),   // billing isn't built yet
     supabase.from('role_actions').select('action').eq('role_id', id),
   ])
   if (!role) notFound()
@@ -40,7 +45,7 @@ export default async function RolePage({ params }: PageProps<'/settings/roles/[i
 
   const grid = (
     <Card>
-      <CardHeader title="Permissions by module" description="View is required for anything else. Scope limits records to all jobs, assigned jobs, or the user's own records." />
+      <CardHeader title="Permissions by module" description="View is required for anything else. Job access (all jobs or only assigned jobs) is set on the Jobs row and applies to every job module; a few modules can also be limited to the user's own records." />
       <div className="overflow-x-auto">
         <table className="w-full text-[13px]">
           <thead className="bg-surface-2 text-xs font-semibold text-text-2">
@@ -65,15 +70,16 @@ export default async function RolePage({ params }: PageProps<'/settings/roles/[i
                       <td className="px-2 text-center">{box(`${m.key}.add`, p?.can_add, `${m.label} add`)}</td>
                       <td className="px-2 text-center">{box(`${m.key}.edit`, p?.can_edit, `${m.label} edit`)}</td>
                       <td className="px-2 text-center">{box(`${m.key}.delete`, p?.can_delete, `${m.label} delete`)}</td>
-                      <td className="px-2 text-center">{m.has_money ? box(`${m.key}.cost`, p?.see_cost, `${m.label} see cost`) : null}</td>
-                      <td className="px-2 text-center">{m.has_money ? box(`${m.key}.price`, p?.see_price, `${m.label} see price`) : null}</td>
+                      <td className="px-2 text-center">{SEES_COST.has(m.key) ? box(`${m.key}.cost`, p?.see_cost, `${m.label} see cost`) : null}</td>
+                      <td className="px-2 text-center">{SEES_PRICE.has(m.key) ? box(`${m.key}.price`, p?.see_price, `${m.label} see price`) : null}</td>
                       <td className="px-3 py-1">
-                        <select name={`${m.key}.scope`} defaultValue={p?.scope ?? 'assigned'} disabled={dis} aria-label={`${m.label} scope`}
-                          className="h-7 rounded border border-border-strong bg-surface px-1 text-xs disabled:bg-surface-2">
-                          <option value="all">All jobs</option>
-                          <option value="assigned">Assigned jobs</option>
-                          <option value="own">Own records</option>
-                        </select>
+                        {m.key === 'jobs' || OWN_SCOPE.has(m.key) ? (
+                          <select name={`${m.key}.scope`} defaultValue={p?.scope ?? 'assigned'} disabled={dis} aria-label={`${m.label} scope`}
+                            className="h-7 rounded border border-border-strong bg-surface px-1 text-xs disabled:bg-surface-2">
+                            {m.key === 'jobs' ? <><option value="all">All jobs</option><option value="assigned">Assigned jobs</option></>
+                              : <><option value="assigned">Everyone’s</option><option value="own">Own records only</option></>}
+                          </select>
+                        ) : <input type="hidden" name={`${m.key}.scope`} value={p?.scope ?? 'assigned'} />}
                       </td>
                     </tr>
                   )

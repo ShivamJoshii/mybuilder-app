@@ -28,7 +28,7 @@ export default async function PoPage({ params }: PageProps<'/purchase-orders/[id
   const { id } = await params
   const ctx = await getAppContext()
   const supabase = await createClient()
-  const { data: po } = await supabase.from('purchase_orders').select('*, sub:organizations!purchase_orders_sub_org_id_fkey(name), builder:organizations!purchase_orders_org_id_fkey(id,name,street,city,province,postal_code,phone,email,logo_url,gst_number,qst_number,updated_at)').eq('id', id).is('deleted_at', null).maybeSingle()
+  const { data: po } = await supabase.from('purchase_orders').select('*, sub:organizations!purchase_orders_sub_org_id_fkey(name), builder:organizations!purchase_orders_org_id_fkey(id,name,legal_name,website,street,city,province,postal_code,phone,email,logo_url,gst_number,qst_number,updated_at)').eq('id', id).is('deleted_at', null).maybeSingle()
   if (!po) notFound()
   const builder = ctx.workspace.mode === 'builder'
   const canEdit = builder && can(ctx, 'purchase_orders', 'edit')

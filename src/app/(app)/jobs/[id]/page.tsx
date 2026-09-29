@@ -85,6 +85,8 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
 
   const canEdit = isBuilder && can(ctx, 'jobs', 'edit')
   const portal = canEdit ? await portalSettings(id, job.org_id) : {}
+  // subs see the owner's contact details when the builder allows it on this job (RLS decides)
+  const owners = ctx.workspace.mode === 'sub' ? (await supabase.from('job_clients').select('first_name,last_name,email,phone').eq('job_id', id)).data ?? [] : []
   // clients see the PM's contact details only if the builder allows it
   const showPm = ctx.workspace.mode !== 'client' || (await supabase.rpc('client_can', { p_job: id, p_key: 'pm_contact' })).data !== false
   let subCanShare = false
@@ -189,7 +191,7 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
                     <fieldset className="grid gap-1 text-[13px] sm:grid-cols-2">
                       <legend className="mb-1 text-xs font-medium text-text-3">Extra permissions on this job</legend>
                       <label className="flex items-center gap-2"><input type="checkbox" name="can_view_owner_info" className="accent-brand" />View owner information</label>
-                      <label className="flex items-center gap-2"><input type="checkbox" name="can_share_with_client" className="accent-brand" />Share comments and files with owner</label>
+                      <label className="flex items-center gap-2"><input type="checkbox" name="can_share_with_client" className="accent-brand" />Share comments with owner</label>
                       <label className="flex items-center gap-2"><input type="checkbox" name="can_assign_rfis_to_subs" className="accent-brand" />Assign RFIs to other subs</label>
                       <label className="flex items-center gap-2"><input type="checkbox" name="see_all_schedule_items" className="accent-brand" />See all schedule items</label>
                     </fieldset>
@@ -250,6 +252,14 @@ export default async function JobPage({ params }: PageProps<'/jobs/[id]'>) {
               <Row label="Square feet">{job.square_feet?.toLocaleString('en-CA')}</Row>
             </dl>
           </Card>
+          {ctx.workspace.mode === 'sub' && owners.length > 0 && (
+            <Card>
+              <CardHeader title="Owner" />
+              <ul className="divide-y divide-border text-[13px]">
+                {owners.map((o, i) => <li key={i} className="px-4 py-2"><div className="font-medium">{`${o.first_name} ${o.last_name}`.trim()}</div><div className="text-xs text-text-3">{[o.email, o.phone].filter(Boolean).join(' · ')}</div></li>)}
+              </ul>
+            </Card>
+          )}
           {!isBuilder && managers.length > 0 && showPm && (
             <Card>
               <CardHeader title="Builder contact" />

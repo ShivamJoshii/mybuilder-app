@@ -25,3 +25,15 @@ describe('custom field values', () => {
     expect(formatField(def('multi_select'), ['A', 'B'])).toBe('A, B')
   })
 })
+
+describe('custom field filters', () => {
+  it('matches selects, booleans and text', async () => {
+    const { matchesCustomFilters } = await import('./custom-fields')
+    const sel = def('single_select', ['Grey', 'White']), yes = { ...def('boolean'), id: 'b' }, txt = { ...def('text'), id: 't' }
+    const vals = new Map<string, unknown>([['f', 'Grey'], ['b', true], ['t', 'BP-2026-114']])
+    expect(matchesCustomFilters([sel, yes, txt], vals, { cf_f: ['Grey'], cf_b: 'yes', cf_t: 'bp-2026' })).toBe(true)
+    expect(matchesCustomFilters([sel], vals, { cf_f: 'White' })).toBe(false)
+    expect(matchesCustomFilters([yes], new Map(), { cf_b: 'yes' })).toBe(false)
+    expect(matchesCustomFilters([sel], vals, {})).toBe(true)
+  })
+})

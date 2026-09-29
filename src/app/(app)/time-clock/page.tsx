@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Download, Trash2 } from 'lucide-react'
 import { requireBuilder, can, hasAction } from '@/lib/context'
 import { createClient } from '@/lib/supabase/server'
-import { costCodes } from '@/lib/financial'
+import { costCodes, labourCodes } from '@/lib/financial'
 import { PageHeader } from '@/components/shell/page-header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -43,16 +43,16 @@ export default async function TimeClockPage({ searchParams }: PageProps<'/time-c
   const { data: orgRow } = await supabase.from('organizations').select('province').eq('id', org).single()
   const rule = OT_RULES[(orgRow?.province ?? 'AB').toUpperCase()] ?? OT_RULES.AB
 
-  const [{ data: openShift }, codes, { data: members }] = await Promise.all([
+  const [{ data: openShift }, allCodes, codes, { data: members }] = await Promise.all([
     supabase.from('time_shifts').select('job_id,clock_in,cost_code_id').eq('user_id', ctx.userId).eq('status', 'open').maybeSingle(),
-    costCodes(org),
+    costCodes(org), labourCodes(org),
     supabase.from('org_members').select('user_id,profiles(first_name,last_name,email)').eq('org_id', org).eq('status', 'active'),
   ])
   let q = supabase.from('time_shifts').select('id,user_id,job_id,cost_code_id,clock_in,clock_out,break_minutes,notes,status,hourly_cost,in_lat').gte('clock_in', from).lt('clock_in', to).order('clock_in')
   if (tab === 'mine') q = q.eq('user_id', ctx.userId)
   const { data: shifts } = tab === 'rates' ? { data: [] } : await q
   const jobName = new Map(ctx.jobs.map((j) => [j.id, j.title]))
-  const codeName = new Map(codes.map((c) => [c.id, `${c.code} ${c.title}`]))
+  const codeName = new Map(allCodes.map((c) => [c.id, `${c.code} ${c.title}`]))
   type P = { first_name: string; last_name: string; email: string } | null
   const person = new Map((members ?? []).map((m) => { const p = m.profiles as P; return [m.user_id, p ? `${p.first_name} ${p.last_name}`.trim() || p.email : 'Someone'] }))
   const byUser = new Map<string, Shift[]>()

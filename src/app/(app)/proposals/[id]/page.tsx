@@ -53,10 +53,10 @@ export default async function ProposalPage({ params }: PageProps<'/proposals/[id
     const byGroup = (gid: string | null) => ls.filter((l) => l.group_id === gid)
     doc = [
       ...gs.filter((g) => !(g.is_optional && g.option_status === 'declined')).map((g) => ({ id: g.id, name: g.name, sort: g.sort, optional: g.is_optional,
-        lines: byGroup(g.id).map((l) => ({ title: l.title, description: l.description, quantity: Number(l.quantity), unit: l.unit, price: Number(l.price), taxable: l.taxable })),
+        lines: byGroup(g.id).map((l) => ({ title: l.title, description: l.description, quantity: Number(l.quantity), unit: l.unit, price: Number(l.price), taxable: l.taxable, marked_as: l.marked_as })),
         total: byGroup(g.id).reduce((s, l) => s + Number(l.price), 0) })),
       ...(byGroup(null).length ? [{ id: 'ungrouped', name: 'Items', sort: 99999, optional: false,
-        lines: byGroup(null).map((l) => ({ title: l.title, description: l.description, quantity: Number(l.quantity), unit: l.unit, price: Number(l.price), taxable: l.taxable })),
+        lines: byGroup(null).map((l) => ({ title: l.title, description: l.description, quantity: Number(l.quantity), unit: l.unit, price: Number(l.price), taxable: l.taxable, marked_as: l.marked_as })),
         total: byGroup(null).reduce((s, l) => s + Number(l.price), 0) }] : []),
     ].filter((g) => g.lines.length)
     const base = doc.filter((g) => !g.optional).flatMap((g) => g.lines)
@@ -128,7 +128,7 @@ export default async function ProposalPage({ params }: PageProps<'/proposals/[id
                   <tbody>
                     {g.lines.map((l, i) => (
                       <tr key={i} className="align-top">
-                        <td className="py-1 pr-2">{l.title}{l.description && <div className="whitespace-pre-wrap text-xs text-text-3">{l.description}</div>}</td>
+                        <td className="py-1 pr-2">{l.title}{l.marked_as === 'allowance' && <span className="ml-2 rounded border border-border px-1 text-[11px] text-text-2">Allowance</span>}{l.description && <div className="whitespace-pre-wrap text-xs text-text-3">{l.description}</div>}</td>
                         {p.show_quantities && <td className="w-28 py-1 text-right text-text-3">{Number(l.quantity)} {l.unit}</td>}
                         <td className="w-32 py-1 text-right tabular-nums">{formatCAD(Number(l.price))}</td>
                       </tr>

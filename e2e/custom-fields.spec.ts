@@ -38,4 +38,11 @@ test('custom fields: define in settings, fill on a job, validation keeps input',
   await page.reload()
   await expect(page.getByLabel('Siding colour')).toHaveValue('Charcoal')
   await expect(page.getByLabel('Engineer drawings')).toHaveValue('https://files.example.com/eng.pdf')
+
+  // "Show in filters": the jobs list filters by the field
+  const field = await page.getByLabel('Siding colour').getAttribute('name')
+  await page.goto(`/jobs?${field}=Charcoal`)
+  await expect(page.getByRole('link', { name: `Birch ${id}` })).toBeVisible()
+  await page.goto(`/jobs?${field}=White`)
+  await expect(page.getByRole('link', { name: `Birch ${id}` })).toHaveCount(0)
 })

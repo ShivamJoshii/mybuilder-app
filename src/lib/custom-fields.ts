@@ -49,3 +49,29 @@ export function formatField(d: FieldDef, v: unknown): string {
     default: return String(v)
   }
 }
+
+/** Custom fields a user can filter a list by, as filter-drawer definitions (name = `cf_<id>`). */
+type CfFilter = { type: 'multi'; name: string; label: string; options: { value: string; label: string }[] } | { type: 'text'; name: string; label: string }
+export function customFilterDefs(defs: FieldDef[]): CfFilter[] {
+  return defs.flatMap((d): CfFilter[] => {
+    if (d.data_type === 'single_select' || d.data_type === 'multi_select') return [{ type: 'multi' as const, name: `cf_${d.id}`, label: d.label, options: opts(d).map((o) => ({ value: o, label: o })) }]
+    if (d.data_type === 'boolean') return [{ type: 'multi' as const, name: `cf_${d.id}`, label: d.label, options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] }]
+    if (d.data_type === 'text' || d.data_type === 'long_text' || d.data_type === 'hyperlink') return [{ type: 'text' as const, name: `cf_${d.id}`, label: d.label }]
+    return []
+  })
+}
+
+/** Does a record's value pass the custom-field filters in the URL? */
+export function matchesCustomFilters(defs: FieldDef[], values: Map<string, unknown>, sp: Record<string, string | string[] | undefined>) {
+  for (const d of defs) {
+    const raw = sp[`cf_${d.id}`]
+    const want = raw == null ? [] : Array.isArray(raw) ? raw : [raw]
+    if (!want.length || want.every((w) => !w)) continue
+    const v = values.get(d.id)
+    if (d.data_type === 'boolean') { if (!want.includes(v === true ? 'yes' : 'no')) return false }
+    else if (d.data_type === 'single_select') { if (!want.includes(String(v ?? ''))) return false }
+    else if (d.data_type === 'multi_select') { if (!(Array.isArray(v) && v.some((x) => want.includes(String(x))))) return false }
+    else if (!String(v ?? '').toLowerCase().includes(want[0].toLowerCase())) return false
+  }
+  return true
+}

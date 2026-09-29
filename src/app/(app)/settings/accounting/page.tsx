@@ -47,7 +47,7 @@ export default async function AccountingPage() {
           <CardHeader title="Chart of accounts mapping" description="Which expense account each kind of cost posts to. Override by cost code below." />
           <ActionForm action={saveAccounting} resetOnSuccess={false} className="space-y-4 p-4">
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Accounting system" htmlFor="system">
+              <Field label="Accounting system" htmlFor="system" hint="Exports are laid out for QuickBooks Online's CSV import; other systems can map the same columns.">
                 <Select id="system" name="system" defaultValue={s?.system ?? 'qbo'}><option value="qbo">QuickBooks Online</option><option value="xero">Xero</option><option value="sage">Sage 50</option><option value="other">Other</option></Select>
               </Field>
               <Field label="Income product/service for invoices" htmlFor="income_item"><Input id="income_item" name="income_item" defaultValue={s?.income_item ?? 'Construction services'} maxLength={100} /></Field>

@@ -9,6 +9,7 @@ import { FilterDrawer, type FilterDef } from '@/components/kit/filter-drawer'
 import { SavedViews } from '@/components/kit/saved-views'
 import { DataTable, type Column } from '@/components/kit/data-table'
 import { fetchViews } from '@/lib/views'
+import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -25,6 +26,8 @@ export default async function LeadsPage({ searchParams }: PageProps<'/leads'>) {
   const sp = await searchParams
   const ctx = await requireBuilder('leads')
   const [l, all, views] = await Promise.all([fetchLookups(ctx.workspace.orgId), fetchLeads(ctx.workspace.orgId), fetchViews(ctx, 'leads')])
+  const def = views.find((v) => v.is_default)
+  if (def?.query && Object.keys(sp).length === 0) redirect(`/leads?${def.query}`)
   const tab = (['list', 'pipeline', 'map'] as const).find((t) => t === one(sp.tab)) ?? 'list'
   const statusById = new Map(l.statuses.map((s) => [s.id, s]))
   const sourceName = new Map(l.sources.map((s) => [s.id, s.name]))

@@ -3226,7 +3226,7 @@ isOneToOne: false
                            },
 "estimate_price_lines":
 { Args: { "p_estimate": string }; Returns: {
-              "description": string,"group_id": string,"id": string,"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
+              "description": string,"group_id": string,"id": string,"marked_as": Database["public"]['Enums']["marked_as"],"price": number,"quantity": number,"sort": number,"taxable": boolean,"title": string,"unit": string
             }[]
                            },
 "finish_delivery":
