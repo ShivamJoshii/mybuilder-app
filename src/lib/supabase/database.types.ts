@@ -250,6 +250,130 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"file_folders": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"deleted_at": string | null,"id": string,"job_id": string | null,"kind": Database["public"]['Enums']["file_kind"],"name": string,"org_id": string,"share_clients": boolean,"share_subs": boolean,"system_key": string | null,"updated_at": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"job_id"?: string | null,"kind": Database["public"]['Enums']["file_kind"],"name": string,"org_id": string,"share_clients"?: boolean,"share_subs"?: boolean,"system_key"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"job_id"?: string | null,"kind"?: Database["public"]['Enums']["file_kind"],"name"?: string,"org_id"?: string,"share_clients"?: boolean,"share_subs"?: boolean,"system_key"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "file_folders_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "file_folders_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "file_folders_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"file_share_links": {
+                  Row: {
+                    "created_at": string,"created_by": string,"expires_at": string | null,"file_id": string,"id": string,"revoked_at": string | null,"token": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"expires_at"?: string | null,"file_id": string,"id"?: string,"revoked_at"?: string | null,"token"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"expires_at"?: string | null,"file_id"?: string,"id"?: string,"revoked_at"?: string | null,"token"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "file_share_links_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "file_share_links_file_id_fkey"
+      columns: ["file_id"]
+isOneToOne: false
+      referencedRelation: "files"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"file_versions": {
+                  Row: {
+                    "created_at": string,"file_id": string,"id": string,"mime": string,"size_bytes": number,"storage_key": string,"uploaded_by": string | null,"version": number
+                  }
+                  Insert: {
+                    "created_at"?: string,"file_id": string,"id"?: string,"mime": string,"size_bytes": number,"storage_key": string,"uploaded_by"?: string | null,"version": number
+                  }
+                  Update: {
+                    "created_at"?: string,"file_id"?: string,"id"?: string,"mime"?: string,"size_bytes"?: number,"storage_key"?: string,"uploaded_by"?: string | null,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "file_versions_file_id_fkey"
+      columns: ["file_id"]
+isOneToOne: false
+      referencedRelation: "files"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "file_versions_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"files": {
+                  Row: {
+                    "created_at": string,"deleted_at": string | null,"folder_id": string,"id": string,"job_id": string | null,"kind": Database["public"]['Enums']["file_kind"],"mime": string,"name": string,"org_id": string,"share_clients": boolean,"share_subs": boolean,"size_bytes": number,"status": Database["public"]['Enums']["file_status"],"storage_key": string,"updated_at": string,"uploaded_by": string,"uploader_org": string | null,"uploader_type": string,"version": number
+                  }
+                  Insert: {
+                    "created_at"?: string,"deleted_at"?: string | null,"folder_id": string,"id"?: string,"job_id"?: string | null,"kind": Database["public"]['Enums']["file_kind"],"mime"?: string,"name": string,"org_id": string,"share_clients"?: boolean,"share_subs"?: boolean,"size_bytes"?: number,"status"?: Database["public"]['Enums']["file_status"],"storage_key": string,"updated_at"?: string,"uploaded_by"?: string,"uploader_org"?: string | null,"uploader_type"?: string,"version"?: number
+                  }
+                  Update: {
+                    "created_at"?: string,"deleted_at"?: string | null,"folder_id"?: string,"id"?: string,"job_id"?: string | null,"kind"?: Database["public"]['Enums']["file_kind"],"mime"?: string,"name"?: string,"org_id"?: string,"share_clients"?: boolean,"share_subs"?: boolean,"size_bytes"?: number,"status"?: Database["public"]['Enums']["file_status"],"storage_key"?: string,"updated_at"?: string,"uploaded_by"?: string,"uploader_org"?: string | null,"uploader_type"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "files_folder_id_fkey"
+      columns: ["folder_id"]
+isOneToOne: false
+      referencedRelation: "file_folders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "files_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "files_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "files_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "files_uploader_org_fkey"
+      columns: ["uploader_org"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"invites": {
                   Row: {
                     "accepted_at": string | null,"accepted_by": string | null,"created_at": string,"email": string,"expires_at": string,"id": string,"invited_by": string | null,"job_client_id": string | null,"kind": Database["public"]['Enums']["invite_kind"],"org_id": string,"role_id": string | null,"sub_org_id": string | null,"token": string
@@ -860,6 +984,31 @@ isOneToOne: false
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"record_attachments": {
+                  Row: {
+                    "created_at": string,"created_by": string,"file_id": string,"record_id": string,"record_type": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"file_id": string,"record_id": string,"record_type": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"file_id"?: string,"record_id"?: string,"record_type"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "record_attachments_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "record_attachments_file_id_fkey"
+      columns: ["file_id"]
+isOneToOne: false
+      referencedRelation: "files"
       referencedColumns: ["id"]
     }
                   ]
@@ -1503,6 +1652,11 @@ isOneToOne: false
 "my_permissions":
 { Args: { "p_org": string }; Returns: Json
                            },
+"resolve_share_link":
+{ Args: { "p_token": string }; Returns: {
+              "mime": string,"name": string,"size_bytes": number,"storage_key": string
+            }[]
+                           },
 "respond_schedule_item":
 { Args: { "p_confirm": boolean,"p_item": string }; Returns: undefined
                            },
@@ -1529,7 +1683,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
+            "activity_type": "call"|"email"|"meeting"|"follow_up"|"website_form"|"note"|"sms","confirm_status": "pending"|"confirmed"|"declined","contract_type": "fixed_price"|"open_book","cost_type": "labor"|"material"|"equipment"|"subcontractor"|"other"|"none","delivery_channel": "email"|"text"|"push","delivery_status": "queued"|"sent"|"failed"|"skipped","dep_type": "FS"|"SS","field_type": "text"|"long_text"|"number"|"currency"|"date"|"boolean"|"single_select"|"multi_select"|"file"|"hyperlink","file_kind": "documents"|"photos"|"videos","file_status": "pending"|"ready","invite_kind": "internal"|"sub"|"client","job_status": "presale"|"open"|"warranty"|"closed","lead_status_category": "open"|"won"|"lost"|"inactive","link_status": "active"|"inactive","log_status": "draft"|"published","member_status": "active"|"inactive"|"archived","org_kind": "builder"|"sub","perm_scope": "all"|"assigned"|"own","rfi_status": "not_sent"|"sent"|"completed"|"reopened","todo_priority": "low"|"medium"|"high","workday_exception_type": "non_workday"|"extra_workday"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1645,7 +1799,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
+            "activity_type": ["call", "email", "meeting", "follow_up", "website_form", "note", "sms"],"confirm_status": ["pending", "confirmed", "declined"],"contract_type": ["fixed_price", "open_book"],"cost_type": ["labor", "material", "equipment", "subcontractor", "other", "none"],"delivery_channel": ["email", "text", "push"],"delivery_status": ["queued", "sent", "failed", "skipped"],"dep_type": ["FS", "SS"],"field_type": ["text", "long_text", "number", "currency", "date", "boolean", "single_select", "multi_select", "file", "hyperlink"],"file_kind": ["documents", "photos", "videos"],"file_status": ["pending", "ready"],"invite_kind": ["internal", "sub", "client"],"job_status": ["presale", "open", "warranty", "closed"],"lead_status_category": ["open", "won", "lost", "inactive"],"link_status": ["active", "inactive"],"log_status": ["draft", "published"],"member_status": ["active", "inactive", "archived"],"org_kind": ["builder", "sub"],"perm_scope": ["all", "assigned", "own"],"rfi_status": ["not_sent", "sent", "completed", "reopened"],"todo_priority": ["low", "medium", "high"],"workday_exception_type": ["non_workday", "extra_workday"]
           }
         }
 } as const
