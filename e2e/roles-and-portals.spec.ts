@@ -37,7 +37,7 @@ test('owner adds a sub and a field crew user; each sees only what they should', 
   await page.screenshot({ path: 'test-results/10-subs.png', fullPage: true })
 
   await page.goto(`/jobs/${job1}`)
-  await page.getByRole('button', { name: 'Add to job' }).click()
+  await Promise.all([page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/jobs/')), page.getByRole('button', { name: 'Add to job' }).click()])
   await expect(page.locator('li', { hasText: `Sparks Electric ${id}` })).toBeVisible()
 
   // Invite a field crew member

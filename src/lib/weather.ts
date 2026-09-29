@@ -25,7 +25,7 @@ export async function geocode(city: string | null, province: string | null): Pro
   if (!city) return null
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=10&country=CA&language=en`
   try {
-    const res = await fetch(url, { next: { revalidate: 60 * 60 * 24 * 30 } })
+    const res = await fetch(url, { next: { revalidate: 60 * 60 * 24 * 30 }, signal: AbortSignal.timeout(4000) })
     if (!res.ok) return null
     const data = (await res.json()) as { results?: { latitude: number; longitude: number; admin1?: string }[] }
     const results = data.results ?? []
@@ -43,7 +43,7 @@ export async function dailyWeather(lat: number, lng: number, date: string, tz = 
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum,relative_humidity_2m_mean` +
     `&timezone=${encodeURIComponent(tz)}&start_date=${date}&end_date=${date}`
   try {
-    const res = await fetch(url, { next: { revalidate: 60 * 60 } })
+    const res = await fetch(url, { next: { revalidate: 60 * 60 }, signal: AbortSignal.timeout(4000) })
     if (!res.ok) return null
     const d = ((await res.json()) as { daily?: Record<string, (number | null)[]> }).daily
     if (!d || d.weather_code?.[0] == null) return null

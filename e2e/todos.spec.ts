@@ -21,7 +21,7 @@ test('builder assigns a to-do to a sub; the sub completes it', async ({ page }) 
   await page.keyboard.press('Escape')
   const link = await page.locator('[data-copy*="/invite/"]').first().getAttribute('data-copy')
   await page.goto(jobUrl)
-  await page.getByRole('button', { name: 'Add to job' }).click()
+  await Promise.all([page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/jobs/')), page.getByRole('button', { name: 'Add to job' }).click()])
 
   await page.goto('/todos/new')
   await page.getByLabel('Title').fill('Install baseboards main floor')
