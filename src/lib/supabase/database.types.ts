@@ -423,6 +423,87 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"chat_conversations": {
+                  Row: {
+                    "created_at": string,"created_by": string,"id": string,"job_id": string | null,"last_message_at": string,"org_id": string,"title": string | null
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string,"id"?: string,"job_id"?: string | null,"last_message_at"?: string,"org_id": string,"title"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"id"?: string,"job_id"?: string | null,"last_message_at"?: string,"org_id"?: string,"title"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_conversations_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_conversations_job_id_fkey"
+      columns: ["job_id"]
+isOneToOne: false
+      referencedRelation: "jobs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_conversations_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chat_members": {
+                  Row: {
+                    "conversation_id": string,"last_read_at": string,"muted": boolean,"user_id": string
+                  }
+                  Insert: {
+                    "conversation_id": string,"last_read_at"?: string,"muted"?: boolean,"user_id": string
+                  }
+                  Update: {
+                    "conversation_id"?: string,"last_read_at"?: string,"muted"?: boolean,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_members_conversation_id_fkey"
+      columns: ["conversation_id"]
+isOneToOne: false
+      referencedRelation: "chat_conversations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_members_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chat_messages": {
+                  Row: {
+                    "author_id": string,"body": string,"conversation_id": string,"created_at": string,"deleted_at": string | null,"edited_at": string | null,"id": string
+                  }
+                  Insert: {
+                    "author_id"?: string,"body": string,"conversation_id": string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string
+                  }
+                  Update: {
+                    "author_id"?: string,"body"?: string,"conversation_id"?: string,"created_at"?: string,"deleted_at"?: string | null,"edited_at"?: string | null,"id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_messages_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_messages_conversation_id_fkey"
+      columns: ["conversation_id"]
+isOneToOne: false
+      referencedRelation: "chat_conversations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_invoice_lines": {
                   Row: {
                     "amount": number,"change_order_id": string | null,"id": string,"invoice_id": string,"kind": string,"percent": number | null,"sort": number,"taxable": boolean,"title": string
@@ -2634,6 +2715,16 @@ isOneToOne: false
 "can_see_sheet":
 { Args: { "p_sheet": string }; Returns: boolean
                            },
+"chat_directory":
+{ Args: { "p_job"?: string,"p_org": string }; Returns: {
+              "company": string,"email": string,"kind": string,"name": string,"user_id": string
+            }[]
+                           },
+"chat_feed":
+{ Args: { "p_after"?: string,"p_conv": string }; Returns: {
+              "author": string,"author_id": string,"body": string,"created_at": string,"edited_at": string,"id": string
+            }[]
+                           },
 "choose_selection":
 { Args: { "p_choice": string,"p_sel": string }; Returns: undefined
                            },
@@ -2718,12 +2809,20 @@ isOneToOne: false
               "form_name": string,"org_name": string,"thank_you": string
             }[]
                            },
+"mark_chat_read":
+{ Args: { "p_conv": string }; Returns: undefined
+                           },
 "mark_notifications_read":
 { Args: { "p_ids"?: (string)[] }; Returns: undefined
                            },
 "my_bid_requests":
 { Args: Record<PropertyKey, never>; Returns: {
               "builder_name": string,"due_at": string,"job_city": string,"job_title": string,"package_id": string,"package_status": Database["public"]['Enums']["bid_package_status"],"request_id": string,"status": Database["public"]['Enums']["bid_request_status"],"title": string,"total": number
+            }[]
+                           },
+"my_chats":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "conversation_id": string,"job_id": string,"last_body": string,"last_message_at": string,"members": (string)[],"org_id": string,"title": string,"unread": number
             }[]
                            },
 "my_context":
@@ -2838,6 +2937,9 @@ isOneToOne: false
                            },
 "set_todo_complete":
 { Args: { "p_done": boolean,"p_todo": string }; Returns: undefined
+                           },
+"start_conversation":
+{ Args: { "p_body"?: string,"p_job": string,"p_org": string,"p_title"?: string,"p_users": (string)[] }; Returns: string
                            },
 "submit_bid":
 { Args: { "p_notes"?: string,"p_prices": Json,"p_request": string }; Returns: undefined

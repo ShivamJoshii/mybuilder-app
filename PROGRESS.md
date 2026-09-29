@@ -34,7 +34,8 @@ Last updated: 2026-09-29 (overnight build)
 | Client invoices: draws by % of contract, fixed amounts, approved change orders; GST/HST; owner holdback; send to client; record payments; void | Built, browser-tested |
 | Reports: work in progress (earned vs billed, over/under billing), receivables aging, payables aging | Built, browser-tested |
 | Warranty: client requests (portal setting), assignment to team or sub, service visits the sub confirms/completes, internal notes kept private, client rating | Built, browser-tested |
-| Messages (email), chat, time clock, accounting sync | Next, per build order |
+| Chat: 1:1 and group conversations with team, job subs and job clients (membership checked server-side), unread counts, live updates (3s polling; Supabase Realtime later) | Built, browser-tested (two browsers) |
+| Messages (email in/out), time clock, accounting sync | Next, per build order |
 | Hosted Supabase project | **Blocked** — see "Needs you" |
 | Push to GitHub | **Blocked** — see "Needs you" |
 
@@ -84,9 +85,9 @@ Last updated: 2026-09-29 (overnight build)
 
 | Suite | Count | Command |
 | --- | --- | --- |
-| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks | 249 | `pnpm db:test` |
+| Database (pgTAP): isolation, roles, subs, clients, invites, comments, to-dos, logs, RFIs, notifications, schedule, leads, files, estimates/proposals, change orders, selections, plans/specs, bids/POs/bills/budget, invoices/reports, warranty, private-notes checks, chat | 259 | `pnpm db:test` |
 | Unit (Vitest): workday calendar, dependency cascade, loops, critical path, estimate math, time zones | 14 | `pnpm test` |
-| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty | 16 flows (run against a production build) | `pnpm test:e2e` |
+| Browser (Playwright): onboarding, jobs, views, comments, portals, to-dos, logs, RFIs, notifications, schedule, leads, files, estimate→proposal→signature→budget, change orders, selections, plans, bid→PO→bill→budget, invoices→reports, warranty, chat | 17 flows (run against a production build) | `pnpm test:e2e` |
 | Lint, types, production build | clean | `pnpm lint && pnpm typecheck && pnpm build` |
 
 ## Next up (build order)
